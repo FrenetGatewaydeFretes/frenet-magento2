@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Frenet\Shipping\Api\ServiceApiInterface" type="Frenet\Shipping\Model\ApiService"/>
+    <preference for="Frenet\Shipping\Api\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>
+</config>
