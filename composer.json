@@ -1,0 +1,30 @@
+{
+    "name": "tiagosampaio/frenet-magento2",
+    "description":"Integrate your Magento 2 with Frenet Services in a simple way.",
+    "require": {
+        "tiagosampaio/frenet-php": "dev-master"
+    },
+    "suggest": {},
+    "type": "magento2-module",
+    "version": "2.0.0",
+    "authors": [
+        {
+            "name": "Tiago Sampaio",
+            "email": "tiago@tiagosampaio.com",
+            "homepage": "http://tiagosampaio.com",
+            "role": "Magento Architect"
+        }
+    ],
+    "support": {
+        "email": "contato@frenet.com.br"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Frenet\\Shipping\\": ""
+        }
+    },
+    "minimum-stability": "dev"
+}
