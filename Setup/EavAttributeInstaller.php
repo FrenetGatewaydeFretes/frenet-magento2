@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup;
@@ -44,14 +43,15 @@ abstract class EavAttributeInstaller
     public function install($code, array $config = [])
     {
         /** @var \Magento\Eav\Setup\EavSetup $setup */
-        $setup     = $this->setupFactory->create();
+        $setup = $this->setupFactory->create();
         $attribute = $this->prepareConfiguration($config);
-        
         try {
             $setup->addAttribute($this->getEntityType(), $code, $attribute);
+            
             return true;
         } catch (\Exception $e) {
             $this->logger->critical($e);
+            
             return false;
         }
     }
@@ -67,28 +67,19 @@ abstract class EavAttributeInstaller
     private function prepareConfiguration(array $config = [])
     {
         $defaultConfig = [
-            'label'                   => null,
-            'default'                 => null,
-            'note'                    => null,
-            'input'                   => 'text',
-            'apply_to'                => implode(',', $this->getProductTypes()),
-            'type'                    => 'text',
-            'group'                   => $this->getAttributeGroup(),
-            'backend'                 => null,
-            //            'frontend'                => '',
-            'global'                  => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-            'visible'                 => false,
-            'required'                => false,
-            'user_defined'            => true,
-            //            'input_renderer'          => \Magento\Msrp\Block\Adminhtml\Product\Helper\Form\Type::class,
-            //            'frontend_input_renderer' => \Magento\Msrp\Block\Adminhtml\Product\Helper\Form\Type::class,
-            //            'visible_on_front'        => true,
-            //            'used_in_product_listing' => true,
-            //            'is_used_in_grid'         => true,
-            //            'is_visible_in_grid'      => false,
-            //            'is_filterable_in_grid'   => true
+            'label' => null,
+            'default' => null,
+            'note' => null,
+            'input' => 'text',
+            'apply_to' => implode(',', $this->getProductTypes()),
+            'type' => 'text',
+            'group' => $this->getAttributeGroup(),
+            'backend' => null,
+            'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+            'visible' => true,
+            'required' => false,
+            'user_defined' => true,
         ];
-        
         $config = array_merge($defaultConfig, $config);
         
         return $config;
@@ -112,6 +103,7 @@ abstract class EavAttributeInstaller
             \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL,
             \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE,
             \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE,
+            \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE,
         ];
     }
 }
