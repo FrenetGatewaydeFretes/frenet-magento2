@@ -13,11 +13,22 @@ use Frenet\Shipping\Api\Data\AttributesMappingInterface;
 class AttributesMapping implements AttributesMappingInterface
 {
     /**
+     * @var \Frenet\Shipping\Model\Config
+     */
+    private $config;
+    
+    public function __construct(
+        \Frenet\Shipping\Model\Config $config
+    ) {
+        $this->config = $config;
+    }
+    
+    /**
      * {@inheritdoc}
      */
     public function getWeightAttributeCode()
     {
-        return self::DEFAULT_ATTRIBUTE_WEIGHT;
+        return $this->config->getWeightAttribute() ?: self::DEFAULT_ATTRIBUTE_WEIGHT;
     }
     
     /**
@@ -25,7 +36,7 @@ class AttributesMapping implements AttributesMappingInterface
      */
     public function getHeightAttributeCode()
     {
-        return self::DEFAULT_ATTRIBUTE_HEIGHT;
+        return $this->config->getHeightAttribute() ?: self::DEFAULT_ATTRIBUTE_HEIGHT;
     }
     
     /**
@@ -33,7 +44,7 @@ class AttributesMapping implements AttributesMappingInterface
      */
     public function getLengthAttributeCode()
     {
-        return self::DEFAULT_ATTRIBUTE_LENGTH;
+        return $this->config->getLengthAttribute() ?: self::DEFAULT_ATTRIBUTE_LENGTH;
     }
     
     /**
@@ -41,7 +52,7 @@ class AttributesMapping implements AttributesMappingInterface
      */
     public function getWidthAttributeCode()
     {
-        return self::DEFAULT_ATTRIBUTE_WIDTH;
+        return $this->config->getWidthAttribute() ?: self::DEFAULT_ATTRIBUTE_WIDTH;
     }
     
     /**

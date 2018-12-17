@@ -47,6 +47,38 @@ class Config
     }
     
     /**
+     * @return string
+     */
+    public function getWeightAttribute()
+    {
+        return $this->getCarrierConfig('weight_attribute');
+    }
+    
+    /**
+     * @return string
+     */
+    public function getHeightAttribute()
+    {
+        return $this->getCarrierConfig('height_attribute');
+    }
+    
+    /**
+     * @return string
+     */
+    public function getLengthAttribute()
+    {
+        return $this->getCarrierConfig('length_attribute');
+    }
+    
+    /**
+     * @return string
+     */
+    public function getWidthAttribute()
+    {
+        return $this->getCarrierConfig('width_attribute');
+    }
+    
+    /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
      * @return string

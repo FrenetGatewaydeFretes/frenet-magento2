@@ -37,9 +37,38 @@
                 <field id="specificerrmsg" translate="label" type="textarea" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Displayed Error Message</label>
                 </field>
+                <field id="weight_attribute" translate="label" type="select" sortOrder="800" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Weight Attribute</label>
+                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+                </field>
+                <field id="height_attribute" translate="label" type="select" sortOrder="810" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Height Attribute</label>
+                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+                </field>
+                <field id="length_attribute" translate="label" type="select" sortOrder="820" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Length Attribute</label>
+                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+                </field>
+                <field id="width_attribute" translate="label" type="select" sortOrder="830" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Width Attribute</label>
+                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+                </field>
                 <field id="debug" translate="label" type="select" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Debug</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="debug_filename" translate="label" type="text" sortOrder="910" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Debug Filename</label>
+                    <depends>
+                        <field id="debug">1</field>
+                    </depends>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="1100" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
                 </field>
             </group>
         </section>

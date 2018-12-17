@@ -11,7 +11,7 @@
                 <model>Frenet\Shipping\Model\Carrier\Frenet</model>
                 <name>frenet</name>
                 <active>0</active>
-                <title>Frenet</title>
+                <title>Frenet Shipping Gateway</title>
                 <token backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
                 <use_default>1</use_default>
                 <default_height>2</default_height>
@@ -27,7 +27,13 @@
                 <sort_order>10</sort_order>
                 <specificerrmsg>Frenet shipping method is not available.</specificerrmsg>
                 <sallowspecific>0</sallowspecific>
+                <weight_attribute>weight</weight_attribute>
+                <height_attribute>volume_height</height_attribute>
+                <length_attribute>volume_length</length_attribute>
+                <width_attribute>volume_width</width_attribute>
                 <debug>0</debug>
+                <debug_filename>frenet_request_debug.log</debug_filename>
+                <sort_order>90</sort_order>
             </frenet_shipping>
         </carriers>
     </default>
