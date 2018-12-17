@@ -65,42 +65,43 @@ class InstallData implements InstallDataInterface
     private function getAttributes()
     {
         $attributes = [
-            'volume_length' => [
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LENGTH => [
                 'label' => __('Length (cm)'),
                 'description' => __("Product's package length (for shipping calculation, minimum of 16cm)."),
                 'note' => __("Product's package length (for shipping calculation, minimum of 16cm)."),
                 'default' => 16,
                 'type' => 'int',
             ],
-            'volume_height' => [
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_HEIGHT => [
                 'label' => __('Height (cm)'),
                 'description' => __("Product's package height (for shipping calculation, minimum of 2cm)."),
                 'note' => __("Product's package height (for shipping calculation, minimum of 2cm)."),
                 'default' => 2,
                 'type' => 'int',
             ],
-            'volume_width' => [
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_WIDTH => [
                 'label' => __('Width (cm)'),
                 'description' => __("Product's package width (for shipping calculation, minimum of 11cm)."),
                 'note' => __("Product's package width (for shipping calculation, minimum of 11cm)."),
                 'default' => 11,
                 'type' => 'int',
             ],
-            'lead_time' => [
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LEAD_TIME => [
                 'label' => __('Lead Time (days)'),
                 'description' => __("Product's manufacturing time (for shipping calculation)."),
                 'note' => __("Product's manufacturing time (for shipping calculation)."),
                 'default' => 0,
                 'type' => 'int',
             ],
-            'fragile' => [
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE => [
                 'label' => __('Is Product Fragile?'),
                 'description' => __('Whether the product contains any fragile materials (for shipping calculation).'),
                 'note' => __('Whether the product contains any fragile materials (for shipping calculation).'),
                 'default' => false,
                 'type' => 'int',
                 'input' => 'boolean',
-                'backend' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class
+                'backend' => \Magento\Catalog\Model\Product\Attribute\Backend\Boolean::class,
+                'source' => \Magento\Catalog\Model\Product\Attribute\Source\Boolean::class,
             ],
         ];
         
