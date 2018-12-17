@@ -36,12 +36,14 @@ class InstallData implements InstallDataInterface
     public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
         $setup->startSetup();
+        
         /**
          * Run for new installation only.
          */
         if (version_compare($context->getVersion(), '2.0.0', '<=')) {
             $this->configureNewInstallation();
         }
+        
         $setup->endSetup();
     }
     
