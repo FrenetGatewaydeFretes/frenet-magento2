@@ -7,4 +7,11 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Frenet\Shipping\Api\ServiceApiInterface" type="Frenet\Shipping\Model\ApiService"/>
     <preference for="Frenet\Shipping\Api\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>
+    <preference for="Frenet\Shipping\Api\Data\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
+
+    <type name="Frenet\Shipping\Model\Calculator">
+        <arguments>
+            <argument name="dimensionsExtractor" xsi:type="object">Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor</argument>
+        </arguments>
+    </type>
 </config>

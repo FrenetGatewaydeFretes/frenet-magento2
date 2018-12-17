@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
@@ -20,6 +19,11 @@ class Calculator implements CalculatorInterface
     private $apiService;
     
     /**
+     * @var Config
+     */
+    private $config;
+    
+    /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     private $scopeConfig;
@@ -30,19 +34,29 @@ class Calculator implements CalculatorInterface
     private $storeManagement;
     
     /**
+     * @var \Frenet\Shipping\Api\Data\ProductExtractorInterface
+     */
+    private $dimensionsExtractor;
+    
+    /**
      * Calculator constructor.
      *
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Store\Model\StoreManagerInterface         $storeManagement
-     * @param ApiService                                         $apiService
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface     $scopeConfig
+     * @param \Magento\Store\Model\StoreManagerInterface             $storeManagement
+     * @param \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor
+     * @param ApiService                                             $apiService
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
+        \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
+        Config $config,
         ApiService $apiService
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManagement = $storeManagement;
+        $this->dimensionsExtractor = $dimensionsExtractor;
+        $this->config = $config;
         $this->apiService = $apiService;
     }
     
@@ -53,29 +67,26 @@ class Calculator implements CalculatorInterface
     {
         /** @var  $quote */
         $quote = $this->apiService->shipping()->quote();
-        $quote->setSellerPostcode($this->getOriginPostcode())
+        $quote->setSellerPostcode($this->config->getOriginPostcode())
             ->setRecipientPostcode($request->getDestPostcode())
             ->setRecipientCountry($request->getCountryId())
-            ->setShipmentInvoiceValue($request->getPackageValue());
+            ->setShipmentInvoiceValue($request->getPackageValue())
+        ;
         
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ((array) $request->getAllItems() as $item) {
-            $quote->addShippingItem($item->getSku(), $item->getQty(), $item->getWeight(), 1, 1, 1, 'test');
+            $this->dimensionsExtractor->setProduct($item->getProduct());
+            $quote->addShippingItem(
+                $item->getSku(),
+                $item->getQty(),
+                $this->dimensionsExtractor->getWeight(),
+                $this->dimensionsExtractor->getLength(),
+                $this->dimensionsExtractor->getHeight(),
+                $this->dimensionsExtractor->getWeight(),
+                'test'
+            );
         }
         
         return $quote->execute();
-    }
-    
-    /**
-     * @return string
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    private function getOriginPostcode()
-    {
-        return $this->scopeConfig->getValue(
-            'shipping/origin/postcode',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-            $this->storeManagement->getStore()->getId()
-        );
     }
 }
