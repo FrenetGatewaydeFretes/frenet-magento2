@@ -5,10 +5,8 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Carrier;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Shipping\Model\Rate\Result;
 use Magento\Shipping\Model\Carrier\AbstractCarrierOnline;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
-use Magento\Store\Model\ScopeInterface;
 
 /**
  * Class Frenet
@@ -19,7 +17,12 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @var string
      */
-    protected $_code = 'frenet_shipping';
+    const CARRIER_CODE = 'frenet_shipping';
+    
+    /**
+     * @var string
+     */
+    protected $_code = self::CARRIER_CODE;
     
     /**
      * @var array
@@ -35,6 +38,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var \Frenet\Shipping\Api\CalculatorInterface
      */
     private $calculator;
+    
+    /**
+     * @var \Frenet\Shipping\Model\Config
+     */
+    private $config;
     
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
@@ -53,6 +61,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Magento\Directory\Helper\Data $directoryData,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Frenet\Shipping\Api\CalculatorInterface $calculator,
+        \Frenet\Shipping\Model\Config $config,
         array $data = []
     ) {
         parent::__construct(
@@ -75,6 +84,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         );
         
         $this->calculator = $calculator;
+        $this->config = $config;
     }
     
     /**
@@ -115,7 +125,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             /** @var \Magento\Quote\Model\Quote\Address\RateResult\Error $error */
             $error = $this->_rateErrorFactory->create();
             $error->setCarrier($this->_code);
-            $error->setCarrierTitle($this->getConfigData('title'));
+            $error->setCarrierTitle($this->config->getCarrierConfig('title'));
             $error->setErrorMessage(implode(', ', $this->errors));
             
             $this->debugErrors($error);
@@ -161,27 +171,21 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     public function canCollectRates()
     {
-        /**
-         * validate carrier active flag
-         */
-        if (!$this->getConfigFlag($this->_activeFlag)) {
+        /** Validate carrier active flag */
+        if (!$this->config->isActive()) {
             return false;
         }
         
         /** @var int $store */
         $store = $this->getStore();
         
-        /**
-         * validate origin postcode
-         */
-        if (!$this->_scopeConfig->getValue('shipping/origin/postcode', ScopeInterface::SCOPE_STORE, $store)) {
+        /** Validate origin postcode */
+        if (!$this->config->getOriginPostcode($store)) {
             return false;
         }
         
-        /**
-         * validate frenet token
-         */
-        if (!$this->getConfigData('token')) {
+        /** Validate frenet token */
+        if (!$this->config->getToken()) {
             return false;
         }
         
@@ -196,7 +200,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     public function getAllowedMethods()
     {
-        // TODO: Implement getAllowedMethods() method.
+        return [self::CARRIER_CODE => $this->config->getCarrierConfig('name')];
     }
     
     /**
@@ -233,10 +237,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     }
     
     /**
-     * @param $method
-     * @param $title
-     * @param $price
-     * @param $cost
+     * @param string $method
+     * @param string $title
+     * @param float  $price
+     * @param float  $cost
      *
      * @return \Magento\Quote\Model\Quote\Address\RateResult\Method
      */
@@ -245,7 +249,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         /** @var \Magento\Quote\Model\Quote\Address\RateResult\Method $methodInstance */
         $methodInstance = $this->_rateMethodFactory->create();
         $methodInstance->setCarrier($this->_code)
-            ->setCarrierTitle($this->getConfigData('title'))
+            ->setCarrierTitle($this->config->getCarrierConfig('title'))
             ->setMethod($method)
             ->setMethodTitle($title)
             ->setPrice($price)
@@ -262,6 +266,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function prepareMethodTitle($carrier, $description)
     {
-        return "{$carrier} - {$description}";
+        return sprintf('%s - %s', $carrier, $description);
     }
 }
