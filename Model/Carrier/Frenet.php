@@ -17,7 +17,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @var string
      */
-    const CARRIER_CODE = 'frenet_shipping';
+    const CARRIER_CODE = 'frenetshipping';
     
     /**
      * @var string

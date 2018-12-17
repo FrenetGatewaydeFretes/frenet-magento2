@@ -28,28 +28,20 @@ class ApiService implements ApiServiceInterface
      */
     private $storeManagement;
     
+    /**
+     * @var Config
+     */
+    private $config;
+    
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Store\Model\StoreManagerInterface $storeManagement
+        \Magento\Store\Model\StoreManagerInterface $storeManagement,
+        Config $config
     ) {
+        $this->config = $config;
         $this->scopeConfig     = $scopeConfig;
         $this->storeManagement = $storeManagement;
-        $this->api             = \Frenet\ApiFactory::create($this->getToken());
-    }
-    
-    /**
-     * @return string
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    private function getToken()
-    {
-        $token = (string) $this->scopeConfig->getValue(
-            'carriers/frenet_shipping/token',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-            $this->storeManagement->getStore()->getId()
-        );
-        
-        return $token;
+        $this->api             = \Frenet\ApiFactory::create($config->getToken());
     }
     
     /**

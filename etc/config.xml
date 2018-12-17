@@ -7,7 +7,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <carriers>
-            <frenet_shipping>
+            <frenetshipping>
                 <model>Frenet\Shipping\Model\Carrier\Frenet</model>
                 <name>frenet</name>
                 <active>0</active>
@@ -34,7 +34,7 @@
                 <debug>0</debug>
                 <debug_filename>frenet_request_debug.log</debug_filename>
                 <sort_order>90</sort_order>
-            </frenet_shipping>
+            </frenetshipping>
         </carriers>
     </default>
 </config>
