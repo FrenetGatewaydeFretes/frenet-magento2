@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
@@ -13,7 +12,6 @@ use \Magento\Store\Model\ScopeInterface;
  */
 class Config
 {
-    
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
@@ -27,8 +25,7 @@ class Config
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManager
-    )
-    {
+    ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
     }
@@ -73,7 +70,7 @@ class Config
     /**
      * @param string                                            $section
      * @param string                                            $group
-     * @param     string                                        $field
+     * @param string                                            $field
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      * @param string                                            $scopeType
      *
@@ -81,12 +78,8 @@ class Config
      */
     public function get($section, $group, $field, $store = null, $scopeType = ScopeInterface::SCOPE_STORE)
     {
-        return $this->scopeConfig
-            ->getValue(
-                implode('/', [$section, $group, $field]),
-                $scopeType,
-                $this->getStore($store)
-            );
+        $path = implode('/', [$section, $group, $field]);
+        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store));
     }
     
     /**
