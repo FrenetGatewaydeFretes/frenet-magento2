@@ -75,18 +75,75 @@ class Calculator implements CalculatorInterface
         
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ((array) $request->getAllItems() as $item) {
-            $this->dimensionsExtractor->setProduct($item->getProduct());
+            if (!$this->validateItem($item)) {
+                continue;
+            }
+            
+            $this->dimensionsExtractor->setProduct($this->getProduct($item));
             $quote->addShippingItem(
                 $item->getSku(),
                 $item->getQty(),
                 $this->dimensionsExtractor->getWeight(),
                 $this->dimensionsExtractor->getLength(),
                 $this->dimensionsExtractor->getHeight(),
-                $this->dimensionsExtractor->getWeight(),
-                'test'
+                $this->dimensionsExtractor->getWidth(),
+                $this->getProductCategory($item)
             );
         }
         
         return $quote->execute();
+    }
+    
+    /**
+     * @param \Magento\Quote\Model\Quote\Item $item
+     *
+     * @return bool|\Magento\Catalog\Model\Product
+     */
+    private function getProduct(\Magento\Quote\Model\Quote\Item $item)
+    {
+        /** @var \Magento\Catalog\Model\Product $product */
+        $product = $item->getProduct();
+        return $product;
+    }
+    
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     *
+     * @return bool
+     */
+    private function validateItem(\Magento\Quote\Model\Quote\Item $item)
+    {
+        if ($this->getProduct($item)->isComposite()) {
+            return false;
+        }
+        
+        if ($this->getProduct($item)->isVirtual()) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     */
+    private function getProductCategory(\Magento\Quote\Model\Quote\Item $item)
+    {
+        if ($item->getParentItemId()) {
+            return $this->getProductCategory($item->getParentItem());
+        }
+        
+        /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
+        $collection = $this->getProduct($item)->getCategoryCollection();
+        $collection->addAttributeToSelect('name');
+        
+        /** @var \Magento\Catalog\Model\Category $category */
+        $category = $collection->getFirstItem();
+        
+        if ($category) {
+            return $category->getName();
+        }
+        
+        return null;
     }
 }
