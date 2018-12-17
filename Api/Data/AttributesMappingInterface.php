@@ -14,18 +14,31 @@ interface AttributesMappingInterface
      * @var string
      */
     const DEFAULT_ATTRIBUTE_WEIGHT = 'weight';
+    
     /**
      * @var string
      */
     const DEFAULT_ATTRIBUTE_HEIGHT = 'volume_height';
+    
     /**
      * @var string
      */
     const DEFAULT_ATTRIBUTE_WIDTH = 'volume_width';
+    
     /**
      * @var string
      */
     const DEFAULT_ATTRIBUTE_LENGTH = 'volume_length';
+    
+    /**
+     * @var string
+     */
+    const DEFAULT_ATTRIBUTE_LEAD_TIME = 'lead_time';
+    
+    /**
+     * @var string
+     */
+    const DEFAULT_ATTRIBUTE_FRAGILE = 'fragile';
     
     /**
      * @return string
@@ -46,4 +59,14 @@ interface AttributesMappingInterface
      * @return string
      */
     public function getWidthAttributeCode();
+    
+    /**
+     * @return string
+     */
+    public function getLeadTimeAttributeCode();
+    
+    /**
+     * @return string
+     */
+    public function getFragileAttributeCode();
 }

@@ -13,7 +13,7 @@ use Frenet\Shipping\Api\Data\AttributesMappingInterface;
 class AttributesMapping implements AttributesMappingInterface
 {
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getWeightAttributeCode()
     {
@@ -21,7 +21,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
     
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getHeightAttributeCode()
     {
@@ -29,7 +29,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
     
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getLengthAttributeCode()
     {
@@ -37,10 +37,26 @@ class AttributesMapping implements AttributesMappingInterface
     }
     
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getWidthAttributeCode()
     {
         return self::DEFAULT_ATTRIBUTE_WIDTH;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getLeadTimeAttributeCode()
+    {
+        return self::DEFAULT_ATTRIBUTE_LEAD_TIME;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getFragileAttributeCode()
+    {
+        return self::DEFAULT_ATTRIBUTE_FRAGILE;
     }
 }
