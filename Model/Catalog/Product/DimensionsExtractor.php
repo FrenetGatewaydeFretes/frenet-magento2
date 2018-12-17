@@ -94,12 +94,11 @@ class DimensionsExtractor implements ProductExtractorInterface
             return $this->product->getData($key);
         }
         
-        /** @var \Magento\Catalog\Model\ResourceModel\Product $resource */
-        $resource = $this->productResourceFactory->create();
-    
-        $resource->getAttributeRawValue($this->product->getId(), $key, $this->product->getStore());
+        $value = $this->productResourceFactory
+            ->create()
+            ->getAttributeRawValue($this->product->getId(), $key, $this->product->getStore());
         
-        return null;
+        return $value;
     }
     
     /**
