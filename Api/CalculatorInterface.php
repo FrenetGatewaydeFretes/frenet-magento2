@@ -13,7 +13,7 @@ interface CalculatorInterface
 {
     /**
      * @param RateRequest $request
-     * @return mixed
+     * @return array
      */
     public function getQuote(RateRequest $request);
 }
