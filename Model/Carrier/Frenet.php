@@ -88,55 +88,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     }
     
     /**
-     * Make this module compatible with older versions of Magento 2.
-     *
-     * @param \Magento\Framework\DataObject $request
-     * @return $this|bool|\Magento\Framework\DataObject
-     */
-    public function proccessAdditionalValidation(\Magento\Framework\DataObject $request)
-    {
-        return $this->processAdditionalValidation($request);
-    }
-    
-    /**
-     * Processing additional validation (quote data) to check if carrier applicable.
-     *
-     * @param \Magento\Framework\DataObject $request
-     *
-     * @return $this|bool|\Magento\Framework\DataObject
-     */
-    public function processAdditionalValidation(\Magento\Framework\DataObject $request)
-    {
-        /**
-         * validate request items data
-         */
-        if (!count($this->getAllItems($request))) {
-            $this->errors[] = __('There is no items in this order');
-        }
-        
-        /**
-         * validate destination postcode
-         */
-        if (!$request->getDestPostcode()) {
-            $this->errors[] = __('Please inform the destination postcode');
-        }
-        
-        if (!empty($this->errors)) {
-            /** @var \Magento\Quote\Model\Quote\Address\RateResult\Error $error */
-            $error = $this->_rateErrorFactory->create();
-            $error->setCarrier($this->_code);
-            $error->setCarrierTitle($this->config->getCarrierConfig('title'));
-            $error->setErrorMessage(implode(', ', $this->errors));
-            
-            $this->debugErrors($error);
-            
-            return $error;
-        }
-        
-        return $this;
-    }
-    
-    /**
      * Collect and get rates
      *
      * @param RateRequest $request
@@ -193,6 +144,52 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     }
     
     /**
+     * Make this module compatible with older versions of Magento 2.
+     *
+     * @param \Magento\Framework\DataObject $request
+     * @return $this|bool|\Magento\Framework\DataObject
+     */
+    public function proccessAdditionalValidation(\Magento\Framework\DataObject $request)
+    {
+        return $this->processAdditionalValidation($request);
+    }
+    
+    /**
+     * Processing additional validation (quote data) to check if carrier applicable.
+     *
+     * @param \Magento\Quote\Model\Quote\Address\RateRequest $request
+     *
+     * @return $this|bool|\Magento\Framework\DataObject
+     */
+    public function processAdditionalValidation(\Magento\Framework\DataObject $request)
+    {
+        /** Validate request items data */
+        if (!count($this->getAllItems($request))) {
+            $this->errors[] = __('There is no items in this order');
+        }
+        
+        /** Validate destination postcode */
+        if (!$request->getDestPostcode()) {
+            $this->errors[] = __('Please inform the destination postcode');
+        }
+        
+        if (!empty($this->errors)) {
+            /** @var \Magento\Quote\Model\Quote\Address\RateResult\Error $error */
+            $error = $this->_rateErrorFactory->create([
+                'carrier' => $this->_code,
+                'carrier_title' => $this->config->getCarrierConfig('title'),
+                'error_message' => implode(', ', $this->errors)
+            ]);
+            
+            $this->debugErrors($error);
+            
+            return $error;
+        }
+        
+        return $this;
+    }
+    
+    /**
      * Get allowed shipping methods
      *
      * @return array
@@ -215,7 +212,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         // TODO: Implement _doShipmentRequest() method.
     }
     
-    
+    /**
+     * @param array $items
+     *
+     * @return $this
+     */
     private function prepareResult(array $items = [])
     {
         /** @var \Magento\Shipping\Model\Rate\Result $result */
