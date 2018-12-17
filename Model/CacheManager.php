@@ -73,14 +73,17 @@ class CacheManager
         return $data;
     }
     
-    
+    /**
+     * @param array       $services
+     * @param RateRequest $request
+     *
+     * @return bool
+     */
     public function save(array $services, RateRequest $request)
     {
         $identifier = $this->generateCacheKey($request);
-        $lifetime = null;
-        $tags = [
-            \Frenet\Shipping\Cache\Type\Frenet::CACHE_TAG
-        ];
+        $lifetime   = null;
+        $tags       = [\Frenet\Shipping\Cache\Type\Frenet::CACHE_TAG];
         
         return $this->cache->save($this->prepareBeforeSaving($services), $identifier, $tags, $lifetime);
     }
