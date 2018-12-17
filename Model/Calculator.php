@@ -24,6 +24,11 @@ class Calculator implements CalculatorInterface
     private $config;
     
     /**
+     * @var CacheManager
+     */
+    private $cacheManager;
+    
+    /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     private $scopeConfig;
@@ -39,6 +44,11 @@ class Calculator implements CalculatorInterface
     private $dimensionsExtractor;
     
     /**
+     * @var \Frenet\Shipping\Api\QuoteItemValidator
+     */
+    private $quoteItemValidator;
+    
+    /**
      * Calculator constructor.
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface     $scopeConfig
@@ -50,14 +60,18 @@ class Calculator implements CalculatorInterface
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
+        \Frenet\Shipping\Api\QuoteItemValidator $quoteItemValidator,
+        CacheManager $cacheManager,
         Config $config,
         ApiService $apiService
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManagement = $storeManagement;
         $this->dimensionsExtractor = $dimensionsExtractor;
+        $this->quoteItemValidator = $quoteItemValidator;
         $this->config = $config;
         $this->apiService = $apiService;
+        $this->cacheManager = $cacheManager;
     }
     
     /**
@@ -65,7 +79,11 @@ class Calculator implements CalculatorInterface
      */
     public function getQuote(RateRequest $request)
     {
-        /** @var  $quote */
+        if ($result = $this->cacheManager->load($request)) {
+            return $result;
+        }
+        
+        /** @var \Frenet\Command\Shipping\QuoteInterface $quote */
         $quote = $this->apiService->shipping()->quote();
         $quote->setSellerPostcode($this->config->getOriginPostcode())
             ->setRecipientPostcode($request->getDestPostcode())
@@ -75,7 +93,7 @@ class Calculator implements CalculatorInterface
         
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ((array) $request->getAllItems() as $item) {
-            if (!$this->validateItem($item)) {
+            if (!$this->quoteItemValidator->validate($item)) {
                 continue;
             }
             
@@ -91,7 +109,16 @@ class Calculator implements CalculatorInterface
             );
         }
         
-        return $quote->execute();
+        /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
+        $result   = $quote->execute();
+        $services = $result->getShippingServices();
+        
+        if ($services) {
+            $this->cacheManager->save($services, $request);
+            return $services;
+        }
+        
+        return false;
     }
     
     /**
@@ -104,24 +131,6 @@ class Calculator implements CalculatorInterface
         /** @var \Magento\Catalog\Model\Product $product */
         $product = $item->getProduct();
         return $product;
-    }
-    
-    /**
-     * @param \Magento\Catalog\Model\Product $product
-     *
-     * @return bool
-     */
-    private function validateItem(\Magento\Quote\Model\Quote\Item $item)
-    {
-        if ($this->getProduct($item)->isComposite()) {
-            return false;
-        }
-        
-        if ($this->getProduct($item)->isVirtual()) {
-            return false;
-        }
-        
-        return true;
     }
     
     /**

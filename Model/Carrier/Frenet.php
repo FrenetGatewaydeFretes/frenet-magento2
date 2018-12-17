@@ -103,14 +103,12 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             return $errorMessage;
         }
     
-        /** @var \Frenet\ObjectType\Entity\Shipping\QuoteInterface $quote */
-        $quote = $this->calculator->getQuote($request);
-        
-        if (!$quote->getShippingServices()) {
+        /** @var array $results */
+        if (!$results = $this->calculator->getQuote($request)) {
             return $this->result;
         }
     
-        $this->prepareResult($quote->getShippingServices());
+        $this->prepareResult($results);
     
         return $this->result;
     }
