@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Cache\Type;
+namespace Frenet\Shipping\Model\Cache\Type;
 
 use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 use Magento\Framework\Config\CacheInterface;

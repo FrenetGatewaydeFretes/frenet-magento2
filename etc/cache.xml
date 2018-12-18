@@ -5,7 +5,7 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
-    <type name="frenet_result" translate="label,description" instance="Frenet\Shipping\Cache\Type\Frenet">
+    <type name="frenet_result" translate="label,description" instance="Frenet\Shipping\Model\Cache\Type\Frenet">
         <label>Frenet Result</label>
         <description>Improve the performance to Frenet API call by caching the results when possible.</description>
     </type>
