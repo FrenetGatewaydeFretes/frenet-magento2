@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="attributes_mapping" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Attributes Mapping</label>
+        <field id="weight_attribute" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Weight Attribute</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+            <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+        </field>
+        <field id="height_attribute" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Height Attribute</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+            <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+        </field>
+        <field id="length_attribute" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Length Attribute</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+            <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+        </field>
+        <field id="width_attribute" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Width Attribute</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
+            <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
+        </field>
+    </group>
+</include>

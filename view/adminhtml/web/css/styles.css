@@ -3,7 +3,7 @@
  */
 .frenet-shipping-header-section {}
 
-.frenet-shipping-header-section .entry-edit-head {
+.frenet-shipping-header-section > .entry-edit-head {
     background: url("../images/frenet-logo.png") 0 no-repeat;
     padding: 10px 0 10px 100px;
 }

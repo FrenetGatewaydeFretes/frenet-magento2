@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="default_measurements" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Default Measurements</label>
+        <field id="default_weight" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Default Weight</label>
+            <frontend_class>validate-number</frontend_class>
+            <comment>The default weight used to get quotes from Frenet API in case of product lacks this information.</comment>
+        </field>
+        <field id="default_height" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Default Height</label>
+            <frontend_class>validate-number</frontend_class>
+            <comment>The default height used to get quotes from Frenet API in case of product lacks this information.</comment>
+        </field>
+        <field id="default_length" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Default Length</label>
+            <frontend_class>validate-number</frontend_class>
+            <comment>The default length used to get quotes from Frenet API in case of product lacks this information.</comment>
+        </field>
+        <field id="default_width" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Default Width</label>
+            <frontend_class>validate-number</frontend_class>
+            <comment>The default width used to get quotes from Frenet API in case of product lacks this information.</comment>
+        </field>
+    </group>
+</include>

@@ -7,9 +7,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="carriers">
-            <group id="frenetshipping" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="frenetshipping" translate="label commant" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Frenet Shipping Gateway</label>
                 <fieldset_css>complex frenet-shipping-header-section</fieldset_css>
+                <comment><![CDATA[You will need an API token to use Frenet services. Please visit <a href="http://www.frenet.com.br/" target="_blank">our official website</a> and create your account.]]></comment>
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -21,55 +22,54 @@
                     <label>API Token</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
-                <field id="sallowspecific" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="specificerrmsg" translate="label" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Displayed Error Message</label>
+                </field>
+
+                <!-- ATTRIBUTES MAPPING -->
+                <include path="Frenet_Shipping::system/attributes_mapping.xml"/>
+
+                <!-- DEFAULT MEASUREMENTS -->
+                <include path="Frenet_Shipping::system/default_measurements.xml"/>
+
+                <!-- ADDITIONAL LEAD TIME -->
+                <field id="additional_lead_time" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Additional Lead Time</label>
+                    <frontend_class>validate-number</frontend_class>
+                    <comment>The additional lead time (in days) that will be summed to original lead time.</comment>
+                </field>
+
+                <field id="sallowspecific" translate="label" type="select" sortOrder="400" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Ship to Applicable Countries</label>
                     <frontend_class>shipping-applicable-country</frontend_class>
                     <source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
                 </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="410" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Ship to Specific Countries</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                     <can_be_empty>1</can_be_empty>
                 </field>
-                <field id="showmethod" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="showmethod" translate="label" type="select" sortOrder="420" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Show Method if Not Applicable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="specificerrmsg" translate="label" type="textarea" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Displayed Error Message</label>
-                </field>
-                <field id="weight_attribute" translate="label" type="select" sortOrder="800" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Weight Attribute</label>
-                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
-                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
-                </field>
-                <field id="height_attribute" translate="label" type="select" sortOrder="810" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Height Attribute</label>
-                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
-                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
-                </field>
-                <field id="length_attribute" translate="label" type="select" sortOrder="820" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Length Attribute</label>
-                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
-                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
-                </field>
-                <field id="width_attribute" translate="label" type="select" sortOrder="830" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Width Attribute</label>
-                    <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Attributes</source_model>
-                    <comment>This attribute will be used to get shipping quotes from Frenet API.</comment>
-                </field>
-                <field id="debug" translate="label" type="select" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+
+                <!-- DEBUG -->
+                <field id="debug" translate="label" type="select" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Debug</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="debug_filename" translate="label" type="text" sortOrder="910" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="debug_filename" translate="label" type="text" sortOrder="510" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Debug Filename</label>
                     <depends>
                         <field id="debug">1</field>
                     </depends>
                 </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="1100" showInDefault="1" showInWebsite="1" showInStore="0">
+
+                <!-- OTHER OPTIONS -->
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
         </section>

@@ -27,12 +27,31 @@
                 <sort_order>10</sort_order>
                 <specificerrmsg>Frenet shipping method is not available.</specificerrmsg>
                 <sallowspecific>0</sallowspecific>
-                <weight_attribute>weight</weight_attribute>
-                <height_attribute>volume_height</height_attribute>
-                <length_attribute>volume_length</length_attribute>
-                <width_attribute>volume_width</width_attribute>
+
+                <!-- ATTRIBUTES MAPPING -->
+                <attributes_mapping>
+                    <weight_attribute>weight</weight_attribute>
+                    <height_attribute>volume_height</height_attribute>
+                    <length_attribute>volume_length</length_attribute>
+                    <width_attribute>volume_width</width_attribute>
+                </attributes_mapping>
+
+                <!-- ADDITIONAL LEAD TIME -->
+                <additional_lead_time>0</additional_lead_time>
+
+                <!-- DEFAULT MEASUREMENTS -->
+                <default_measurements>
+                    <default_weight>1</default_weight>
+                    <default_height>2</default_height>
+                    <default_length>16</default_length>
+                    <default_width>11</default_width>
+                </default_measurements>
+
+                <!-- DEBUG -->
                 <debug>0</debug>
                 <debug_filename>frenet_request_debug.log</debug_filename>
+
+                <!-- OTHER OPTIONS -->
                 <sort_order>90</sort_order>
             </frenetshipping>
         </carriers>
