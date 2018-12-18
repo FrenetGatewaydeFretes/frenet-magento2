@@ -51,7 +51,7 @@ class Config
      */
     public function getWeightAttribute()
     {
-        return $this->getCarrierConfig('weight_attribute');
+        return $this->getCarrierConfig('attributes_mapping/weight_attribute');
     }
     
     /**
@@ -59,7 +59,7 @@ class Config
      */
     public function getHeightAttribute()
     {
-        return $this->getCarrierConfig('height_attribute');
+        return $this->getCarrierConfig('attributes_mapping/height_attribute');
     }
     
     /**
@@ -67,7 +67,7 @@ class Config
      */
     public function getLengthAttribute()
     {
-        return $this->getCarrierConfig('length_attribute');
+        return $this->getCarrierConfig('attributes_mapping/length_attribute');
     }
     
     /**
@@ -75,7 +75,39 @@ class Config
      */
     public function getWidthAttribute()
     {
-        return $this->getCarrierConfig('width_attribute');
+        return $this->getCarrierConfig('attributes_mapping/width_attribute');
+    }
+    
+    /**
+     * @return float
+     */
+    public function getDefaultWeight()
+    {
+        return (float) $this->getCarrierConfig('default_measurements/default_weight');
+    }
+    
+    /**
+     * @return float
+     */
+    public function getDefaultHeight()
+    {
+        return (float) $this->getCarrierConfig('default_measurements/default_height');
+    }
+    
+    /**
+     * @return float
+     */
+    public function getDefaultLength()
+    {
+        return (float) $this->getCarrierConfig('default_measurements/default_length');
+    }
+    
+    /**
+     * @return float
+     */
+    public function getDefaultWidth()
+    {
+        return (float) $this->getCarrierConfig('default_measurements/default_width');
     }
     
     /**

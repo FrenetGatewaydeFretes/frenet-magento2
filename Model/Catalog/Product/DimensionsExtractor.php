@@ -27,12 +27,19 @@ class DimensionsExtractor implements ProductExtractorInterface
      */
     private $attributesMapping;
     
+    /**
+     * @var \Frenet\Shipping\Model\Config
+     */
+    private $config;
+    
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
-        \Frenet\Shipping\Api\Data\AttributesMappingInterface $attributesMapping
+        \Frenet\Shipping\Api\Data\AttributesMappingInterface $attributesMapping,
+        \Frenet\Shipping\Model\Config $config
     ) {
         $this->productResourceFactory = $productResourceFactory;
         $this->attributesMapping = $attributesMapping;
+        $this->config = $config;
     }
     
     /**
@@ -52,7 +59,13 @@ class DimensionsExtractor implements ProductExtractorInterface
      */
     public function getWeight()
     {
-        return (float) $this->extractData($this->attributesMapping->getWeightAttributeCode());
+        $value = $this->extractData($this->attributesMapping->getWeightAttributeCode());
+        
+        if (empty($value)) {
+            $value = $this->config->getDefaultWeight();
+        }
+        
+        return (float) $value;
     }
     
     /**
@@ -60,7 +73,13 @@ class DimensionsExtractor implements ProductExtractorInterface
      */
     public function getHeight()
     {
-        return (float) $this->extractData($this->attributesMapping->getHeightAttributeCode());
+        $value = $this->extractData($this->attributesMapping->getHeightAttributeCode());
+    
+        if (empty($value)) {
+            $value = $this->config->getDefaultHeight();
+        }
+        
+        return (float) $value;
     }
     
     /**
@@ -68,7 +87,13 @@ class DimensionsExtractor implements ProductExtractorInterface
      */
     public function getWidth()
     {
-        return (float) $this->extractData($this->attributesMapping->getWidthAttributeCode());
+        $value = $this->extractData($this->attributesMapping->getWidthAttributeCode());
+        
+        if (empty($value)) {
+            $value = $this->config->getDefaultWidth();
+        }
+    
+        return (float) $value;
     }
     
     /**
@@ -76,7 +101,13 @@ class DimensionsExtractor implements ProductExtractorInterface
      */
     public function getLength()
     {
-        return (float) $this->extractData($this->attributesMapping->getLengthAttributeCode());
+        $value = $this->extractData($this->attributesMapping->getLengthAttributeCode());
+        
+        if (empty($value)) {
+            $value = $this->config->getDefaultLength();
+        }
+        
+        return (float) $value;
     }
     
     /**
