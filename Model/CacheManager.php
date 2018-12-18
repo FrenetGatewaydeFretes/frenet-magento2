@@ -6,6 +6,7 @@ namespace Frenet\Shipping\Model;
 
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
 
 /**
  * Class CacheManager
@@ -83,7 +84,7 @@ class CacheManager
     {
         $identifier = $this->generateCacheKey($request);
         $lifetime   = null;
-        $tags       = [\Frenet\Shipping\Cache\Type\Frenet::CACHE_TAG];
+        $tags       = [FrenetCacheType::CACHE_TAG];
         
         return $this->cache->save($this->prepareBeforeSaving($services), $identifier, $tags, $lifetime);
     }
@@ -166,7 +167,7 @@ class CacheManager
      */
     private function isCacheEnabled()
     {
-        return (bool) $this->cacheState->isEnabled(\Frenet\Shipping\Cache\Type\Frenet::TYPE_IDENTIFIER);
+        return (bool) $this->cacheState->isEnabled(FrenetCacheType::TYPE_IDENTIFIER);
     }
     
     /**
