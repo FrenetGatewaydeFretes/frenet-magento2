@@ -1,0 +1,17 @@
+/**
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ */
+.frenet-shipping-header-section {}
+
+.frenet-shipping-header-section .entry-edit-head {
+    background: url("../images/frenet-logo.png") 0 no-repeat;
+    padding: 10px 0 10px 100px;
+}
+
+.frenet-shipping-header-section .entry-edit-head > a,
+.frenet-shipping-header-section .entry-edit-head > a:active,
+.frenet-shipping-header-section .entry-edit-head > a:hover,
+.frenet-shipping-header-section .entry-edit-head > a:visited,
+.frenet-shipping-header-section .entry-edit-head > a:focus {
+    visibility: visible;
+}
