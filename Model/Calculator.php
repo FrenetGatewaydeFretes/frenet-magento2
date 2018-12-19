@@ -50,6 +50,11 @@ class Calculator implements CalculatorInterface
     private $quoteItemValidator;
     
     /**
+     * @var Quote\ItemQuantityCalculatorInterface
+     */
+    private $quoteItemQtyCalculator;
+    
+    /**
      * Calculator constructor.
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface     $scopeConfig
@@ -62,6 +67,7 @@ class Calculator implements CalculatorInterface
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
         \Frenet\Shipping\Api\QuoteItemValidator $quoteItemValidator,
+        \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         CacheManager $cacheManager,
         Config $config,
         ApiService $apiService
@@ -70,6 +76,7 @@ class Calculator implements CalculatorInterface
         $this->storeManagement = $storeManagement;
         $this->dimensionsExtractor = $dimensionsExtractor;
         $this->quoteItemValidator = $quoteItemValidator;
+        $this->quoteItemQtyCalculator = $itemQuantityCalculator;
         $this->config = $config;
         $this->apiService = $apiService;
         $this->cacheManager = $cacheManager;
@@ -121,15 +128,10 @@ class Calculator implements CalculatorInterface
      */
     private function addItemToQuote(QuoteInterface $quote, \Magento\Quote\Model\Quote\Item $item)
     {
-        /**
-         * The right quantity for configurable products are on the parent item.
-         */
-        $qty = $item->getParentItemId() ? $item->getParentItem()->getQty() : $item->getQty();
-        
         $this->dimensionsExtractor->setProduct($this->getProduct($item));
         $quote->addShippingItem(
             $item->getSku(),
-            $qty,
+            $this->quoteItemQtyCalculator->calculate($item),
             $this->dimensionsExtractor->getWeight(),
             $this->dimensionsExtractor->getLength(),
             $this->dimensionsExtractor->getHeight(),
