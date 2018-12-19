@@ -29,6 +29,11 @@ class ApiService implements ApiServiceInterface
     private $storeManagement;
     
     /**
+     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     */
+    private $directoryList;
+    
+    /**
      * @var Config
      */
     private $config;
@@ -36,12 +41,16 @@ class ApiService implements ApiServiceInterface
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
+        \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
         Config $config
     ) {
-        $this->config = $config;
+        $this->config          = $config;
         $this->scopeConfig     = $scopeConfig;
         $this->storeManagement = $storeManagement;
+        $this->directoryList   = $directoryList;
         $this->api             = \Frenet\ApiFactory::create($config->getToken());
+        
+        $this->init();
     }
     
     /**
@@ -66,5 +75,20 @@ class ApiService implements ApiServiceInterface
     public function shipping()
     {
         return $this->api->shipping();
+    }
+    
+    /**
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    private function init()
+    {
+        if (true == $this->config->isDebugModeEnabled()) {
+            $this->api
+                ->config()
+                ->debugger()
+                ->isEnabled(true)
+                ->setFilePath($this->directoryList->getPath(\Magento\Framework\App\Filesystem\DirectoryList::LOG))
+                ->setFilename($this->config->getDebugFilename());
+        }
     }
 }

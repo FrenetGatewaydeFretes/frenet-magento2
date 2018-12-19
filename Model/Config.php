@@ -119,6 +119,22 @@ class Config
     }
     
     /**
+     * @return float
+     */
+    public function isDebugModeEnabled()
+    {
+        return (float) $this->getCarrierConfig('debug');
+    }
+    
+    /**
+     * @return string
+     */
+    public function getDebugFilename()
+    {
+        return (string) $this->getCarrierConfig('debug_filename');
+    }
+    
+    /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
      * @return string
