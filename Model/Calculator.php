@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Api\CalculatorInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
@@ -97,16 +98,7 @@ class Calculator implements CalculatorInterface
                 continue;
             }
             
-            $this->dimensionsExtractor->setProduct($this->getProduct($item));
-            $quote->addShippingItem(
-                $item->getSku(),
-                $item->getQty(),
-                $this->dimensionsExtractor->getWeight(),
-                $this->dimensionsExtractor->getLength(),
-                $this->dimensionsExtractor->getHeight(),
-                $this->dimensionsExtractor->getWidth(),
-                $this->getProductCategory($item)
-            );
+            $this->addItemToQuote($quote, $item);
         }
         
         /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
@@ -119,6 +111,33 @@ class Calculator implements CalculatorInterface
         }
         
         return false;
+    }
+    
+    /**
+     * @param QuoteInterface                  $quote
+     * @param \Magento\Quote\Model\Quote\Item $item
+     *
+     * @return $this
+     */
+    private function addItemToQuote(QuoteInterface $quote, \Magento\Quote\Model\Quote\Item $item)
+    {
+        /**
+         * The right quantity for configurable products are on the parent item.
+         */
+        $qty = $item->getParentItemId() ? $item->getParentItem()->getQty() : $item->getQty();
+        
+        $this->dimensionsExtractor->setProduct($this->getProduct($item));
+        $quote->addShippingItem(
+            $item->getSku(),
+            $qty,
+            $this->dimensionsExtractor->getWeight(),
+            $this->dimensionsExtractor->getLength(),
+            $this->dimensionsExtractor->getHeight(),
+            $this->dimensionsExtractor->getWidth(),
+            $this->getProductCategory($item)
+        );
+        
+        return $this;
     }
     
     /**
