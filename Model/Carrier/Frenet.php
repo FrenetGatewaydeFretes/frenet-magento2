@@ -7,9 +7,11 @@ namespace Frenet\Shipping\Model\Carrier;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Shipping\Model\Carrier\AbstractCarrierOnline;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
+use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInterface;
 
 /**
  * Class Frenet
+ *
  * @package Frenet\Shipping\Model\Shipping\Carrier
  */
 class Frenet extends AbstractCarrierOnline implements CarrierInterface
@@ -100,16 +102,17 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         if (!$this->canCollectRates()) {
             $errorMessage = $this->getErrorMessage();
             $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
+            
             return $errorMessage;
         }
-    
+        
         /** @var array $results */
         if (!$results = $this->calculator->getQuote($request)) {
             return $this->result;
         }
-    
+        
         $this->prepareResult($results);
-    
+        
         return $this->result;
     }
     
@@ -145,6 +148,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * Make this module compatible with older versions of Magento 2.
      *
      * @param \Magento\Framework\DataObject $request
+     *
      * @return $this|bool|\Magento\Framework\DataObject
      */
     public function proccessAdditionalValidation(\Magento\Framework\DataObject $request)
@@ -219,19 +223,29 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     {
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $this->result = $this->_rateFactory->create();
-    
-        /** @var \Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface $item */
+        
+        /** @var QuoteServiceInterface $item */
         foreach ($items as $item) {
             if ($item->isError()) {
                 continue;
             }
             
-            $title  = $this->prepareMethodTitle($item->getCarrier(), $item->getServiceDescription());
+            $deliveryTime = (int) $item->getDeliveryTime();
+            $additionalLeadTime = (int) $this->config->getAdditionalLeadTime();
+            
+            $item->setData(QuoteServiceInterface::FIELD_DELIVERY_TIME, $deliveryTime + $additionalLeadTime);
+            
+            $title = $this->prepareMethodTitle(
+                $item->getCarrier(),
+                $item->getServiceDescription(),
+                $item->getDeliveryTime()
+            );
+            
             $method = $this->prepareMethod($title, $title, $item->getShippingPrice(), $item->getShippingPrice());
             
             $this->result->append($method);
         }
-    
+        
         return $this;
     }
     
@@ -252,7 +266,8 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             ->setMethod($method)
             ->setMethodTitle($title)
             ->setPrice($price)
-            ->setCost($cost);
+            ->setCost($cost)
+        ;
         
         return $methodInstance;
     }
@@ -260,11 +275,13 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @param string $carrier
      * @param string $description
+     * @param int    $leadTime
      *
      * @return string
      */
-    private function prepareMethodTitle($carrier, $description)
+    private function prepareMethodTitle($carrier, $description, $leadTime = 0)
     {
-        return sprintf('%s - %s', $carrier, $description);
+        $title = __('%1 - %2 (%3 day(s))', $carrier, $description, (int) $leadTime);
+        return $title;
     }
 }

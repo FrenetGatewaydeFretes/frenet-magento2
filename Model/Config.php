@@ -111,6 +111,14 @@ class Config
     }
     
     /**
+     * @return int
+     */
+    public function getAdditionalLeadTime()
+    {
+        return (int) $this->getCarrierConfig('additional_lead_time');
+    }
+    
+    /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
      * @return string
