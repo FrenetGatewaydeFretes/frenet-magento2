@@ -10,6 +10,7 @@
     <preference for="Frenet\Shipping\Api\Data\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
     <preference for="Frenet\Shipping\Api\QuoteItemValidator" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
+    <preference for="Frenet\Shipping\Api\WeightConverterInterface" type="Frenet\Shipping\Model\WeightConverter"/>
 
     <type name="Frenet\Shipping\Model\Calculator">
         <arguments>

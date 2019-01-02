@@ -53,13 +53,23 @@ class Calculator implements CalculatorInterface
      * @var Quote\ItemQuantityCalculatorInterface
      */
     private $quoteItemQtyCalculator;
-    
+
+    /**
+     * @var \Frenet\Shipping\Api\WeightConverterInterface
+     */
+    private $weightConverter;
+
     /**
      * Calculator constructor.
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface     $scopeConfig
      * @param \Magento\Store\Model\StoreManagerInterface             $storeManagement
      * @param \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor
+     * @param \Frenet\Shipping\Api\QuoteItemValidator                $quoteItemValidator
+     * @param Quote\ItemQuantityCalculatorInterface                  $itemQuantityCalculator
+     * @param \Frenet\Shipping\Api\WeightConverterInterface          $weightConverter
+     * @param CacheManager                                           $cacheManager
+     * @param Config                                                 $config
      * @param ApiService                                             $apiService
      */
     public function __construct(
@@ -68,6 +78,7 @@ class Calculator implements CalculatorInterface
         \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
         \Frenet\Shipping\Api\QuoteItemValidator $quoteItemValidator,
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        \Frenet\Shipping\Api\WeightConverterInterface $weightConverter,
         CacheManager $cacheManager,
         Config $config,
         ApiService $apiService
@@ -77,6 +88,7 @@ class Calculator implements CalculatorInterface
         $this->dimensionsExtractor = $dimensionsExtractor;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->quoteItemQtyCalculator = $itemQuantityCalculator;
+        $this->weightConverter = $weightConverter;
         $this->config = $config;
         $this->apiService = $apiService;
         $this->cacheManager = $cacheManager;
@@ -129,10 +141,11 @@ class Calculator implements CalculatorInterface
     private function addItemToQuote(QuoteInterface $quote, \Magento\Quote\Model\Quote\Item $item)
     {
         $this->dimensionsExtractor->setProduct($this->getProduct($item));
+
         $quote->addShippingItem(
             $item->getSku(),
             $this->quoteItemQtyCalculator->calculate($item),
-            $this->dimensionsExtractor->getWeight(),
+            $this->weightConverter->convertToKg($this->dimensionsExtractor->getWeight()),
             $this->dimensionsExtractor->getLength(),
             $this->dimensionsExtractor->getHeight(),
             $this->dimensionsExtractor->getWidth(),
