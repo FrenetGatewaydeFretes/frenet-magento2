@@ -77,7 +77,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
      */
     private function calculateGroupedProduct(Item $item)
     {
-        /** @todo Create the logic to calculate item quantities for grouped products. */
+        return $item->getQty();
     }
     
     /**
