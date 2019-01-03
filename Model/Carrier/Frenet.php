@@ -281,7 +281,13 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function prepareMethodTitle($carrier, $description, $leadTime = 0)
     {
-        $title = __('%1 - %2 (%3 day(s))', $carrier, $description, (int) $leadTime);
+        $title = __('%1 - %2', $carrier, $description);
+
+        if ($this->config->canShowShippingForecast()) {
+            $message = str_replace('{{d}}', (int) $leadTime , $this->config->getShippingForecast());
+            $title .= ' - ' . $message;
+        }
+
         return $title;
     }
 }
