@@ -117,13 +117,29 @@ class Config
     {
         return (int) $this->getCarrierConfig('additional_lead_time');
     }
+
+    /**
+     * @return bool
+     */
+    public function canShowShippingForecast()
+    {
+        return (bool) $this->getCarrierConfig('show_shipping_forecast');
+    }
+
+    /**
+     * @return bool
+     */
+    public function getShippingForecast()
+    {
+        return (string) $this->getCarrierConfig('shipping_forecast_message');
+    }
     
     /**
-     * @return float
+     * @return bool
      */
     public function isDebugModeEnabled()
     {
-        return (float) $this->getCarrierConfig('debug');
+        return (bool) $this->getCarrierConfig('debug');
     }
     
     /**
