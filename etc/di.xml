@@ -1,9 +1,16 @@
 <?xml version="1.0"?>
 <!--
-/**
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- */
--->
+  Frenet Shipping Gateway
+
+  @category Frenet
+  @package Frenet\Shipping
+  @author Tiago Sampaio <tiago@tiagosampaio.com>
+  @link https://github.com/tiagosampaio
+  @link https://tiagosampaio.com
+
+  Copyright (c) 2019.
+  -->
+
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Frenet\Shipping\Api\ServiceApiInterface" type="Frenet\Shipping\Model\ApiService"/>
     <preference for="Frenet\Shipping\Api\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>

@@ -1,6 +1,15 @@
-/**
+/*
+ * Frenet Shipping Gateway
+ *
+ * @category Frenet
+ * @package Frenet\Shipping
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2019.
  */
+
 .frenet-shipping-header-section {}
 
 .frenet-shipping-header-section > .entry-edit-head {
