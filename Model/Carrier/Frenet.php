@@ -257,7 +257,12 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
                 $item->getDeliveryTime()
             );
             
-            $method = $this->prepareMethod($title, $title, $item->getShippingPrice(), $item->getShippingPrice());
+            $method = $this->prepareMethod(
+                $title,
+                $item->getServiceDescription(),
+                $item->getShippingPrice(),
+                $item->getShippingPrice()
+            );
             
             $this->result->append($method);
         }
