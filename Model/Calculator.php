@@ -191,12 +191,16 @@ class Calculator implements CalculatorInterface
         /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
         $collection = $this->getProduct($item)->getCategoryCollection();
         $collection->addAttributeToSelect('name');
-        
+
+        $categories = [];
+
         /** @var \Magento\Catalog\Model\Category $category */
-        $category = $collection->getFirstItem();
-        
-        if ($category) {
-            return $category->getName();
+        foreach ($collection as $category) {
+            $categories[] = $category->getName();
+        }
+
+        if (empty($categories)) {
+            return implode('|', $categories);
         }
         
         return null;
