@@ -14,10 +14,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="carriers">
-            <group id="frenetshipping" translate="label commant" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="frenetshipping" translate="label comment" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Frenet Shipping Gateway</label>
                 <fieldset_css>complex frenet-shipping-header-section</fieldset_css>
-                <comment><![CDATA[You will need an API token to use Frenet services. Please visit <a href="http://www.frenet.com.br/" target="_blank">our official website</a> and create your account.]]></comment>
+                <comment><![CDATA[You will need an API token to use Frenet services. Please visit <a href="http://painel.frenet.com.br/" target="_blank">our official website</a> and create your account.]]></comment>
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
