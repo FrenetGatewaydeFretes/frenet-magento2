@@ -217,6 +217,49 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     {
         return [self::CARRIER_CODE => $this->config->getCarrierConfig('name')];
     }
+
+    /**
+     * Get tracking
+     *
+     * @param string|string[] $trackings
+     * @return Result
+     */
+    public function getTracking($trackings)
+    {
+        if (!is_array($trackings)) {
+            $trackings = [$trackings];
+        }
+
+        $this->prepareTracking($trackings);
+
+        return $this->_result;
+    }
+
+    /**
+     * @param string[] $trackings
+     * @return \Magento\Shipping\Model\Tracking\Result
+     */
+    private function prepareTracking(array $trackings)
+    {
+        /** @var \Magento\Shipping\Model\Tracking\Result $result */
+        $result = $this->_trackFactory->create();
+
+        /** @var string $tracking */
+        foreach ($trackings as $tracking) {
+            /** @var \Magento\Shipping\Model\Tracking\Result\Status $status */
+            $status = $this->_trackStatusFactory->create();
+            $status->setCarrier(self::CARRIER_CODE);
+            $status->setCarrierTitle($this->getConfigData('title'));
+            $status->setTracking($tracking);
+            $status->setPopup(1);
+            $status->setTrackSummary('Some information will come here.');
+            $result->append($status);
+        }
+
+        $this->_result = $result;
+
+        return $result;
+    }
     
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
