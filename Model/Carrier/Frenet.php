@@ -51,6 +51,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var \Frenet\Shipping\Api\CalculatorInterface
      */
     private $calculator;
+
+    /**
+     * @var \Frenet\Shipping\Model\Tracking
+     */
+    private $trackingService;
     
     /**
      * @var \Frenet\Shipping\Model\Config
@@ -74,6 +79,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Magento\Directory\Helper\Data $directoryData,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Frenet\Shipping\Api\CalculatorInterface $calculator,
+        \Frenet\Shipping\Model\Tracking $trackingService,
         \Frenet\Shipping\Model\Config $config,
         array $data = []
     ) {
@@ -95,7 +101,8 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             $stockRegistry,
             $data
         );
-        
+
+        $this->trackingService = $trackingService;
         $this->calculator = $calculator;
         $this->config = $config;
     }
@@ -221,44 +228,65 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * Get tracking
      *
-     * @param string|string[] $trackings
+     * @param string|string[] $trackingNumbers
      * @return Result
      */
-    public function getTracking($trackings)
+    public function getTracking($trackingNumbers)
     {
-        if (!is_array($trackings)) {
-            $trackings = [$trackings];
+        if (!is_array($trackingNumbers)) {
+            $trackingNumbers = [$trackingNumbers];
         }
 
-        $this->prepareTracking($trackings);
+        $this->prepareTracking($trackingNumbers);
 
         return $this->_result;
     }
 
     /**
-     * @param string[] $trackings
+     * @param string[] $trackingNumbers
      * @return \Magento\Shipping\Model\Tracking\Result
      */
-    private function prepareTracking(array $trackings)
+    private function prepareTracking(array $trackingNumbers)
     {
         /** @var \Magento\Shipping\Model\Tracking\Result $result */
         $result = $this->_trackFactory->create();
 
-        /** @var string $tracking */
-        foreach ($trackings as $tracking) {
+        /** @var string $trackingNumber */
+        foreach ($trackingNumbers as $trackingNumber) {
             /** @var \Magento\Shipping\Model\Tracking\Result\Status $status */
             $status = $this->_trackStatusFactory->create();
             $status->setCarrier(self::CARRIER_CODE);
             $status->setCarrierTitle($this->getConfigData('title'));
-            $status->setTracking($tracking);
+            $status->setTracking($trackingNumber);
             $status->setPopup(1);
-            $status->setTrackSummary('Some information will come here.');
+            $status->setTrackSummary($this->prepareTrackingInformation($status, $trackingNumber, '04014'));
             $result->append($status);
         }
 
         $this->_result = $result;
 
         return $result;
+    }
+
+    /**
+     * @param \Magento\Shipping\Model\Tracking\Result\Status $status
+     * @param string $trackingNumber
+     * @param string $shippingServiceCode
+     * @return string
+     */
+    private function prepareTrackingInformation($status, $trackingNumber, $shippingServiceCode)
+    {
+        /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface $trackingInfo */
+        $trackingInfo = $this->trackingService->track($trackingNumber, $shippingServiceCode);
+        $events = $trackingInfo->getTrackingEvents();
+
+        /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfo\EventInterface $event */
+        $event = end($events);
+
+        $status->setStatus($event->getEventDescription());
+        $status->setDeliveryLocation($event->getEventLocation());
+        $status->setShippedDate($event->getEventDatetime());
+        $status->setService($event->getTrackingInfo()->getServiceDescription());
     }
     
     /**
