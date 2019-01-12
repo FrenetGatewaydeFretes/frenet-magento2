@@ -74,11 +74,11 @@ class ServiceFinder
         $shippingDescription = $track->getShipment()->getOrder()->getShippingDescription();
         $parts = explode(' - ', $shippingDescription);
 
-        if (count($parts) >= 2) {
-            return $parts[1];
+        if (count($parts) > 3) {
+            array_pop($parts);
         }
 
-        return null;
+        return end($parts);
     }
 
     /**
