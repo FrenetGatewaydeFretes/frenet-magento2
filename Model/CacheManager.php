@@ -47,7 +47,7 @@ class CacheManager
     private $config;
     
     /**
-     * @var \Frenet\Shipping\Api\QuoteItemValidator
+     * @var \Frenet\Shipping\Api\QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
     
@@ -55,7 +55,7 @@ class CacheManager
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\App\Cache\StateInterface $cacheState,
         \Magento\Framework\App\CacheInterface $cache,
-        \Frenet\Shipping\Api\QuoteItemValidator $quoteItemValidator,
+        \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         Config $config
     ) {
         $this->serializer = $serializer;

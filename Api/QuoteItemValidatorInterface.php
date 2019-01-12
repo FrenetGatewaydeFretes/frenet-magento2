@@ -16,11 +16,11 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Api;
 
 /**
- * Class QuoteItemValidator
+ * Class QuoteItemValidatorInterface
  *
  * @package Frenet\Shipping\Api
  */
-interface QuoteItemValidator
+interface QuoteItemValidatorInterface
 {
     /**
      * @param \Magento\Quote\Api\Data\CartItemInterface $item

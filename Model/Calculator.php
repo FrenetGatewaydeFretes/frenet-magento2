@@ -57,7 +57,7 @@ class Calculator implements CalculatorInterface
     private $dimensionsExtractor;
     
     /**
-     * @var \Frenet\Shipping\Api\QuoteItemValidator
+     * @var \Frenet\Shipping\Api\QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
     
@@ -77,7 +77,7 @@ class Calculator implements CalculatorInterface
      * @param \Magento\Framework\App\Config\ScopeConfigInterface     $scopeConfig
      * @param \Magento\Store\Model\StoreManagerInterface             $storeManagement
      * @param \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor
-     * @param \Frenet\Shipping\Api\QuoteItemValidator                $quoteItemValidator
+     * @param \Frenet\Shipping\Api\QuoteItemValidatorInterface       $quoteItemValidator
      * @param Quote\ItemQuantityCalculatorInterface                  $itemQuantityCalculator
      * @param \Frenet\Shipping\Api\WeightConverterInterface          $weightConverter
      * @param CacheManager                                           $cacheManager
@@ -88,7 +88,7 @@ class Calculator implements CalculatorInterface
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
-        \Frenet\Shipping\Api\QuoteItemValidator $quoteItemValidator,
+        \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         \Frenet\Shipping\Api\WeightConverterInterface $weightConverter,
         CacheManager $cacheManager,
@@ -120,8 +120,7 @@ class Calculator implements CalculatorInterface
         $quote->setSellerPostcode($this->config->getOriginPostcode())
             ->setRecipientPostcode($request->getDestPostcode())
             ->setRecipientCountry($request->getCountryId())
-            ->setShipmentInvoiceValue($request->getPackageValue())
-        ;
+            ->setShipmentInvoiceValue($request->getPackageValue());
         
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ((array) $request->getAllItems() as $item) {

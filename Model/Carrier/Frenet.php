@@ -196,7 +196,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     public function processAdditionalValidation(\Magento\Framework\DataObject $request)
     {
         /** Validate request items data */
-        if (!count($this->getAllItems($request))) {
+        if (empty($this->getAllItems($request))) {
             $this->errors[] = __('There is no items in this order');
         }
         
@@ -297,7 +297,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
         $events = $trackingInfo->getTrackingEvents();
 
-        if (!count($events)) {
+        if (empty($events)) {
             return null;
         }
 
@@ -309,17 +309,13 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $status->setShippedDate($event->getEventDatetime());
         $status->setService($event->getTrackingInfo()->getServiceDescription());
     }
-    
+
     /**
-     * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
-     *
-     * @param \Magento\Framework\DataObject $request
-     *
-     * @return \Magento\Framework\DataObject
+     * @inheritdoc
      */
     protected function _doShipmentRequest(\Magento\Framework\DataObject $request)
     {
-        // TODO: Implement _doShipmentRequest() method.
+        return $this;
     }
     
     /**
@@ -399,7 +395,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
 
         if ($this->config->canShowShippingForecast()) {
-            $message = str_replace('{{d}}', (int) $leadTime , $this->config->getShippingForecast());
+            $message = str_replace('{{d}}', (int) $leadtime, $this->config->getShippingForecast());
             $title .= self::STR_SEPARATOR . $message;
         }
 

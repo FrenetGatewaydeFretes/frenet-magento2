@@ -47,7 +47,6 @@ class FrenetTest extends \PHPUnit\Framework\TestCase
         
         $packageValue = 1.59;
         
-        
         return [
             'all_items' => [
                 $item

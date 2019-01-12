@@ -71,7 +71,7 @@ abstract class EavAttributeInstaller
     /**
      * @return string
      */
-    protected abstract function getEntityType();
+    abstract protected function getEntityType();
     
     /**
      * @param array $config
