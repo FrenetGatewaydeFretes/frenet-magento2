@@ -44,6 +44,10 @@ class ServiceFinder
     {
         $names = $this->getShipmentPossibleNames($trackingNumber);
 
+        if (empty($names)) {
+            return null;
+        }
+
         /** @var \Frenet\ObjectType\Entity\Shipping\InfoInterface $info */
         $info = $this->apiService->shipping()->info()->execute();
         $services = (array) $info->getAvailableShippingServices();
@@ -92,7 +96,10 @@ class ServiceFinder
         $shippingDescription = $track->getShipment()->getOrder()->getShippingDescription();
         $parts = explode(' - ', $shippingDescription);
 
-        return (array) $parts;
+        /**
+         * Reversing the array makes it more performatic because it begins searching by the last piece.
+         */
+        return (array) array_reverse($parts);
     }
 
     /**
