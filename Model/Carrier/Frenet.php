@@ -56,6 +56,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var \Frenet\Shipping\Model\Tracking
      */
     private $trackingService;
+
+    /**
+     * @var \Frenet\Shipping\Model\ServiceFinder
+     */
+    private $serviceFinder;
     
     /**
      * @var \Frenet\Shipping\Model\Config
@@ -80,6 +85,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Frenet\Shipping\Api\CalculatorInterface $calculator,
         \Frenet\Shipping\Model\Tracking $trackingService,
+        \Frenet\Shipping\Model\ServiceFinder $serviceFinder,
         \Frenet\Shipping\Model\Config $config,
         array $data = []
     ) {
@@ -104,6 +110,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
         $this->trackingService = $trackingService;
         $this->calculator = $calculator;
+        $this->serviceFinder = $serviceFinder;
         $this->config = $config;
     }
     
@@ -253,13 +260,17 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
         /** @var string $trackingNumber */
         foreach ($trackingNumbers as $trackingNumber) {
+            /** @var \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface $service */
+            $service = $this->serviceFinder->findByTrackingNumber($trackingNumber);
+            $serviceCode = $service ? $service->getServiceCode() : null;
+
             /** @var \Magento\Shipping\Model\Tracking\Result\Status $status */
             $status = $this->_trackStatusFactory->create();
             $status->setCarrier(self::CARRIER_CODE);
             $status->setCarrierTitle($this->getConfigData('title'));
             $status->setTracking($trackingNumber);
             $status->setPopup(1);
-            $status->setTrackSummary($this->prepareTrackingInformation($status, $trackingNumber, '04014'));
+            $status->setTrackSummary($this->prepareTrackingInformation($status, $trackingNumber, $serviceCode));
             $result->append($status);
         }
 
@@ -278,7 +289,12 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     {
         /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface $trackingInfo */
         $trackingInfo = $this->trackingService->track($trackingNumber, $shippingServiceCode);
+
         $events = $trackingInfo->getTrackingEvents();
+
+        if (!count($events)) {
+            return null;
+        }
 
         /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfo\EventInterface $event */
         $event = end($events);
@@ -330,6 +346,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             
             $method = $this->prepareMethod(
                 $title,
+                $item->getServiceCode(),
                 $item->getServiceDescription(),
                 $item->getShippingPrice(),
                 $item->getShippingPrice()
@@ -343,13 +360,14 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     
     /**
      * @param string $method
+     * @param string $code
      * @param string $title
      * @param float  $price
      * @param float  $cost
      *
      * @return \Magento\Quote\Model\Quote\Address\RateResult\Method
      */
-    private function prepareMethod($method, $title, $price, $cost)
+    private function prepareMethod($method, $code, $title, $price, $cost)
     {
         /** @var \Magento\Quote\Model\Quote\Address\RateResult\Method $methodInstance */
         $methodInstance = $this->_rateMethodFactory->create();
@@ -357,9 +375,9 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             ->setCarrierTitle($this->config->getCarrierConfig('title'))
             ->setMethod($method)
             ->setMethodTitle($title)
+            ->setMethodDescription($code)
             ->setPrice($price)
-            ->setCost($cost)
-        ;
+            ->setCost($cost);
         
         return $methodInstance;
     }
