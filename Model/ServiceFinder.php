@@ -94,7 +94,7 @@ class ServiceFinder
         }
 
         $shippingDescription = $track->getShipment()->getOrder()->getShippingDescription();
-        $parts = explode(' - ', $shippingDescription);
+        $parts = explode(\Frenet\Shipping\Model\Carrier\Frenet::STR_SEPARATOR, $shippingDescription);
 
         /**
          * Reversing the array makes it more performatic because it begins searching by the last piece.

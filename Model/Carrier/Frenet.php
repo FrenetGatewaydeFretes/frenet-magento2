@@ -31,6 +31,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var string
      */
     const CARRIER_CODE = 'frenetshipping';
+
+    /**
+     * @var string
+     */
+    const STR_SEPARATOR = ' - ';
     
     /**
      * @var string
@@ -391,11 +396,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function prepareMethodTitle($carrier, $description, $leadTime = 0)
     {
-        $title = __('%1 - %2', $carrier, $description);
+        $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
 
         if ($this->config->canShowShippingForecast()) {
             $message = str_replace('{{d}}', (int) $leadTime , $this->config->getShippingForecast());
-            $title .= ' - ' . $message;
+            $title .= self::STR_SEPARATOR . $message;
         }
 
         return $title;
