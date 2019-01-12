@@ -18,6 +18,8 @@
     <preference for="Frenet\Shipping\Api\QuoteItemValidator" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
     <preference for="Frenet\Shipping\Api\WeightConverterInterface" type="Frenet\Shipping\Model\WeightConverter"/>
+    <preference for="Frenet\Shipping\Model\ServiceFinderInterface" type="Frenet\Shipping\Model\ServiceFinder"/>
+    <preference for="Frenet\Shipping\Model\TrackingInterface" type="Frenet\Shipping\Model\Tracking"/>
 
     <type name="Frenet\Shipping\Model\Calculator">
         <arguments>

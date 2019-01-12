@@ -8,7 +8,7 @@ namespace Frenet\Shipping\Model;
  * Class ServiceFinder
  * @package Frenet\Shipping\Model
  */
-class ServiceFinder
+class ServiceFinder implements ServiceFinderInterface
 {
     /**
      * @var ApiService
@@ -36,9 +36,7 @@ class ServiceFinder
     }
 
     /**
-     * @param $trackingNumber
-     * @return \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @inheritdoc
      */
     public function findByTrackingNumber($trackingNumber)
     {

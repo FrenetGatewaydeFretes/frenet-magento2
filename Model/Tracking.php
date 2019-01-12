@@ -8,13 +8,17 @@ namespace Frenet\Shipping\Model;
  * Class Tracking
  * @package Frenet\Shipping\Model
  */
-class Tracking
+class Tracking implements TrackingInterface
 {
     /**
      * @var ApiService
      */
     private $apiService;
 
+    /**
+     * Tracking constructor.
+     * @param ApiService $apiService
+     */
     public function __construct(
         ApiService $apiService
     ) {
@@ -22,8 +26,7 @@ class Tracking
     }
 
     /**
-     * @param string $number
-     * @return \Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface
+     * @inheritdoc
      */
     public function track($number, $shippingServiceCode)
     {
