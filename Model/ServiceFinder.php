@@ -42,14 +42,15 @@ class ServiceFinder
      */
     public function findByTrackingNumber($trackingNumber)
     {
-        $name = $this->getShipmentName($trackingNumber);
+        $names = $this->getShipmentPossibleNames($trackingNumber);
 
         /** @var \Frenet\ObjectType\Entity\Shipping\InfoInterface $info */
         $info = $this->apiService->shipping()->info()->execute();
+        $services = (array) $info->getAvailableShippingServices();
 
-        /** @var \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface $service */
-        foreach ($info->getAvailableShippingServices() as $service) {
-            if ($name == $service->getServiceDescription()) {
+        /** @var string $name */
+        foreach ($names as $name) {
+            if ($service = $this->machServiceByName($services, $name)) {
                 return $service;
             }
         }
@@ -58,11 +59,28 @@ class ServiceFinder
     }
 
     /**
+     * @param \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface[] $services
+     * @param string                                                     $name
+     * @return bool|\Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface
+     */
+    private function machServiceByName(array $services, $name)
+    {
+        /** @var \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface $service */
+        foreach ($services as $service) {
+            if (trim($name) == $service->getServiceDescription()) {
+                return $service;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $trackingNumber
-     * @return string
+     * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function getShipmentName($trackingNumber)
+    private function getShipmentPossibleNames($trackingNumber)
     {
         /** @var \Magento\Sales\Model\Order\Shipment\Track $track */
         $track = $this->getShipmentTrack($trackingNumber);
@@ -74,11 +92,7 @@ class ServiceFinder
         $shippingDescription = $track->getShipment()->getOrder()->getShippingDescription();
         $parts = explode(' - ', $shippingDescription);
 
-        if (count($parts) > 3) {
-            array_pop($parts);
-        }
-
-        return end($parts);
+        return (array) $parts;
     }
 
     /**
