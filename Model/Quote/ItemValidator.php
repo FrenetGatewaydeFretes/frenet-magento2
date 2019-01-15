@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -34,14 +34,14 @@ class ItemValidator implements QuoteItemValidatorInterface
         if ($this->getProduct($item)->isComposite()) {
             return false;
         }
-    
+
         if ($this->getProduct($item)->isVirtual()) {
             return false;
         }
-    
+
         return true;
     }
-    
+
     /**
      * @param \Magento\Quote\Model\Quote\Item $item
      *

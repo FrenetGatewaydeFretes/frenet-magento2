@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -32,34 +32,34 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     public function calculate(Item $item)
     {
         $type = $item->getProductType();
-        
+
         if ($item->getParentItemId()) {
             $type = $item->getParentItem()->getProductType();
         }
-        
+
         switch ($type) {
             case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
                 $qty = $this->calculateBundleProduct($item);
                 break;
-                
+
             case \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE:
                 $qty = $this->calculateGroupedProduct($item);
                 break;
-                
+
             case \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE:
                 $qty = $this->calculateConfigurableProduct($item);
                 break;
-                
+
             case \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL:
             case \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE:
             case \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE:
             default:
                 $qty = $this->calculateSimpleProduct($item);
         }
-        
+
         return (int) max(1, $qty);
     }
-    
+
     /**
      * @param Item $item
      *
@@ -69,7 +69,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     {
         return $item->getQty();
     }
-    
+
     /**
      * @param Item $item
      *
@@ -80,7 +80,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
         $bundleQty = (float) $item->getParentItem()->getQty();
         return $item->getQty() * $bundleQty;
     }
-    
+
     /**
      * @param Item $item
      *
@@ -90,7 +90,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     {
         return $item->getQty();
     }
-    
+
     /**
      * The right quantity for configurable products are on the parent item.
      *

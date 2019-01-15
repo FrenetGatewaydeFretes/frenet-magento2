@@ -153,7 +153,6 @@ class Calculator implements CalculatorInterface
     /**
      * @param QuoteInterface                  $quote
      * @param \Magento\Quote\Model\Quote\Item $item
-     *
      * @return $this
      */
     private function addItemToQuote(QuoteInterface $quote, \Magento\Quote\Model\Quote\Item $item)
@@ -193,7 +192,7 @@ class Calculator implements CalculatorInterface
     private function isProductFragile(\Magento\Quote\Model\Quote\Item $item)
     {
         /** @var \Magento\Catalog\Model\Product $product */
-        $product = $item->getProduct();
+        $product = $this->getProduct($item);
 
         if ($product->hasData(AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE)) {
             return (bool) $product->getData(AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE);
@@ -210,7 +209,6 @@ class Calculator implements CalculatorInterface
 
             return (bool) $value;
         } catch (\Exception $e) {
-
         }
 
         return false;
@@ -219,7 +217,6 @@ class Calculator implements CalculatorInterface
     /**
      * @param \Magento\Quote\Model\Quote\Item $item
      * @return string|null
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function getProductCategory(\Magento\Quote\Model\Quote\Item $item)
     {
@@ -227,9 +224,13 @@ class Calculator implements CalculatorInterface
             return $this->getProductCategory($item->getParentItem());
         }
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
-        $collection = $this->getProduct($item)->getCategoryCollection();
-        $collection->addAttributeToSelect('name');
+        try {
+            /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
+            $collection = $this->getProduct($item)->getCategoryCollection();
+            $collection->addAttributeToSelect('name');
+        } catch (\Exception $e) {
+            return null;
+        }
 
         $categories = [];
 

@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -28,22 +28,22 @@ class DimensionsExtractor implements ProductExtractorInterface
      * @var \Magento\Catalog\Model\Product
      */
     private $product;
-    
+
     /**
      * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
      */
     private $productResourceFactory;
-    
+
     /**
      * @var \Frenet\Shipping\Api\Data\AttributesMappingInterface
      */
     private $attributesMapping;
-    
+
     /**
      * @var \Frenet\Shipping\Model\Config
      */
     private $config;
-    
+
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
         \Frenet\Shipping\Api\Data\AttributesMappingInterface $attributesMapping,
@@ -53,7 +53,7 @@ class DimensionsExtractor implements ProductExtractorInterface
         $this->attributesMapping = $attributesMapping;
         $this->config = $config;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -62,66 +62,66 @@ class DimensionsExtractor implements ProductExtractorInterface
         if ($this->validateProduct($product)) {
             $this->product = $product;
         }
-    
+
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function getWeight()
     {
         $value = $this->extractData($this->attributesMapping->getWeightAttributeCode());
-        
+
         if (empty($value)) {
             $value = $this->config->getDefaultWeight();
         }
-        
+
         return (float) $value;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function getHeight()
     {
         $value = $this->extractData($this->attributesMapping->getHeightAttributeCode());
-    
+
         if (empty($value)) {
             $value = $this->config->getDefaultHeight();
         }
-        
+
         return (float) $value;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function getWidth()
     {
         $value = $this->extractData($this->attributesMapping->getWidthAttributeCode());
-        
+
         if (empty($value)) {
             $value = $this->config->getDefaultWidth();
         }
-    
+
         return (float) $value;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function getLength()
     {
         $value = $this->extractData($this->attributesMapping->getLengthAttributeCode());
-        
+
         if (empty($value)) {
             $value = $this->config->getDefaultLength();
         }
-        
+
         return (float) $value;
     }
-    
+
     /**
      * @param string $key
      *
@@ -132,18 +132,18 @@ class DimensionsExtractor implements ProductExtractorInterface
         if (!$this->product) {
             return null;
         }
-        
+
         if ($this->product->getData($key)) {
             return $this->product->getData($key);
         }
-        
+
         $value = $this->productResourceFactory
             ->create()
             ->getAttributeRawValue($this->product->getId(), $key, $this->product->getStore());
-        
+
         return $value;
     }
-    
+
     /**
      * @param \Magento\Catalog\Api\Data\ProductInterface $product
      *
@@ -154,11 +154,11 @@ class DimensionsExtractor implements ProductExtractorInterface
         if (!$product->getId()) {
             return false;
         }
-        
+
         if (!$product->getStoreId()) {
             return false;
         }
-        
+
         return true;
     }
 }

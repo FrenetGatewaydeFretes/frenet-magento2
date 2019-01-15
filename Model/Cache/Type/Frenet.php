@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -29,17 +29,17 @@ class Frenet extends TagScope implements CacheInterface
      * Cache type code unique among all cache types
      */
     const TYPE_IDENTIFIER = 'frenet_result';
-    
+
     /**
      * Cache tag used to distinguish the cache type from all other cache
      */
     const CACHE_TAG = 'FRENET_RESULT';
-    
+
     /**
      * @var \Magento\Framework\App\Cache\Type\FrontendPool
      */
     private $cacheFrontendPool;
-    
+
     /**
      * @param \Magento\Framework\App\Cache\Type\FrontendPool $cacheFrontendPool
      */
@@ -47,7 +47,7 @@ class Frenet extends TagScope implements CacheInterface
     {
         $this->cacheFrontendPool = $cacheFrontendPool;
     }
-    
+
     /**
      * Retrieve cache frontend instance being decorated
      *
@@ -62,7 +62,7 @@ class Frenet extends TagScope implements CacheInterface
         }
         return $frontend;
     }
-    
+
     /**
      * Retrieve cache tag name
      *

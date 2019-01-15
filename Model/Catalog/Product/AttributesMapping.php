@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -28,13 +28,13 @@ class AttributesMapping implements AttributesMappingInterface
      * @var \Frenet\Shipping\Model\Config
      */
     private $config;
-    
+
     public function __construct(
         \Frenet\Shipping\Model\Config $config
     ) {
         $this->config = $config;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -42,7 +42,7 @@ class AttributesMapping implements AttributesMappingInterface
     {
         return $this->config->getWeightAttribute() ?: self::DEFAULT_ATTRIBUTE_WEIGHT;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -50,7 +50,7 @@ class AttributesMapping implements AttributesMappingInterface
     {
         return $this->config->getHeightAttribute() ?: self::DEFAULT_ATTRIBUTE_HEIGHT;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -58,7 +58,7 @@ class AttributesMapping implements AttributesMappingInterface
     {
         return $this->config->getLengthAttribute() ?: self::DEFAULT_ATTRIBUTE_LENGTH;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -66,7 +66,7 @@ class AttributesMapping implements AttributesMappingInterface
     {
         return $this->config->getWidthAttribute() ?: self::DEFAULT_ATTRIBUTE_WIDTH;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -74,7 +74,7 @@ class AttributesMapping implements AttributesMappingInterface
     {
         return self::DEFAULT_ATTRIBUTE_LEAD_TIME;
     }
-    
+
     /**
      * {@inheritdoc}
      */

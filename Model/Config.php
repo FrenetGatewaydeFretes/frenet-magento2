@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -28,12 +28,12 @@ class Config
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     private $scopeConfig;
-    
+
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     private $storeManager;
-    
+
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManager
@@ -41,7 +41,7 @@ class Config
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
     }
-    
+
     /**
      * @return bool
      */
@@ -49,7 +49,7 @@ class Config
     {
         return (bool) $this->getCarrierConfig('active');
     }
-    
+
     /**
      * @return string
      */
@@ -57,7 +57,7 @@ class Config
     {
         return $this->getCarrierConfig('token');
     }
-    
+
     /**
      * @return string
      */
@@ -65,7 +65,7 @@ class Config
     {
         return $this->getCarrierConfig('attributes_mapping/weight_attribute');
     }
-    
+
     /**
      * @return string
      */
@@ -73,7 +73,7 @@ class Config
     {
         return $this->getCarrierConfig('attributes_mapping/height_attribute');
     }
-    
+
     /**
      * @return string
      */
@@ -81,7 +81,7 @@ class Config
     {
         return $this->getCarrierConfig('attributes_mapping/length_attribute');
     }
-    
+
     /**
      * @return string
      */
@@ -89,7 +89,7 @@ class Config
     {
         return $this->getCarrierConfig('attributes_mapping/width_attribute');
     }
-    
+
     /**
      * @return float
      */
@@ -97,7 +97,7 @@ class Config
     {
         return (float) $this->getCarrierConfig('default_measurements/default_weight');
     }
-    
+
     /**
      * @return float
      */
@@ -105,7 +105,7 @@ class Config
     {
         return (float) $this->getCarrierConfig('default_measurements/default_height');
     }
-    
+
     /**
      * @return float
      */
@@ -113,7 +113,7 @@ class Config
     {
         return (float) $this->getCarrierConfig('default_measurements/default_length');
     }
-    
+
     /**
      * @return float
      */
@@ -121,7 +121,7 @@ class Config
     {
         return (float) $this->getCarrierConfig('default_measurements/default_width');
     }
-    
+
     /**
      * @return int
      */
@@ -145,7 +145,7 @@ class Config
     {
         return (string) $this->getCarrierConfig('shipping_forecast_message');
     }
-    
+
     /**
      * @return bool
      */
@@ -153,7 +153,7 @@ class Config
     {
         return (bool) $this->getCarrierConfig('debug');
     }
-    
+
     /**
      * @return string
      */
@@ -161,7 +161,7 @@ class Config
     {
         return (string) $this->getCarrierConfig('debug_filename');
     }
-    
+
     /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
@@ -171,7 +171,7 @@ class Config
     {
         return $this->get('shipping', 'origin', 'postcode', $store);
     }
-    
+
     /**
      * @param string                                            $field
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
@@ -182,7 +182,7 @@ class Config
     {
         return $this->get('carriers', \Frenet\Shipping\Model\Carrier\Frenet::CARRIER_CODE, $field, $store);
     }
-    
+
     /**
      * @param string                                            $section
      * @param string                                            $group
@@ -197,7 +197,7 @@ class Config
         $path = implode('/', [$section, $group, $field]);
         return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store));
     }
-    
+
     /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
