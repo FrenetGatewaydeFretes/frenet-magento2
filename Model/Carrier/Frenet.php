@@ -395,7 +395,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
 
         if ($this->config->canShowShippingForecast()) {
-            $message = str_replace('{{d}}', (int) $leadtime, $this->config->getShippingForecast());
+            $message = str_replace('{{d}}', (int) $leadTime, $this->config->getShippingForecast());
             $title .= self::STR_SEPARATOR . $message;
         }
 
