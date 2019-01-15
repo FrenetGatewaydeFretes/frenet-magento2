@@ -1,5 +1,5 @@
 {
-    "name": "tiagosampaio/frenet-magento2",
+    "name": "frenet/frenet-magento2",
     "description":"Integrate your Magento 2 with Frenet Services in a simple way.",
     "require": {
         "tiagosampaio/frenet-php": "^0.1.0"
