@@ -3,10 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @package  Frenet\Shipping
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2019.
  */
@@ -30,7 +30,7 @@ class InstallData implements InstallDataInterface
      * @var CatalogProductAttributeInstaller
      */
     private $attributeInstaller;
-    
+
     /**
      * Constructor
      *
@@ -41,24 +41,24 @@ class InstallData implements InstallDataInterface
     ) {
         $this->attributeInstaller = $attributeInstaller;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
         $setup->startSetup();
-        
+
         /**
          * Run for new installation only.
          */
         if (version_compare($context->getVersion(), '2.0.0', '<=')) {
             $this->configureNewInstallation();
         }
-        
+
         $setup->endSetup();
     }
-    
+
     /**
      * Creates the new attributes during the module installation.
      */
@@ -72,53 +72,53 @@ class InstallData implements InstallDataInterface
             $this->attributeInstaller->install($code, (array) $data);
         }
     }
-    
+
     /**
      * @return array
      */
     private function getAttributes()
     {
         $attributes = [
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LENGTH => [
-                'label' => __('Length (cm)'),
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LENGTH    => [
+                'label'       => __('Length (cm)'),
                 'description' => __("Product's package length (for shipping calculation, minimum of 16cm)."),
-                'note' => __("Product's package length (for shipping calculation, minimum of 16cm)."),
-                'default' => 16,
-                'type' => 'int',
+                'note'        => __("Product's package length (for shipping calculation, minimum of 16cm)."),
+                'default'     => 16,
+                'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_HEIGHT => [
-                'label' => __('Height (cm)'),
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_HEIGHT    => [
+                'label'       => __('Height (cm)'),
                 'description' => __("Product's package height (for shipping calculation, minimum of 2cm)."),
-                'note' => __("Product's package height (for shipping calculation, minimum of 2cm)."),
-                'default' => 2,
-                'type' => 'int',
+                'note'        => __("Product's package height (for shipping calculation, minimum of 2cm)."),
+                'default'     => 2,
+                'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_WIDTH => [
-                'label' => __('Width (cm)'),
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_WIDTH     => [
+                'label'       => __('Width (cm)'),
                 'description' => __("Product's package width (for shipping calculation, minimum of 11cm)."),
-                'note' => __("Product's package width (for shipping calculation, minimum of 11cm)."),
-                'default' => 11,
-                'type' => 'int',
+                'note'        => __("Product's package width (for shipping calculation, minimum of 11cm)."),
+                'default'     => 11,
+                'type'        => 'int',
             ],
             \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LEAD_TIME => [
-                'label' => __('Lead Time (days)'),
+                'label'       => __('Lead Time (days)'),
                 'description' => __("Product's manufacturing time (for shipping calculation)."),
-                'note' => __("Product's manufacturing time (for shipping calculation)."),
-                'default' => 0,
-                'type' => 'int',
+                'note'        => __("Product's manufacturing time (for shipping calculation)."),
+                'default'     => 0,
+                'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE => [
-                'label' => __('Is Product Fragile?'),
+            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE   => [
+                'label'       => __('Is Product Fragile?'),
                 'description' => __('Whether the product contains any fragile materials (for shipping calculation).'),
-                'note' => __('Whether the product contains any fragile materials (for shipping calculation).'),
-                'default' => false,
-                'type' => 'int',
-                'input' => 'boolean',
-                'backend' => \Magento\Catalog\Model\Product\Attribute\Backend\Boolean::class,
-                'source' => \Magento\Catalog\Model\Product\Attribute\Source\Boolean::class,
+                'note'        => __('Whether the product contains any fragile materials (for shipping calculation).'),
+                'default'     => false,
+                'type'        => 'int',
+                'input'       => 'boolean',
+                'backend'     => \Magento\Catalog\Model\Product\Attribute\Backend\Boolean::class,
+                'source'      => \Magento\Catalog\Model\Product\Attribute\Source\Boolean::class,
             ],
         ];
-        
+
         return $attributes;
     }
 }

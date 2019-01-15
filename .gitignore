@@ -1,0 +1,5 @@
+/index.php
+/.idea
+/vendor
+/composer.lock
+/**/temp

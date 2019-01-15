@@ -2,7 +2,7 @@
     "name": "tiagosampaio/frenet-magento2",
     "description":"Integrate your Magento 2 with Frenet Services in a simple way.",
     "require": {
-        "tiagosampaio/frenet-php": "dev-master"
+        "tiagosampaio/frenet-php": "^0.1.0"
     },
     "suggest": {},
     "type": "magento2-module",
@@ -26,5 +26,5 @@
             "Frenet\\Shipping\\": ""
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
