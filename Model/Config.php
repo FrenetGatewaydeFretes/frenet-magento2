@@ -141,7 +141,7 @@ class Config
     /**
      * @return bool
      */
-    public function getShippingForecast()
+    public function getShippingForecastMessage()
     {
         return (string) $this->getCarrierConfig('shipping_forecast_message');
     }

@@ -31,7 +31,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var string
      */
     const CARRIER_CODE = 'frenetshipping';
-
     /**
      * @var string
      */
@@ -41,6 +40,16 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var string
      */
     protected $_code = self::CARRIER_CODE;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    protected $storeManagement;
+
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
+     */
+    private $productResourceFactory;
 
     /**
      * @var array
@@ -88,6 +97,8 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Magento\Directory\Model\CurrencyFactory $currencyFactory,
         \Magento\Directory\Helper\Data $directoryData,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
+        \Magento\Store\Model\StoreManagerInterface $storeManagement,
+        \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
         \Frenet\Shipping\Api\CalculatorInterface $calculator,
         \Frenet\Shipping\Model\TrackingInterface $trackingService,
         \Frenet\Shipping\Model\ServiceFinderInterface $serviceFinder,
@@ -113,6 +124,8 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             $data
         );
 
+        $this->storeManagement = $storeManagement;
+        $this->productResourceFactory = $productResourceFactory;
         $this->trackingService = $trackingService;
         $this->calculator = $calculator;
         $this->serviceFinder = $serviceFinder;
@@ -141,7 +154,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             return $this->result;
         }
 
-        $this->prepareResult($results);
+        $this->prepareResult($request, $results);
 
         return $this->result;
     }
@@ -239,6 +252,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
     /**
      * @param $trackingNumbers
+     *
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -255,6 +269,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
     /**
      * @param array $trackingNumbers
+     *
      * @return \Magento\Shipping\Model\Tracking\Result
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -288,6 +303,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @param \Magento\Shipping\Model\Tracking\Result\Status $status
      * @param string                                         $trackingNumber
      * @param string                                         $shippingServiceCode
+     *
      * @return string
      */
     private function prepareTrackingInformation($status, $trackingNumber, $shippingServiceCode)
@@ -323,7 +339,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      *
      * @return $this
      */
-    private function prepareResult(array $items = [])
+    private function prepareResult(RateRequest $request, array $items = [])
     {
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $this->result = $this->_rateFactory->create();
@@ -342,7 +358,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             $title = $this->prepareMethodTitle(
                 $item->getCarrier(),
                 $item->getServiceDescription(),
-                $item->getDeliveryTime()
+                $this->calculateDeliveryTime($request, $item)
             );
 
             $method = $this->prepareMethod(
@@ -357,6 +373,61 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @param RateRequest           $request
+     * @param QuoteServiceInterface $item
+     *
+     * @return array|bool|int|string
+     */
+    private function calculateDeliveryTime(RateRequest $request, QuoteServiceInterface $item)
+    {
+        $serviceForecast = $item->getDeliveryTime();
+        $maxProductForecast = 0;
+
+        /** @var \Magento\Quote\Model\Quote\Item $item */
+        foreach ($request->getAllItems() as $item) {
+            $leadTime = $this->extractProductLeadTime($item->getProduct());
+
+            if ($maxProductForecast >= $leadTime) {
+                continue;
+            }
+
+            $maxProductForecast = $leadTime;
+        }
+
+        return ($serviceForecast + $maxProductForecast + $this->config->getAdditionalLeadTime());
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     *
+     * @return int
+     */
+    private function extractProductLeadTime(\Magento\Catalog\Model\Product $product)
+    {
+        $leadTime = max($product->getData('lead_time'), 0);
+
+        if (empty($leadTime)) {
+            $leadTime = $this->productResourceFactory
+                ->create()
+                ->getAttributeRawValue($product->getId(), 'lead_time', $this->getStore());
+        }
+
+        return (int) $leadTime;
+    }
+
+    /**
+     * @return \Magento\Store\Api\Data\StoreInterface
+     */
+    private function getStore()
+    {
+        try {
+            return $this->storeManagement->getStore();
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            return null;
+        }
     }
 
     /**
@@ -395,7 +466,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
 
         if ($this->config->canShowShippingForecast()) {
-            $message = str_replace('{{d}}', (int) $leadTime, $this->config->getShippingForecast());
+            $message = str_replace('{{d}}', (int) $leadTime, $this->config->getShippingForecastMessage());
             $title .= self::STR_SEPARATOR . $message;
         }
 
@@ -411,6 +482,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     {
         $postcode = preg_replace('/[^0-9]/', null, $postcode);
         $postcode = str_pad($postcode, 8, '0', STR_PAD_LEFT);
+
         return $postcode;
     }
 }
