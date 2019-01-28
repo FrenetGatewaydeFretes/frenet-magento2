@@ -350,21 +350,18 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
                 continue;
             }
 
-            $deliveryTime = (int) $item->getDeliveryTime();
-            $additionalLeadTime = (int) $this->config->getAdditionalLeadTime();
-
-            $item->setData(QuoteServiceInterface::FIELD_DELIVERY_TIME, $deliveryTime + $additionalLeadTime);
+            $deliveryTime = $this->calculateDeliveryTime($request, $item);
 
             $title = $this->prepareMethodTitle(
                 $item->getCarrier(),
                 $item->getServiceDescription(),
-                $this->calculateDeliveryTime($request, $item)
+                $deliveryTime
             );
 
             $method = $this->prepareMethod(
                 $title,
                 $item->getServiceCode(),
-                $item->getServiceDescription(),
+                $this->appendDeliveryTimeMessage($item->getServiceDescription(), $deliveryTime),
                 $item->getShippingPrice(),
                 $item->getShippingPrice()
             );
@@ -457,20 +454,41 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @param string $carrier
      * @param string $description
-     * @param int    $leadTime
+     * @param int    $deliveryTime
      *
      * @return string
      */
-    private function prepareMethodTitle($carrier, $description, $leadTime = 0)
+    private function prepareMethodTitle($carrier, $description, $deliveryTime = 0)
     {
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
-
-        if ($this->config->canShowShippingForecast()) {
-            $message = str_replace('{{d}}', (int) $leadTime, $this->config->getShippingForecastMessage());
-            $title .= self::STR_SEPARATOR . $message;
-        }
+        $title = $this->appendDeliveryTimeMessage($title, $deliveryTime);
 
         return $title;
+    }
+
+    /**
+     * @param string $text
+     * @param int    $deliveryTime
+     *
+     * @return string
+     */
+    private function appendDeliveryTimeMessage($text, $deliveryTime = 0)
+    {
+        if ($this->config->canShowShippingForecast()) {
+            $text .= self::STR_SEPARATOR . $this->getDeliveryTimeMessage($deliveryTime);
+        }
+
+        return $text;
+    }
+
+    /**
+     * @param int $deliveryTime
+     *
+     * @return mixed
+     */
+    private function getDeliveryTimeMessage($deliveryTime = 0)
+    {
+        return str_replace('{{d}}', (int) $deliveryTime, $this->config->getShippingForecastMessage());
     }
 
     /**
