@@ -28,6 +28,11 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 class Calculator implements CalculatorInterface
 {
     /**
+     * @var Catalog\Product\CategoryExtractor
+     */
+    private $categoryExtractor;
+
+    /**
      * @var ApiService
      */
     private $apiService;
@@ -71,6 +76,7 @@ class Calculator implements CalculatorInterface
      * @var \Frenet\Shipping\Api\WeightConverterInterface
      */
     private $weightConverter;
+
     /**
      * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
      */
@@ -97,6 +103,7 @@ class Calculator implements CalculatorInterface
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Api\WeightConverterInterface $weightConverter,
         Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor $categoryExtractor,
         CacheManager $cacheManager,
         Config $config,
         ApiService $apiService
@@ -111,6 +118,7 @@ class Calculator implements CalculatorInterface
         $this->apiService = $apiService;
         $this->cacheManager = $cacheManager;
         $this->productResourceFactory = $productResourceFactory;
+        $this->categoryExtractor = $categoryExtractor;
     }
 
     /**
@@ -166,7 +174,7 @@ class Calculator implements CalculatorInterface
             $this->dimensionsExtractor->getLength(),
             $this->dimensionsExtractor->getHeight(),
             $this->dimensionsExtractor->getWidth(),
-            $this->getProductCategory($item),
+            $this->categoryExtractor->getProductCategories($this->getProduct($item, true)),
             $this->isProductFragile($item)
         );
 
@@ -175,11 +183,16 @@ class Calculator implements CalculatorInterface
 
     /**
      * @param \Magento\Quote\Model\Quote\Item $item
+     * @param bool                            $useParentItemIfAvailable
      *
      * @return bool|\Magento\Catalog\Model\Product
      */
-    private function getProduct(\Magento\Quote\Model\Quote\Item $item)
+    private function getProduct(\Magento\Quote\Model\Quote\Item $item, $useParentItemIfAvailable = false)
     {
+        if ((true === $useParentItemIfAvailable) && $item->getParentItem()) {
+            return $this->getProduct($item->getParentItem());
+        }
+
         /** @var \Magento\Catalog\Model\Product $product */
         $product = $item->getProduct();
         return $product;
@@ -212,37 +225,5 @@ class Calculator implements CalculatorInterface
         }
 
         return false;
-    }
-
-    /**
-     * @param \Magento\Quote\Model\Quote\Item $item
-     * @return string|null
-     */
-    private function getProductCategory(\Magento\Quote\Model\Quote\Item $item)
-    {
-        if ($item->getParentItemId()) {
-            return $this->getProductCategory($item->getParentItem());
-        }
-
-        try {
-            /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
-            $collection = $this->getProduct($item)->getCategoryCollection();
-            $collection->addAttributeToSelect('name');
-        } catch (\Exception $e) {
-            return null;
-        }
-
-        $categories = [];
-
-        /** @var \Magento\Catalog\Model\Category $category */
-        foreach ($collection as $category) {
-            $categories[] = $category->getName();
-        }
-
-        if (!empty($categories)) {
-            return implode('|', $categories);
-        }
-
-        return null;
     }
 }
