@@ -28,6 +28,11 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 class Calculator implements CalculatorInterface
 {
     /**
+     * @var \Magento\Checkout\Model\Session
+     */
+    private $checkoutSession;
+
+    /**
      * @var Catalog\Product\CategoryExtractor
      */
     private $categoryExtractor;
@@ -84,13 +89,16 @@ class Calculator implements CalculatorInterface
 
     /**
      * Calculator constructor.
+     *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface     $scopeConfig
      * @param \Magento\Store\Model\StoreManagerInterface             $storeManagement
      * @param \Magento\Catalog\Model\ResourceModel\ProductFactory    $productResourceFactory
+     * @param \Magento\Checkout\Model\Session                        $checkoutSession
      * @param \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor
      * @param \Frenet\Shipping\Api\QuoteItemValidatorInterface       $quoteItemValidator
      * @param \Frenet\Shipping\Api\WeightConverterInterface          $weightConverter
      * @param Quote\ItemQuantityCalculatorInterface                  $itemQuantityCalculator
+     * @param Catalog\Product\CategoryExtractor                      $categoryExtractor
      * @param CacheManager                                           $cacheManager
      * @param Config                                                 $config
      * @param ApiService                                             $apiService
@@ -99,6 +107,7 @@ class Calculator implements CalculatorInterface
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
+        \Magento\Checkout\Model\Session $checkoutSession,
         \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Api\WeightConverterInterface $weightConverter,
@@ -119,6 +128,7 @@ class Calculator implements CalculatorInterface
         $this->cacheManager = $cacheManager;
         $this->productResourceFactory = $productResourceFactory;
         $this->categoryExtractor = $categoryExtractor;
+        $this->checkoutSession = $checkoutSession;
     }
 
     /**
@@ -144,6 +154,13 @@ class Calculator implements CalculatorInterface
             }
 
             $this->addItemToQuote($quote, $item);
+        }
+
+        /**
+         * Add coupon code if exists.
+         */
+        if ($this->getQuoteCouponCode()) {
+            $quote->setCouponCode($this->getQuoteCouponCode());
         }
 
         /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
@@ -225,5 +242,13 @@ class Calculator implements CalculatorInterface
         }
 
         return false;
+    }
+
+    /**
+     * @return string
+     */
+    private function getQuoteCouponCode()
+    {
+        return $this->checkoutSession->getQuote()->getCouponCode();
     }
 }
