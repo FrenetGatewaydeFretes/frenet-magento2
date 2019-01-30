@@ -41,10 +41,13 @@ class Frenet extends TagScope implements CacheInterface
     private $cacheFrontendPool;
 
     /**
+     * Frenet constructor.
+     *
      * @param \Magento\Framework\App\Cache\Type\FrontendPool $cacheFrontendPool
      */
-    public function __construct(\Magento\Framework\App\Cache\Type\FrontendPool $cacheFrontendPool)
-    {
+    public function __construct(
+        \Magento\Framework\App\Cache\Type\FrontendPool $cacheFrontendPool
+    ) {
         $this->cacheFrontendPool = $cacheFrontendPool;
     }
 
@@ -60,6 +63,7 @@ class Frenet extends TagScope implements CacheInterface
             $frontend = $this->cacheFrontendPool->get(self::TYPE_IDENTIFIER);
             $this->setFrontend($frontend);
         }
+
         return $frontend;
     }
 
