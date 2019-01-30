@@ -28,12 +28,12 @@ class Frenet extends TagScope implements CacheInterface
     /**
      * Cache type code unique among all cache types
      */
-    const TYPE_IDENTIFIER = 'frenet_result';
+    const TYPE_IDENTIFIER = 'frenet_api_result';
 
     /**
      * Cache tag used to distinguish the cache type from all other cache
      */
-    const CACHE_TAG = 'FRENET_RESULT';
+    const CACHE_TAG = 'FRENET_API_RESULT';
 
     /**
      * @var \Magento\Framework\App\Cache\Type\FrontendPool
