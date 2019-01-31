@@ -27,6 +27,11 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 class InstallData implements InstallDataInterface
 {
     /**
+     * @var \Frenet\Shipping\Model\Cache\Type\Frenet
+     */
+    protected $cacheType;
+
+    /**
      * @var CatalogProductAttributeInstaller
      */
     private $attributeInstaller;
@@ -34,12 +39,15 @@ class InstallData implements InstallDataInterface
     /**
      * Constructor
      *
-     * @param \Magento\Eav\Setup\EavSetupFactory $eavSetupFactory
+     * @param \Frenet\Shipping\Model\Cache\Type\Frenet $cacheType
+     * @param CatalogProductAttributeInstaller         $attributeInstaller
      */
     public function __construct(
+        \Frenet\Shipping\Model\Cache\Type\Frenet $cacheType,
         CatalogProductAttributeInstaller $attributeInstaller
     ) {
         $this->attributeInstaller = $attributeInstaller;
+        $this->cacheType = $cacheType;
     }
 
     /**
@@ -54,6 +62,9 @@ class InstallData implements InstallDataInterface
          */
         if (version_compare($context->getVersion(), '2.0.0', '<=')) {
             $this->configureNewInstallation();
+
+            /** Set the Frenet cache type enabled by default when module is installed. */
+            $this->cacheType->setEnabled(true);
         }
 
         $setup->endSetup();
