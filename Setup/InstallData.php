@@ -15,6 +15,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup;
 
+use Frenet\Shipping\Api\Data\AttributesMappingInterface;
 use Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
@@ -62,9 +63,6 @@ class InstallData implements InstallDataInterface
          */
         if (version_compare($context->getVersion(), '2.0.0', '<=')) {
             $this->configureNewInstallation();
-
-            /** Set the Frenet cache type enabled by default when module is installed. */
-            $this->cacheType->setEnabled(true);
         }
 
         $setup->endSetup();
@@ -82,6 +80,9 @@ class InstallData implements InstallDataInterface
         foreach ($this->getAttributes() as $code => $data) {
             $this->attributeInstaller->install($code, (array) $data);
         }
+
+        /** Set the Frenet cache type enabled by default when module is installed. */
+        $this->cacheType->setEnabled(true);
     }
 
     /**
@@ -90,35 +91,35 @@ class InstallData implements InstallDataInterface
     private function getAttributes()
     {
         $attributes = [
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LENGTH    => [
+            AttributesMappingInterface::DEFAULT_ATTRIBUTE_LENGTH    => [
                 'label'       => __('Length (cm)'),
                 'description' => __("Product's package length (for shipping calculation, minimum of 16cm)."),
                 'note'        => __("Product's package length (for shipping calculation, minimum of 16cm)."),
                 'default'     => 16,
                 'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_HEIGHT    => [
+            AttributesMappingInterface::DEFAULT_ATTRIBUTE_HEIGHT    => [
                 'label'       => __('Height (cm)'),
                 'description' => __("Product's package height (for shipping calculation, minimum of 2cm)."),
                 'note'        => __("Product's package height (for shipping calculation, minimum of 2cm)."),
                 'default'     => 2,
                 'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_WIDTH     => [
+            AttributesMappingInterface::DEFAULT_ATTRIBUTE_WIDTH     => [
                 'label'       => __('Width (cm)'),
                 'description' => __("Product's package width (for shipping calculation, minimum of 11cm)."),
                 'note'        => __("Product's package width (for shipping calculation, minimum of 11cm)."),
                 'default'     => 11,
                 'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_LEAD_TIME => [
+            AttributesMappingInterface::DEFAULT_ATTRIBUTE_LEAD_TIME => [
                 'label'       => __('Lead Time (days)'),
                 'description' => __("Product's manufacturing time (for shipping calculation)."),
                 'note'        => __("Product's manufacturing time (for shipping calculation)."),
                 'default'     => 0,
                 'type'        => 'int',
             ],
-            \Frenet\Shipping\Api\Data\AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE   => [
+            AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE   => [
                 'label'       => __('Is Product Fragile?'),
                 'description' => __('Whether the product contains any fragile materials (for shipping calculation).'),
                 'note'        => __('Whether the product contains any fragile materials (for shipping calculation).'),
