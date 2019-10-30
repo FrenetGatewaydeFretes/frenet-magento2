@@ -31,6 +31,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var string
      */
     const CARRIER_CODE = 'frenetshipping';
+
     /**
      * @var string
      */
@@ -65,6 +66,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @var \Frenet\Shipping\Api\CalculatorInterface
      */
     private $calculator;
+
+    /**
+     * @var \Frenet\Shipping\Model\DeliveryTimeCalculator
+     */
+    private $deliveryTimeCalculator;
 
     /**
      * @var \Frenet\Shipping\Model\TrackingInterface
@@ -103,6 +109,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Frenet\Shipping\Model\TrackingInterface $trackingService,
         \Frenet\Shipping\Model\ServiceFinderInterface $serviceFinder,
         \Frenet\Shipping\Model\Config $config,
+        \Frenet\Shipping\Model\DeliveryTimeCalculator $deliveryTimeCalculator,
         array $data = []
     ) {
         parent::__construct(
@@ -130,6 +137,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->calculator = $calculator;
         $this->serviceFinder = $serviceFinder;
         $this->config = $config;
+        $this->deliveryTimeCalculator = $deliveryTimeCalculator;
     }
 
     /**
@@ -335,84 +343,42 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     }
 
     /**
-     * @param array $items
+     * @param RateRequest             $request
+     * @param QuoteServiceInterface[] $items
      *
      * @return $this
      */
-    private function prepareResult(RateRequest $request, array $items = [])
+    private function prepareResult(RateRequest $request, array $services = [])
     {
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $this->result = $this->_rateFactory->create();
 
-        /** @var QuoteServiceInterface $item */
-        foreach ($items as $item) {
-            if ($item->isError()) {
+        /** @var QuoteServiceInterface $service */
+        foreach ($services as $service) {
+            if ($service->isError()) {
                 continue;
             }
 
-            $deliveryTime = $this->calculateDeliveryTime($request, $item);
+            $deliveryTime = $this->deliveryTimeCalculator->calculate($request, $service);
 
-            $title = $this->prepareMethodTitle(
-                $item->getCarrier(),
-                $item->getServiceDescription(),
+            $methodTitle = $this->prepareMethodTitle(
+                $service->getCarrier(),
+                $service->getServiceDescription(),
                 $deliveryTime
             );
 
             $method = $this->prepareMethod(
-                $title,
-                $item->getServiceCode(),
-                $this->appendDeliveryTimeMessage($item->getServiceDescription(), $deliveryTime),
-                $item->getShippingPrice(),
-                $item->getShippingPrice()
+                $methodTitle,
+                $service->getServiceCode(),
+                $this->appendInformation($service->getServiceDescription(), $deliveryTime, $service->getMessage()),
+                $service->getShippingPrice(),
+                $service->getShippingPrice()
             );
 
             $this->result->append($method);
         }
 
         return $this;
-    }
-
-    /**
-     * @param RateRequest           $request
-     * @param QuoteServiceInterface $item
-     *
-     * @return array|bool|int|string
-     */
-    private function calculateDeliveryTime(RateRequest $request, QuoteServiceInterface $item)
-    {
-        $serviceForecast = $item->getDeliveryTime();
-        $maxProductForecast = 0;
-
-        /** @var \Magento\Quote\Model\Quote\Item $item */
-        foreach ($request->getAllItems() as $item) {
-            $leadTime = $this->extractProductLeadTime($item->getProduct());
-
-            if ($maxProductForecast >= $leadTime) {
-                continue;
-            }
-
-            $maxProductForecast = $leadTime;
-        }
-
-        return ($serviceForecast + $maxProductForecast + $this->config->getAdditionalLeadTime());
-    }
-
-    /**
-     * @param \Magento\Catalog\Model\Product $product
-     *
-     * @return int
-     */
-    private function extractProductLeadTime(\Magento\Catalog\Model\Product $product)
-    {
-        $leadTime = max($product->getData('lead_time'), 0);
-
-        if (empty($leadTime)) {
-            $leadTime = $this->productResourceFactory
-                ->create()
-                ->getAttributeRawValue($product->getId(), 'lead_time', $this->getStore());
-        }
-
-        return (int) $leadTime;
     }
 
     /**
@@ -430,20 +396,20 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @param string $method
      * @param string $code
-     * @param string $title
+     * @param string $methodTitle
      * @param float  $price
      * @param float  $cost
      *
      * @return \Magento\Quote\Model\Quote\Address\RateResult\Method
      */
-    private function prepareMethod($method, $code, $title, $price, $cost)
+    private function prepareMethod($method, $code, $methodTitle, $price, $cost)
     {
         /** @var \Magento\Quote\Model\Quote\Address\RateResult\Method $methodInstance */
         $methodInstance = $this->_rateMethodFactory->create();
         $methodInstance->setCarrier($this->_code)
             ->setCarrierTitle($this->config->getCarrierConfig('title'))
             ->setMethod($method)
-            ->setMethodTitle($title)
+            ->setMethodTitle($methodTitle)
             ->setMethodDescription($code)
             ->setPrice($price)
             ->setCost($cost);
@@ -455,13 +421,14 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @param string $carrier
      * @param string $description
      * @param int    $deliveryTime
+     * @param string $message
      *
      * @return string
      */
     private function prepareMethodTitle($carrier, $description, $deliveryTime = 0)
     {
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
-        $title = $this->appendDeliveryTimeMessage($title, $deliveryTime);
+        $title = $this->appendInformation($title, $deliveryTime);
 
         return $title;
     }
@@ -469,13 +436,22 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @param string $text
      * @param int    $deliveryTime
+     * @param string $message
      *
      * @return string
      */
-    private function appendDeliveryTimeMessage($text, $deliveryTime = 0)
+    private function appendInformation($text, $deliveryTime = 0, $message = null)
     {
         if ($this->config->canShowShippingForecast()) {
             $text .= self::STR_SEPARATOR . $this->getDeliveryTimeMessage($deliveryTime);
+        }
+
+        /**
+         * In some cases the API returns some messages about restrictions or extended delivery time.
+         * This is where this information will be displayed.
+         */
+        if ($message) {
+            $text .= " ({$message})";
         }
 
         return $text;

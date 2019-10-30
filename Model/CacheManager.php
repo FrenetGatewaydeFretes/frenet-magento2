@@ -111,8 +111,7 @@ class CacheManager
      */
     private function prepareAfterLoading($data)
     {
-        $newData = [];
-
+        $newData  = [];
         $services = $this->serializer->unserialize($data);
 
         /** @var array $service */
