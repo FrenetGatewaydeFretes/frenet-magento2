@@ -93,6 +93,10 @@ class CacheManager
      */
     public function save(array $services, RateRequest $request)
     {
+        if (!$this->isCacheEnabled()) {
+            return false;
+        }
+
         $identifier = $this->generateCacheKey($request);
         $lifetime = null;
         $tags = [FrenetCacheType::CACHE_TAG];
