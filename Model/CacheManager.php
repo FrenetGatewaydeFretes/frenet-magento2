@@ -177,7 +177,8 @@ class CacheManager
         $cacheKey = $this->serializer->serialize([
             $this->normalizePostcode($origPostcode),
             $this->normalizePostcode($destPostcode),
-            $items
+            $items,
+            $this->config->isMultiQuoteEnabled() ? 'multi' : null
         ]);
 
         return $cacheKey;

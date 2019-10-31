@@ -28,6 +28,7 @@
                 <weight_type>kg</weight_type>
                 <show_delivery>1</show_delivery>
                 <msgprazo>%s - Em média %d dia(s)</msgprazo>
+                <multi_quote>0</multi_quote>
                 <add_delivery_days>0</add_delivery_days>
                 <showmethod>0</showmethod>
                 <specificcountry>BR</specificcountry>

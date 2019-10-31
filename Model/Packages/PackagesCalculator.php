@@ -92,15 +92,43 @@ class PackagesCalculator
         }
 
         /**
-         * Make a full call first because of the other companies that don't have weight limit like Correios.
+         * If the multi quote is disabled, we remove the limit.
          */
         $this->packageLimit->removeLimit();
-        $this->packageManager->process($this->rateRequest);
-        $this->packageLimit->resetMaxWeight();
+        if (!$this->canProcessMultiQuote($rateRequest)) {
+            return $this->processPackages();
+        }
 
+        /**
+         * Make a full call first because of the other companies that don't have weight limit like Correios.
+         */
+        $this->packageManager->process($this->rateRequest);
+
+        /**
+         * Reset the limit so the next process will split the cart into pacakges.
+         */
+        $this->packageLimit->resetMaxWeight();
         $packages = $this->processPackages();
 
+        /**
+         * Package Matching binds the results for Correios only.
+         * The other options (not for Correios) are got from the full call (the first one).
+         */
         return $this->packageMatching->match($packages);
+    }
+
+    /**
+     * @param RateRequest $rateRequest
+     *
+     * @return bool
+     */
+    private function canProcessMultiQuote(RateRequest $rateRequest)
+    {
+        if (!$this->config->isMultiQuoteEnabled()) {
+            return false;
+        }
+
+        return true;
     }
 
     private function processPackages()

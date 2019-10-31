@@ -43,123 +43,163 @@ class Config
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return bool
      */
-    public function isActive()
+    public function isActive($store = null)
     {
-        return (bool) $this->getCarrierConfig('active');
+        return (bool) $this->getCarrierConfig('active', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return string
      */
-    public function getToken()
+    public function getToken($store = null)
     {
-        return $this->getCarrierConfig('token');
+        return $this->getCarrierConfig('token', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return string
      */
-    public function getWeightAttribute()
+    public function getWeightAttribute($store = null)
     {
-        return $this->getCarrierConfig('attributes_mapping/weight_attribute');
+        return $this->getCarrierConfig('attributes_mapping/weight_attribute', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return string
      */
-    public function getHeightAttribute()
+    public function getHeightAttribute($store = null)
     {
-        return $this->getCarrierConfig('attributes_mapping/height_attribute');
+        return $this->getCarrierConfig('attributes_mapping/height_attribute', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return string
      */
-    public function getLengthAttribute()
+    public function getLengthAttribute($store = null)
     {
-        return $this->getCarrierConfig('attributes_mapping/length_attribute');
+        return $this->getCarrierConfig('attributes_mapping/length_attribute', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return string
      */
-    public function getWidthAttribute()
+    public function getWidthAttribute($store = null)
     {
-        return $this->getCarrierConfig('attributes_mapping/width_attribute');
+        return $this->getCarrierConfig('attributes_mapping/width_attribute', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return float
      */
-    public function getDefaultWeight()
+    public function getDefaultWeight($store = null)
     {
-        return (float) $this->getCarrierConfig('default_measurements/default_weight');
+        return (float) $this->getCarrierConfig('default_measurements/default_weight', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return float
      */
-    public function getDefaultHeight()
+    public function getDefaultHeight($store = null)
     {
-        return (float) $this->getCarrierConfig('default_measurements/default_height');
+        return (float) $this->getCarrierConfig('default_measurements/default_height', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return float
      */
-    public function getDefaultLength()
+    public function getDefaultLength($store = null)
     {
-        return (float) $this->getCarrierConfig('default_measurements/default_length');
+        return (float) $this->getCarrierConfig('default_measurements/default_length', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return float
      */
-    public function getDefaultWidth()
+    public function getDefaultWidth($store = null)
     {
-        return (float) $this->getCarrierConfig('default_measurements/default_width');
+        return (float) $this->getCarrierConfig('default_measurements/default_width', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return int
      */
-    public function getAdditionalLeadTime()
+    public function getAdditionalLeadTime($store = null)
     {
-        return (int) $this->getCarrierConfig('additional_lead_time');
+        return (int) $this->getCarrierConfig('additional_lead_time', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return bool
      */
-    public function canShowShippingForecast()
+    public function canShowShippingForecast($store = null)
     {
-        return (bool) $this->getCarrierConfig('show_shipping_forecast');
+        return (bool) $this->getCarrierConfig('show_shipping_forecast', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return bool
      */
-    public function getShippingForecastMessage()
+    public function getShippingForecastMessage($store = null)
     {
-        return (string) $this->getCarrierConfig('shipping_forecast_message');
+        return (string) $this->getCarrierConfig('shipping_forecast_message', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return bool
      */
-    public function isDebugModeEnabled()
+    public function isDebugModeEnabled($store = null)
     {
-        return (bool) $this->getCarrierConfig('debug');
+        return (bool) $this->getCarrierConfig('debug', $store);
     }
 
     /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
+     * @return bool
+     */
+    public function isMultiQuoteEnabled($store = null)
+    {
+        return (bool) $this->getCarrierConfig('multi_quote', $store);
+    }
+
+    /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
      * @return string
      */
-    public function getDebugFilename()
+    public function getDebugFilename($store = null)
     {
-        return (string) $this->getCarrierConfig('debug_filename');
+        return (string) $this->getCarrierConfig('debug_filename', $store);
     }
 
     /**

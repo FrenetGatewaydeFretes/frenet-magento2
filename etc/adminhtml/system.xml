@@ -43,6 +43,13 @@
                     </depends>
                 </field>
 
+                <!-- MULTI QUOTE ENABLED -->
+                <field id="multi_quote" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Multi Quote</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment>When the cart's total weight is greater than the limit (30kg) multiple calls will be done for Correios. Note: with this feature enabled you'll need to ship the products in diferent packages.</comment>
+                </field>
+
                 <!-- ATTRIBUTES MAPPING -->
                 <include path="Frenet_Shipping::system/attributes_mapping.xml"/>
 
