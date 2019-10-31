@@ -13,6 +13,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
  * Class PackageMatching
  *
  * @package Frenet\Shipping\Model\Packages
+ * @todo Review this class.
  */
 class PackageMatching
 {
@@ -36,6 +37,11 @@ class PackageMatching
      */
     private $serviceFactory;
 
+    /**
+     * PackageMatching constructor.
+     *
+     * @param \Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory $serviceFactory
+     */
     public function __construct(
         \Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory $serviceFactory
     ) {
@@ -53,6 +59,9 @@ class PackageMatching
         return $this->matchResults();
     }
 
+    /**
+     * @return array
+     */
     private function matchResults()
     {
         /** @var array $result */
@@ -90,6 +99,8 @@ class PackageMatching
      * @param Service $service
      *
      * @return $this
+     *
+     * @todo Refactor this method to make it more consistent and maintanable.
      */
     private function appendService(Service $service)
     {
@@ -176,6 +187,9 @@ class PackageMatching
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     private function processFullResults()
     {
         /** @var Service $service */

@@ -91,9 +91,13 @@ class PackagesCalculator
             return $this->processPackages();
         }
 
+        /**
+         * Make a full call first because of the other companies that don't have weight limit like Correios.
+         */
         $this->packageLimit->removeLimit();
         $this->packageManager->process($this->rateRequest);
         $this->packageLimit->resetMaxWeight();
+
         $packages = $this->processPackages();
 
         return $this->packageMatching->match($packages);

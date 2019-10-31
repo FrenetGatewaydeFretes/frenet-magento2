@@ -51,11 +51,17 @@ class CacheManager
      */
     private $quoteItemValidator;
 
+    /**
+     * @var \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface
+     */
+    private $itemQuantityCalculator;
+
     public function __construct(
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\App\Cache\StateInterface $cacheState,
         \Magento\Framework\App\CacheInterface $cache,
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
+        \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         Config $config
     ) {
         $this->serializer = $serializer;
@@ -63,6 +69,7 @@ class CacheManager
         $this->cache = $cache;
         $this->config = $config;
         $this->quoteItemValidator = $quoteItemValidator;
+        $this->itemQuantityCalculator = $itemQuantityCalculator;
     }
 
     /**
@@ -160,7 +167,7 @@ class CacheManager
                 $productId = $item->getParentItem()->getProductId() . '-' . $productId;
             }
 
-            $qty = (float) $item->getQty();
+            $qty = (float) $this->itemQuantityCalculator->calculate($item);
 
             $items[$productId] = $qty;
         }
