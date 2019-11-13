@@ -90,6 +90,15 @@ class PackageManager
     }
 
     /**
+     * @return $this
+     */
+    public function unsetCurrentPackage()
+    {
+        $this->currentPackage = null;
+        return $this;
+    }
+
+    /**
      * @param RateRequest $rateRequest
      *
      * @return $this

@@ -46,6 +46,11 @@ class PackagesCalculator
     private $config;
 
     /**
+     * @var \Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface
+     */
+    private $multiQuoteValidator;
+
+    /**
      * @var \Magento\Checkout\Model\Session
      */
     private $checkoutSession;
@@ -65,6 +70,7 @@ class PackagesCalculator
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\ApiService $apiService,
         \Frenet\Shipping\Model\Config $config,
+        \Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface $multiQuoteValidator,
         PackageManager $packagesManager,
         PackageLimit $packageLimit,
         PackageMatching $packageMatching
@@ -74,6 +80,7 @@ class PackagesCalculator
         $this->packageManager = $packagesManager;
         $this->apiService = $apiService;
         $this->config = $config;
+        $this->multiQuoteValidator = $multiQuoteValidator;
         $this->packageLimit = $packageLimit;
         $this->packageMatching = $packageMatching;
     }
@@ -94,15 +101,17 @@ class PackagesCalculator
         /**
          * If the multi quote is disabled, we remove the limit.
          */
-        $this->packageLimit->removeLimit();
-        if (!$this->canProcessMultiQuote($rateRequest)) {
+        if (!$this->multiQuoteValidator->canProcessMultiQuote($rateRequest)) {
+            $this->packageLimit->removeLimit();
             return $this->processPackages();
         }
 
         /**
          * Make a full call first because of the other companies that don't have weight limit like Correios.
          */
+        $this->packageLimit->removeLimit();
         $this->packageManager->process($this->rateRequest);
+        $this->packageManager->unsetCurrentPackage();
 
         /**
          * Reset the limit so the next process will split the cart into pacakges.
@@ -118,19 +127,8 @@ class PackagesCalculator
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
-     * @return bool
+     * @return array
      */
-    private function canProcessMultiQuote(RateRequest $rateRequest)
-    {
-        if (!$this->config->isMultiQuoteEnabled()) {
-            return false;
-        }
-
-        return true;
-    }
-
     private function processPackages()
     {
         $this->packageManager->process($this->rateRequest);
@@ -157,6 +155,11 @@ class PackagesCalculator
         return $results;
     }
 
+    /**
+     * @param Package $package
+     *
+     * @return array|bool
+     */
     private function processPackage(Package $package)
     {
         $this->initServiceQuote($this->rateRequest);
@@ -174,6 +177,9 @@ class PackagesCalculator
         return $this->callService();
     }
 
+    /**
+     * @return array|bool
+     */
     private function callService()
     {
         /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
@@ -187,6 +193,11 @@ class PackagesCalculator
         return false;
     }
 
+    /**
+     * @param RateRequest $rateRequest
+     *
+     * @return $this
+     */
     private function initServiceQuote(RateRequest $rateRequest)
     {
         /** @var \Frenet\Command\Shipping\QuoteInterface $quote */
