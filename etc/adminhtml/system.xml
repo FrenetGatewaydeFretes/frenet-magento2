@@ -17,7 +17,11 @@
             <group id="frenetshipping" translate="label comment" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Frenet Shipping Gateway</label>
                 <fieldset_css>complex frenet-shipping-header-section</fieldset_css>
-                <comment><![CDATA[You will need an API token to use Frenet services. Please visit <a href="http://painel.frenet.com.br/" target="_blank">our official website</a> and create your account.]]></comment>
+                <comment><![CDATA[You will need an API token to use Frenet services. Please visit <a href='http://painel.frenet.com.br/' target='_blank'>our official website</a> and create your account.]]></comment>
+                <field id="version" translate="label" type="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Version</label>
+                    <comment><![CDATA[This is the version of your module installation.]]></comment>
+                </field>
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -47,7 +51,7 @@
                 <field id="multi_quote" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Multi Quote</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
-                    <comment>When the cart's total weight is greater than the limit (30kg) multiple calls will be done for Correios. Note: with this feature enabled you'll need to ship the products in diferent packages.</comment>
+                    <comment><![CDATA[When the cart's total weight is greater than the limit (30kg) multiple calls will be done for Correios.<br/><br/><b>Note</b>: with this feature enabled you'll need to ship the products in diferent packages.<br/><br/><b style='color:red;'>Warning</b>: The shipping rules and restrictions based in cart total or weight may not work properly when this option is enabled.]]></comment>
                 </field>
 
                 <!-- ATTRIBUTES MAPPING -->
