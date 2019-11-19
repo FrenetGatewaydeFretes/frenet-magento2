@@ -30,6 +30,11 @@ class DimensionsExtractor implements ProductExtractorInterface
     private $product;
 
     /**
+     * @var \Magento\Quote\Api\Data\CartItemInterface
+     */
+    private $cartItem;
+
+    /**
      * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
      */
     private $productResourceFactory;
@@ -63,6 +68,18 @@ class DimensionsExtractor implements ProductExtractorInterface
             $this->product = $product;
         }
 
+        return $this;
+    }
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartItemInterface $cartItem
+     *
+     * @return $this
+     */
+    public function setProductByCartItem(\Magento\Quote\Api\Data\CartItemInterface $cartItem)
+    {
+        $this->cartItem = $cartItem;
+        $this->setProduct($this->cartItem->getProduct());
         return $this;
     }
 
@@ -131,6 +148,10 @@ class DimensionsExtractor implements ProductExtractorInterface
     {
         if (!$this->product) {
             return null;
+        }
+
+        if ($this->cartItem->getData($key)) {
+            return $this->cartItem->getData($key);
         }
 
         if ($this->product->getData($key)) {

@@ -119,6 +119,8 @@ class PackageItem
      */
     public function getPrice()
     {
+        $this->initProduct();
+
         /** @todo There will be needed a extractor here. */
         return (float) $this->itemPriceCalculator->getPrice($this->cartItem);
     }
@@ -128,6 +130,8 @@ class PackageItem
      */
     public function getFinalPrice()
     {
+        $this->initProduct();
+
         /** @todo There will be needed a extractor here. */
         return (float) $this->itemPriceCalculator->getFinalPrice($this->cartItem);
     }
@@ -137,6 +141,7 @@ class PackageItem
      */
     public function getTotalPrice()
     {
+        $this->initProduct();
         return (float) $this->getFinalPrice() * $this->getQty();
     }
 
@@ -158,6 +163,8 @@ class PackageItem
      */
     public function getProduct($useParentItemIfAvailable = false)
     {
+        $this->initProduct();
+
         if ((true === $useParentItemIfAvailable) && $this->cartItem->getParentItem()) {
             return $this->getProduct($this->cartItem->getParentItem());
         }
@@ -179,6 +186,7 @@ class PackageItem
      */
     public function getWeight()
     {
+        $this->initProduct();
         return $this->weightConverter->convertToKg($this->dimensionsExtractor->getWeight());
     }
 
@@ -187,6 +195,7 @@ class PackageItem
      */
     public function getTotalWeight()
     {
+        $this->initProduct();
         return (float) ($this->getWeight() * $this->getQty());
     }
 
@@ -259,13 +268,7 @@ class PackageItem
      */
     private function initProduct()
     {
-        if ($this->isInitialized) {
-            return $this;
-        }
-
-        $this->dimensionsExtractor->setProduct($this->cartItem->getProduct());
-
-        $this->isInitialized = true;
+        $this->dimensionsExtractor->setProductByCartItem($this->cartItem);
         return $this;
     }
 }

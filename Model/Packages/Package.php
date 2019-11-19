@@ -94,7 +94,7 @@ class Package
      */
     public function canAddItem(Item $item, $qty = 1)
     {
-        $this->dimensionsExtractor->setProduct($item->getProduct());
+        $this->dimensionsExtractor->setProductByCartItem($item);
 
         $weight = $this->dimensionsExtractor->getWeight();
         $itemWeight = $weight * $qty;
