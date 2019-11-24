@@ -83,6 +83,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     private $serviceFinder;
 
     /**
+     * @var \Frenet\Shipping\Model\Formatters\PostcodeNornalizer
+     */
+    private $postcodeNornalizer;
+
+    /**
      * @var \Frenet\Shipping\Model\Config
      */
     private $config;
@@ -110,6 +115,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Frenet\Shipping\Model\ServiceFinderInterface $serviceFinder,
         \Frenet\Shipping\Model\Config $config,
         \Frenet\Shipping\Model\DeliveryTimeCalculator $deliveryTimeCalculator,
+        \Frenet\Shipping\Model\Formatters\PostcodeNornalizer $postcodeNornalizer,
         array $data = []
     ) {
         parent::__construct(
@@ -138,6 +144,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->serviceFinder = $serviceFinder;
         $this->config = $config;
         $this->deliveryTimeCalculator = $deliveryTimeCalculator;
+        $this->postcodeNornalizer = $postcodeNornalizer;
     }
 
     /**
@@ -227,7 +234,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         }
 
         /** Validate destination postcode */
-        if (!((int) $this->normalizePostcode($request->getDestPostcode()))) {
+        if (!((int) $this->postcodeNornalizer->format($request->getDestPostcode()))) {
             $this->errors[] = __('Please inform a valid postcode');
         }
 
@@ -465,18 +472,5 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     private function getDeliveryTimeMessage($deliveryTime = 0)
     {
         return str_replace('{{d}}', (int) $deliveryTime, $this->config->getShippingForecastMessage());
-    }
-
-    /**
-     * @param string $postcode
-     *
-     * @return string|string[]|null
-     */
-    private function normalizePostcode($postcode)
-    {
-        $postcode = preg_replace('/[^0-9]/', null, $postcode);
-        $postcode = str_pad($postcode, 8, '0', STR_PAD_LEFT);
-
-        return $postcode;
     }
 }
