@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Formatters;
 
-use Magento\Tests\NamingConvention\true\string;
-
 /**
  * Class PostcodeNornalizer
  */
