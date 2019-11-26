@@ -17,7 +17,7 @@
             <frenetshipping>
                 <model>Frenet\Shipping\Model\Carrier\Frenet</model>
                 <name>frenet</name>
-                <version>2.0.2</version>
+                <version>2.1.1</version>
                 <active>0</active>
                 <title>Frenet Shipping Gateway</title>
                 <token backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
