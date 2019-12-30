@@ -38,7 +38,10 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
             return false;
         }
 
-        if (!$this->packageLimit->isUnlimited() && !$this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight())) {
+        $isUnlimited = $this->packageLimit->isUnlimited();
+        $isOverweight = $this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight());
+
+        if (!$isUnlimited && !$isOverweight) {
             return false;
         }
 
