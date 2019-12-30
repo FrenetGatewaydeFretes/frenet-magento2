@@ -27,22 +27,22 @@ class DeliveryTimeCalculator
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
-    private $storeManager;
+    private $storeManagement;
 
     /**
      * DeliveryTimeCalculator constructor.
      *
      * @param \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory
-     * @param \Magento\Store\Model\StoreManagerInterface          $storeManager
+     * @param \Magento\Store\Model\StoreManagerInterface          $storeManagement
      * @param Config                                              $config
      */
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Frenet\Shipping\Model\Config $config
     ) {
         $this->productResourceFactory = $productResourceFactory;
-        $this->storeManager = $storeManager;
+        $this->storeManagement = $storeManagement;
         $this->config = $config;
     }
 
@@ -83,7 +83,7 @@ class DeliveryTimeCalculator
         if (!$leadTime) {
             $leadTime = $this->productResourceFactory
                 ->create()
-                ->getAttributeRawValue($product->getId(), 'lead_time', $this->storeManager->getStore());
+                ->getAttributeRawValue($product->getId(), 'lead_time', $this->storeManagement->getStore());
         }
 
         return (int) $leadTime;
