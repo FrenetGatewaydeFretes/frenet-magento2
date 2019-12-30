@@ -59,17 +59,19 @@ class ItemPriceCalculator
         }
 
         switch ($type) {
-            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
-                // $qty = $this->calculateBundleProduct($item);
-                break;
-
-            case \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE:
-                // $qty = $this->calculateGroupedProduct($item);
-                break;
-
             case \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE:
                 return $item->getParentItem();
 
+            case \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE:
+                /**
+                 * Product is Grouped.
+                 * @todo Validate if this approach is the correct one.
+                 */
+            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
+                /**
+                 * Product is Bundle.
+                 * @todo Validate if this approach is the correct one.
+                 */
             case \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL:
             case \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE:
             case \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE:
