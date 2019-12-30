@@ -177,9 +177,9 @@ class Config
      *
      * @return bool
      */
-    public function isDebugModeEnabled($store = null)
+    public function isMultiQuoteEnabled($store = null)
     {
-        return (bool) $this->getCarrierConfig('debug', $store);
+        return (bool) $this->getCarrierConfig('multi_quote', $store);
     }
 
     /**
@@ -187,9 +187,9 @@ class Config
      *
      * @return bool
      */
-    public function isMultiQuoteEnabled($store = null)
+    public function isDebugModeEnabled($store = null)
     {
-        return (bool) $this->getCarrierConfig('multi_quote', $store);
+        return (bool) $this->getCarrierConfig('debug', $store);
     }
 
     /**
