@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
+use Magento\Quote\Model\Quote\Item as QuoteItem;
+
 /**
  * Class ItemPriceCalculator
  *
@@ -23,32 +25,32 @@ class ItemPriceCalculator
     }
 
     /**
-     * @param \Magento\Quote\Model\Quote\Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    public function getPrice(\Magento\Quote\Model\Quote\Item $item)
+    public function getPrice(QuoteItem $item)
     {
         return $this->getRealItem($item)->getPrice();
     }
 
     /**
-     * @param \Magento\Quote\Model\Quote\Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    public function getFinalPrice(\Magento\Quote\Model\Quote\Item $item)
+    public function getFinalPrice(QuoteItem $item)
     {
         $realItem = $this->getRealItem($item);
         return $realItem->getRowTotal() / $this->itemQuantityCalculator->calculate($realItem);
     }
 
     /**
-     * @param \Magento\Quote\Model\Quote\Item $item
+     * @param QuoteItem $item
      *
-     * @return \Magento\Quote\Model\Quote\Item
+     * @return QuoteItem
      */
-    private function getRealItem(\Magento\Quote\Model\Quote\Item $item)
+    private function getRealItem(QuoteItem $item)
     {
         $type = $item->getProductType();
 

@@ -114,7 +114,7 @@ class PackagesCalculator
         $this->packageManager->unsetCurrentPackage();
 
         /**
-         * Reset the limit so the next process will split the cart into pacakges.
+         * Reset the limit so the next process will split the cart into packages.
          */
         $this->packageLimit->resetMaxWeight();
         $packages = $this->processPackages();
