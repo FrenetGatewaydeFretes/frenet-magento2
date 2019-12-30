@@ -145,7 +145,7 @@ class CacheManager
     {
         $newData = [];
 
-        /** @var \Frenet\ObjectType\Entity\Shipping\QuoteInterface $services */
+        /** @var \Frenet\ObjectType\Entity\Shipping\QuoteInterface $service */
         foreach ($services as $service) {
             $newData[] = $service->getData();
         }
