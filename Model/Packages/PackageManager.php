@@ -49,6 +49,7 @@ class PackageManager
      * @param \Frenet\Shipping\Api\QuoteItemValidatorInterface             $quoteItemValidator
      * @param \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator
      * @param PackageFactory                                               $packageFactory
+     * @param PackageLimit                                                 $packageLimit
      */
     public function __construct(
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
@@ -140,7 +141,7 @@ class PackageManager
     }
 
     /**
-     * @return Package
+     * @return $this
      */
     private function useNewPackage()
     {
