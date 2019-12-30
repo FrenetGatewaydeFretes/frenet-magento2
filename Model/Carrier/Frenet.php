@@ -224,7 +224,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     public function processAdditionalValidation(\Magento\Framework\DataObject $request)
     {
         /** Validate request items data */
-        if (empty($this->getAllItems($request))) {
+        if (empty($request->getAllItems())) {
             $this->errors[] = __('There is no items in this order');
         }
 
@@ -319,7 +319,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @param string                                         $trackingNumber
      * @param string                                         $shippingServiceCode
      *
-     * @return string
+     * @return void
      */
     private function prepareTrackingInformation($status, $trackingNumber, $shippingServiceCode)
     {
@@ -329,7 +329,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $events = $trackingInfo->getTrackingEvents();
 
         if (empty($events)) {
-            return null;
+            return;
         }
 
         /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfo\EventInterface $event */
