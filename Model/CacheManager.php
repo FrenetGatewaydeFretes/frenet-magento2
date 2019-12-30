@@ -56,12 +56,18 @@ class CacheManager
      */
     private $itemQuantityCalculator;
 
+    /**
+     * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
+     */
+    private $postcodeNormalizer;
+
     public function __construct(
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\App\Cache\StateInterface $cacheState,
         \Magento\Framework\App\CacheInterface $cache,
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         Config $config
     ) {
         $this->serializer = $serializer;
@@ -70,6 +76,7 @@ class CacheManager
         $this->config = $config;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->postcodeNormalizer = $postcodeNormalizer;
     }
 
     /**
@@ -175,8 +182,8 @@ class CacheManager
         ksort($items);
 
         $cacheKey = $this->serializer->serialize([
-            $this->normalizePostcode($origPostcode),
-            $this->normalizePostcode($destPostcode),
+            $this->postcodeNormalizer->format($origPostcode),
+            $this->postcodeNormalizer->format($destPostcode),
             $items,
             $this->config->isMultiQuoteEnabled() ? 'multi' : null
         ]);
@@ -200,17 +207,5 @@ class CacheManager
         return new \Frenet\ObjectType\Entity\Shipping\Quote\Service(
             new \Frenet\Framework\Data\Serializer()
         );
-    }
-
-    /**
-     * @param string $postcode
-     *
-     * @return string|string[]|null
-     */
-    private function normalizePostcode($postcode)
-    {
-        $postcode = preg_replace('/[^0-9]/', null, $postcode);
-        $postcode = str_pad($postcode, 8, '0', STR_PAD_LEFT);
-        return $postcode;
     }
 }
