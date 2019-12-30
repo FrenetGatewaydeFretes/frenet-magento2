@@ -83,9 +83,9 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     private $serviceFinder;
 
     /**
-     * @var \Frenet\Shipping\Model\Formatters\PostcodeNornalizer
+     * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
      */
-    private $postcodeNornalizer;
+    private $postcodeNormalizer;
 
     /**
      * @var \Frenet\Shipping\Model\Config
@@ -115,7 +115,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Frenet\Shipping\Model\ServiceFinderInterface $serviceFinder,
         \Frenet\Shipping\Model\Config $config,
         \Frenet\Shipping\Model\DeliveryTimeCalculator $deliveryTimeCalculator,
-        \Frenet\Shipping\Model\Formatters\PostcodeNornalizer $postcodeNornalizer,
+        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         array $data = []
     ) {
         parent::__construct(
@@ -144,7 +144,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->serviceFinder = $serviceFinder;
         $this->config = $config;
         $this->deliveryTimeCalculator = $deliveryTimeCalculator;
-        $this->postcodeNornalizer = $postcodeNornalizer;
+        $this->postcodeNormalizer = $postcodeNormalizer;
     }
 
     /**
@@ -234,7 +234,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         }
 
         /** Validate destination postcode */
-        if (!((int) $this->postcodeNornalizer->format($request->getDestPostcode()))) {
+        if (!((int) $this->postcodeNormalizer->format($request->getDestPostcode()))) {
             $this->errors[] = __('Please inform a valid postcode');
         }
 

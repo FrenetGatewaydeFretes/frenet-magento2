@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Formatters;
 
 /**
- * Class PostcodeNornalizer
+ * Class PostcodeNormalizer
  */
-class PostcodeNornalizer
+class PostcodeNormalizer
 {
     /**
      * @param string $postcode
