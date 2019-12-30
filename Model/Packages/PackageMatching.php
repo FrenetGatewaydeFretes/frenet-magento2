@@ -4,9 +4,6 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Magento\Quote\Model\Quote\Address\RateRequest;
-use Frenet\Shipping\Model\Packages\PackageManager;
-use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 
 /**
@@ -100,7 +97,7 @@ class PackageMatching
      *
      * @return $this
      *
-     * @todo Refactor this method to make it more consistent and maintanable.
+     * @todo Refactor this method to make it more consistent and maintainable.
      */
     private function appendService(Service $service)
     {
