@@ -30,16 +30,6 @@ class ApiService implements ApiServiceInterface
     private $api;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    private $storeManagement;
-
-    /**
      * @var \Magento\Framework\App\Filesystem\DirectoryList
      */
     private $directoryList;
@@ -55,14 +45,10 @@ class ApiService implements ApiServiceInterface
     private $isInitialized = false;
 
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
         Config $config
     ) {
         $this->config = $config;
-        $this->scopeConfig = $scopeConfig;
-        $this->storeManagement = $storeManagement;
         $this->directoryList = $directoryList;
     }
 
@@ -94,7 +80,10 @@ class ApiService implements ApiServiceInterface
     }
 
     /**
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * Initializes the API Service.
+     *
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
      */
     private function init()
     {
