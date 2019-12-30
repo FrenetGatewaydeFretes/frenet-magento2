@@ -158,9 +158,11 @@ class DimensionsExtractor implements ProductExtractorInterface
             return $this->product->getData($key);
         }
 
-        $value = $this->productResourceFactory
-            ->create()
-            ->getAttributeRawValue($this->product->getId(), $key, $this->product->getStore());
+        $value = $this->productResourceFactory->create()->getAttributeRawValue(
+            $this->product->getId(),
+            $key,
+            $this->product->getStore()
+        );
 
         return $value;
     }
