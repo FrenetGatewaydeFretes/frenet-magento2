@@ -234,7 +234,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         }
 
         /** Validate destination postcode */
-        if (!((int) $this->postcodeNormalizer->format($request->getDestPostcode()))) {
+        if ($request->getDestPostcode() && !((int) $this->postcodeNormalizer->format($request->getDestPostcode()))) {
             $this->errors[] = __('Please inform a valid postcode');
         }
 
