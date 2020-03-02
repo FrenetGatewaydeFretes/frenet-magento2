@@ -192,7 +192,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         if (!$this->config->isActive()) {
             return false;
         }
-        
+
         /** @var int $store */
         $store = $this->getStore();
 
@@ -417,9 +417,9 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $methodInstance = $this->_rateMethodFactory->create();
         $methodInstance->setCarrier($this->_code)
             ->setCarrierTitle($this->config->getCarrierConfig('title'))
-            ->setMethod($method)
+            ->setMethod($code)
             ->setMethodTitle($methodTitle)
-            ->setMethodDescription($code)
+            ->setMethodDescription($method)
             ->setPrice($price)
             ->setCost($cost);
 
