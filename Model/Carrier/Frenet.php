@@ -192,7 +192,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         if (!$this->config->isActive()) {
             return false;
         }
-
+        
         /** @var int $store */
         $store = $this->getStore();
 

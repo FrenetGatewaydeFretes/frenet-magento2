@@ -10,6 +10,17 @@ namespace Frenet\Shipping\Model\Validator;
 class PostcodeValidator
 {
     /**
+     * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
+     */
+    private $postcodeNormalizer;
+
+    public function __construct(
+        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer
+    ) {
+        $this->postcodeNormalizer = $postcodeNormalizer;
+    }
+
+    /**
      * @param string|null $postcode
      *
      * @return bool
@@ -20,7 +31,7 @@ class PostcodeValidator
             return false;
         }
 
-        if (!((int) $this->postcodeNormalizer->format($request->getDestPostcode()))) {
+        if (!((int) $this->postcodeNormalizer->format($postcode))) {
             return false;
         }
 
