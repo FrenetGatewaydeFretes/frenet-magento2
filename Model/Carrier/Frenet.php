@@ -92,6 +92,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private $config;
 
+    /**
+     * @var \Frenet\Shipping\Model\Validator\PostcodeValidator
+     */
+    private $postcodeValidator;
+
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory,
@@ -116,6 +121,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Frenet\Shipping\Model\Config $config,
         \Frenet\Shipping\Model\DeliveryTimeCalculator $deliveryTimeCalculator,
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
+        \Frenet\Shipping\Model\Validator\PostcodeValidator $postcodeValidator,
         array $data = []
     ) {
         parent::__construct(
@@ -145,6 +151,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->config = $config;
         $this->deliveryTimeCalculator = $deliveryTimeCalculator;
         $this->postcodeNormalizer = $postcodeNormalizer;
+        $this->postcodeValidator = $postcodeValidator;
     }
 
     /**
@@ -223,19 +230,14 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     public function processAdditionalValidation(\Magento\Framework\DataObject $request)
     {
+        /** Validate destination postcode */
+        if (!$this->postcodeValidator->validate($request->getDestPostcode())) {
+            $this->errors[] = __('Please inform a valid postcode');
+        }
+
         /** Validate request items data */
         if (empty($request->getAllItems())) {
             $this->errors[] = __('There is no items in this order');
-        }
-
-        /** Validate destination postcode */
-        if (!$request->getDestPostcode()) {
-            $this->errors[] = __('Please inform the destination postcode');
-        }
-
-        /** Validate destination postcode */
-        if (!((int) $this->postcodeNormalizer->format($request->getDestPostcode()))) {
-            $this->errors[] = __('Please inform a valid postcode');
         }
 
         if (!empty($this->errors)) {
