@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Packages;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class PackagesManager
@@ -44,23 +45,31 @@ class PackageManager
     private $packageLimit;
 
     /**
+     * @var PackageItemDistributor
+     */
+    private $packageItemDistributor;
+
+    /**
      * PackageManager constructor.
      *
      * @param \Frenet\Shipping\Api\QuoteItemValidatorInterface             $quoteItemValidator
      * @param \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator
      * @param PackageFactory                                               $packageFactory
      * @param PackageLimit                                                 $packageLimit
+     * @param PackageItemDistributor                                       $packageItemDistributor
      */
     public function __construct(
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         PackageFactory $packageFactory,
-        PackageLimit $packageLimit
+        PackageLimit $packageLimit,
+        PackageItemDistributor $packageItemDistributor
     ) {
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->packageFactory = $packageFactory;
         $this->packageLimit = $packageLimit;
+        $this->packageItemDistributor = $packageItemDistributor;
     }
 
     /**
@@ -70,14 +79,20 @@ class PackageManager
      */
     public function process(RateRequest $rateRequest)
     {
-        $this->distribute($rateRequest);
+        $items = $this->packageItemDistributor->distribute($rateRequest);
+
+        /** @var QuoteItem $item */
+        foreach ($items as $item) {
+            $this->addItemToPackage($item);
+        }
+
         return $this;
     }
 
     /**
      * @return Package[]
      */
-    public function getPackages()
+    public function getPackages() : array
     {
         return $this->packages;
     }
@@ -100,26 +115,11 @@ class PackageManager
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
-     * @return $this
-     */
-    private function distribute(RateRequest $rateRequest)
-    {
-        /** @var \Magento\Quote\Model\Quote\Item $item */
-        foreach ($this->getUnitItems($rateRequest) as $item) {
-            $this->addItemToPackage($item);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param \Magento\Quote\Model\Quote\Item $item
+     * @param QuoteItem $item
      *
      * @return bool
      */
-    private function addItemToPackage(\Magento\Quote\Model\Quote\Item $item)
+    private function addItemToPackage(QuoteItem $item)
     {
         if (!$this->getPackage()->canAddItem($item, 1)) {
             $this->useNewPackage();
@@ -164,30 +164,5 @@ class PackageManager
     private function createPackage()
     {
         return $this->packageFactory->create();
-    }
-
-    /**
-     * @param RateRequest $rateRequest
-     *
-     * @return array
-     */
-    private function getUnitItems(RateRequest $rateRequest)
-    {
-        $unitItems = [];
-
-        /** @var \Magento\Quote\Model\Quote\Item $item */
-        foreach ($rateRequest->getAllItems() as $item) {
-            if (!$this->quoteItemValidator->validate($item)) {
-                continue;
-            }
-
-            $qty = $this->itemQuantityCalculator->calculate($item);
-
-            for ($i = 1; $i <= $qty; $i++) {
-                $unitItems[] = $item;
-            }
-        }
-
-        return $unitItems;
     }
 }
