@@ -15,38 +15,40 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Test\Unit\Model\Carrier;
 
+use Frenet\Shipping\Test\Unit\TestCase;
+
 /**
  * Class Frenet
  *
  * @package Frenet\Shipping\Test\Unit\Model\Carrier
  */
-class FrenetTest extends \PHPUnit\Framework\TestCase
+class FrenetTest extends TestCase
 {
     /**
      * @var \Magento\Quote\Model\Quote\Address\RateRequest
      */
     private $request;
-    
+
     protected function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
         $this->request = $objectManager->getObject(\Magento\Quote\Model\Quote\Address\RateRequest::class);
         $this->request->setData($this->mockRequestData());
     }
-    
+
     private function mockRequestData()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        
+
         /** @var \Magento\Quote\Model\Quote\Item $item */
         $item = $objectManager->getObject(\Magento\Quote\Model\Quote\Item::class);
-        
+
         /** @var \Magento\Directory\Model\Currency $currency */
         $currency = $objectManager->getObject(\Magento\Directory\Model\Currency::class);
         $currency->setData('currency_code', 'BRL');
-        
+
         $packageValue = 1.59;
-        
+
         return [
             'all_items' => [
                 $item
