@@ -46,14 +46,7 @@ class PackageItemDistributor
      */
     public function distribute(RateRequest $rateRequest) : array
     {
-        $items = [];
-
-        /** @var QuoteItem $item */
-        foreach ($this->getUnitItems($rateRequest) as $item) {
-            $items[$item->getId()] = $item;
-        }
-
-        return (array) $items;
+        return (array) $this->getUnitItems($rateRequest);
     }
 
     /**
@@ -61,7 +54,7 @@ class PackageItemDistributor
      *
      * @return array
      */
-    private function getUnitItems(RateRequest $rateRequest)
+    private function getUnitItems(RateRequest $rateRequest) : array
     {
         $unitItems = [];
 
@@ -74,7 +67,7 @@ class PackageItemDistributor
             $qty = $this->itemQuantityCalculator->calculate($item);
 
             for ($i = 1; $i <= $qty; $i++) {
-                $unitItems[$item->getId()] = $item;
+                $unitItems[] = $item;
             }
         }
 
