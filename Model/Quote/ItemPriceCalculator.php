@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
+use Frenet\Shipping\Model\Quote\Calculators\PriceCalculatorFactory;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
@@ -18,10 +19,17 @@ class ItemPriceCalculator
      */
     private $itemQuantityCalculator;
 
+    /**
+     * @var PriceCalculatorFactory
+     */
+    private $priceCalculatorFactory;
+
     public function __construct(
-        ItemQuantityCalculatorInterface $itemQuantityCalculator
+        ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        PriceCalculatorFactory $priceCalculatorFactory
     ) {
         $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->priceCalculatorFactory = $priceCalculatorFactory;
     }
 
     /**
@@ -31,7 +39,8 @@ class ItemPriceCalculator
      */
     public function getPrice(QuoteItem $item)
     {
-        return $this->getRealItem($item)->getPrice();
+        return $this->priceCalculatorFactory->create($item)->getPrice($item);
+//        return $this->getRealItem($item)->getPrice();
     }
 
     /**
@@ -41,8 +50,10 @@ class ItemPriceCalculator
      */
     public function getFinalPrice(QuoteItem $item)
     {
-        $realItem = $this->getRealItem($item);
-        return $realItem->getRowTotal() / $this->itemQuantityCalculator->calculate($realItem);
+        return $this->priceCalculatorFactory->create($item)->getFinalPrice($item);
+        /** @var QuoteItem $realItem */
+//        $realItem = $this->getRealItem($item);
+//        return $realItem->getRowTotal() / $this->itemQuantityCalculator->calculate($realItem);
     }
 
     /**

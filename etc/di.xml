@@ -28,4 +28,30 @@
             <argument name="dimensionsExtractor" xsi:type="object">Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor</argument>
         </arguments>
     </type>
+
+    <virtualType name="Frenet\Shipping\Model\Quote\Calculators\SimplePriceCalculator" type="Frenet\Shipping\Model\Quote\Calculators\DefaultPriceCalculator">
+    </virtualType>
+
+    <virtualType name="Frenet\Shipping\Model\Quote\Calculators\VirtualPriceCalculator" type="Frenet\Shipping\Model\Quote\Calculators\DefaultPriceCalculator">
+    </virtualType>
+
+    <virtualType name="Frenet\Shipping\Model\Quote\Calculators\DownloadablePriceCalculator" type="Frenet\Shipping\Model\Quote\Calculators\DefaultPriceCalculator">
+    </virtualType>
+
+    <virtualType name="Frenet\Shipping\Model\Quote\Calculators\GroupedPriceCalculator" type="Frenet\Shipping\Model\Quote\Calculators\DefaultPriceCalculator">
+    </virtualType>
+
+    <type name="Frenet\Shipping\Model\Quote\Calculators\PriceCalculatorFactory">
+        <arguments>
+            <argument name="calculators" xsi:type="array">
+                <item name="default" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\DefaultPriceCalculator</item>
+                <item name="simple" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\SimplePriceCalculator</item>
+                <item name="virtual" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\VirtualPriceCalculator</item>
+                <item name="downloadable" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\DownloadablePriceCalculator</item>
+                <item name="grouped" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\GroupedPriceCalculator</item>
+                <item name="configurable" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\ConfigurablePriceCalculator</item>
+                <item name="bundle" xsi:type="object">Frenet\Shipping\Model\Quote\Calculators\BundlePriceCalculator</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
