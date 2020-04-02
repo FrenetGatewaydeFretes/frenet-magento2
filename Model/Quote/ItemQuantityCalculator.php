@@ -27,7 +27,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     /**
      * @param Item $item
      *
-     * @return integer
+     * @return float
      */
     public function calculate(Item $item)
     {
@@ -57,38 +57,38 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
                 $qty = $this->calculateSimpleProduct($item);
         }
 
-        return (int) max(1, $qty);
+        return (float) max(1, $qty);
     }
 
     /**
      * @param Item $item
      *
-     * @return float|int|mixed
+     * @return float
      */
     private function calculateSimpleProduct(Item $item)
     {
-        return $item->getQty();
+        return (float) $item->getQty();
     }
 
     /**
      * @param Item $item
      *
-     * @return float|int|mixed
+     * @return float
      */
     private function calculateBundleProduct(Item $item)
     {
         $bundleQty = (float) $item->getParentItem()->getQty();
-        return $item->getQty() * $bundleQty;
+        return (float) $item->getQty() * $bundleQty;
     }
 
     /**
      * @param Item $item
      *
-     * @return float|int|mixed
+     * @return float
      */
     private function calculateGroupedProduct(Item $item)
     {
-        return $item->getQty();
+        return (float) $item->getQty();
     }
 
     /**
@@ -96,11 +96,10 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
      *
      * @param Item $item
      *
-     * @return float|int|mixed
+     * @return float
      */
     private function calculateConfigurableProduct(Item $item)
     {
-        $qty = $item->getParentItemId() ? $item->getParentItem()->getQty() : $item->getQty();
-        return $qty;
+        return (float) $item->getParentItem()->getQty();
     }
 }
