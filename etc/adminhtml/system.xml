@@ -18,7 +18,7 @@
                 <label>Frenet Shipping Gateway</label>
                 <fieldset_css>complex frenet-shipping-header-section</fieldset_css>
                 <comment><![CDATA[You will need an API token to use Frenet services. Please visit <a href='http://painel.frenet.com.br/' target='_blank'>our official website</a> and create your account.]]></comment>
-                <field id="version" translate="label" type="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="version" translate="note" type="Frenet\Shipping\Block\Form\Element\Label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Version</label>
                     <comment><![CDATA[This is the version of your module installation.]]></comment>
                 </field>
