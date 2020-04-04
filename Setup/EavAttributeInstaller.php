@@ -3,12 +3,13 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package  Frenet\Shipping
- * @author   Tiago Sampaio <tiago@tiagosampaio.com>
- * @link     https://github.com/tiagosampaio
- * @link     https://tiagosampaio.com
+ * @package Frenet\Shipping
  *
- * Copyright (c) 2019.
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
  */
 
 declare(strict_types = 1);

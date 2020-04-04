@@ -1,9 +1,15 @@
 <?php
 /**
- * Copyright © MagedIn. All rights reserved.
- * See COPYING.txt for license details.
+ * Frenet Shipping Gateway
  *
- * @author Tiago Sampaio <tiago.sampaio@magedin.com>
+ * @category Frenet
+ * @package Frenet\Shipping
+ *
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
  */
 declare(strict_types = 1);
 

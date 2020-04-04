@@ -4,11 +4,12 @@
 
   @category Frenet
   @package Frenet\Shipping
+
   @author Tiago Sampaio <tiago@tiagosampaio.com>
   @link https://github.com/tiagosampaio
   @link https://tiagosampaio.com
 
-  Copyright (c) 2019.
+  Copyright (c) 2020.
   -->
 <include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
     <group id="default_measurements" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
