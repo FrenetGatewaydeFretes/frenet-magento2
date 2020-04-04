@@ -11,9 +11,6 @@ namespace Frenet\Shipping\Model;
 
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config;
-use Magento\Framework\Composer\ComposerFactory;
-use Magento\Framework\Composer\ComposerJsonFinder;
-use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Composer\ComposerInformation;
 
 /**
@@ -31,6 +28,11 @@ class ProductMetadata
     /**
      * @var string
      */
+    const PACKAGE_TYPE = 'magento-module';
+
+    /**
+     * @var string
+     */
     const VERSION_CACHE_KEY = 'module-frenet-shipping-version';
 
     /**
@@ -44,16 +46,37 @@ class ProductMetadata
     private $version = null;
 
     /**
+     * @var array
+     */
+    private $package = [];
+
+    /**
      * @var CacheInterface
      */
     private $cache;
 
     public function __construct(
-        ComposerJsonFinder $composerJsonFinder,
+        ComposerInformation $composerInformation,
         CacheInterface $cache
     ) {
-        $this->composerJsonFinder = $composerJsonFinder;
+        $this->composerInformation = $composerInformation;
         $this->cache = $cache;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName() : string
+    {
+        return self::PACKAGE_NAME;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType() : string
+    {
+        return self::PACKAGE_TYPE;
     }
 
     /**
@@ -80,28 +103,42 @@ class ProductMetadata
      */
     private function getPackageVersion()
     {
-        $packages = $this->getComposerInformation()->getInstalledMagentoPackages();
+        $package = $this->getPackage();
 
-        if (isset($packages[self::PACKAGE_NAME]['version'])) {
-            return $packages[self::PACKAGE_NAME]['version'];
+        if (isset($package['version'])) {
+            return $package['version'];
         }
 
-        return 'Unknown Version';
+        return __('Unknown Module Version');
     }
 
     /**
-     * Load composerInformation
-     *
-     * @return ComposerInformation
+     * @return array
      */
-    private function getComposerInformation()
+    private function getPackage() : array
     {
-        if (!$this->composerInformation) {
-            $directoryList = new DirectoryList(BP);
-            $composerFactory = new ComposerFactory($directoryList, $this->composerJsonFinder);
-            $this->composerInformation = new ComposerInformation($composerFactory);
+        $this->preparePackage();
+
+        if ($this->package) {
+            return $this->package;
         }
 
-        return $this->composerInformation;
+        return [];
+    }
+
+    /**
+     * @return void
+     */
+    private function preparePackage()
+    {
+        if ($this->package) {
+            return;
+        }
+
+        $packages = $this->composerInformation->getInstalledMagentoPackages();
+
+        if (isset($packages[self::PACKAGE_NAME])) {
+            $this->package = $packages[self::PACKAGE_NAME];
+        }
     }
 }

@@ -29,7 +29,6 @@ class Label extends \Magento\Framework\Data\Form\Element\Label
         $data = []
     ) {
         parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
-
         $this->productMetadata = $productMetadata;
     }
 
