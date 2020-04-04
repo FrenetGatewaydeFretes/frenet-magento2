@@ -33,10 +33,12 @@ class Label extends \Magento\Framework\Data\Form\Element\Label
     }
 
     /**
+     * Get module's version. First try to get it from composer installation otherwise use the config information.
+     *
      * @return string
      */
     public function getValue() : string
     {
-        return (string) $this->productMetadata->getVersion();
+        return (string) $this->productMetadata->getVersion() ?: $this->getData('version');
     }
 }
