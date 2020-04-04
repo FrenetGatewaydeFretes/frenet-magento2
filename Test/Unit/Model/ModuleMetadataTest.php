@@ -9,17 +9,17 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Test\Unit\Model;
 
-use Frenet\Shipping\Model\ProductMetadata;
+use Frenet\Shipping\Model\ModuleMetadata;
 use Frenet\Shipping\Test\Unit\TestCase;
 use Magento\Framework\Composer\ComposerInformation;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Class ProductMetadata
+ * Class ModuleMetadata
  *
  * @package Frenet\Shipping\Test\Unit\Model
  */
-class ProductMetadataTest extends TestCase
+class ModuleMetadataTest extends TestCase
 {
     /**
      * @var string
@@ -27,7 +27,7 @@ class ProductMetadataTest extends TestCase
     private $version = '2.1.4';
 
     /**
-     * @var ProductMetadata
+     * @var ModuleMetadata
      */
     private $productMetadata;
 
@@ -39,7 +39,7 @@ class ProductMetadataTest extends TestCase
     protected function setUp()
     {
         $this->composerInformation = $this->createMock(ComposerInformation::class);
-        $this->productMetadata = $this->getObjectManager()->getObject(ProductMetadata::class, [
+        $this->productMetadata = $this->getObjectManager()->getObject(ModuleMetadata::class, [
             'composerInformation' => $this->composerInformation
         ]);
     }
@@ -67,7 +67,7 @@ class ProductMetadataTest extends TestCase
     public function getPackageName()
     {
         $this->prepareComposerInformation();
-        $this->assertEquals(ProductMetadata::PACKAGE_NAME, $this->productMetadata->getName());
+        $this->assertEquals(ModuleMetadata::PACKAGE_NAME, $this->productMetadata->getName());
     }
 
     /**
@@ -76,7 +76,7 @@ class ProductMetadataTest extends TestCase
     public function getPackageType()
     {
         $this->prepareComposerInformation();
-        $this->assertEquals(ProductMetadata::PACKAGE_TYPE, $this->productMetadata->getType());
+        $this->assertEquals(ModuleMetadata::PACKAGE_TYPE, $this->productMetadata->getType());
     }
 
     private function prepareComposerInformation()
@@ -90,9 +90,9 @@ class ProductMetadataTest extends TestCase
     private function getPackageInformation()
     {
         $packageInformation = [
-            ProductMetadata::PACKAGE_NAME => [
-                'name' => ProductMetadata::PACKAGE_NAME,
-                'type' => ProductMetadata::PACKAGE_TYPE,
+            ModuleMetadata::PACKAGE_NAME => [
+                'name' => ModuleMetadata::PACKAGE_NAME,
+                'type' => ModuleMetadata::PACKAGE_TYPE,
                 'version' => $this->version
             ]
         ];

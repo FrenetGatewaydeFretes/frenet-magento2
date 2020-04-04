@@ -17,19 +17,19 @@ namespace Frenet\Shipping\Block\Form\Element;
 class Label extends \Magento\Framework\Data\Form\Element\Label
 {
     /**
-     * @var \Frenet\Shipping\Model\ProductMetadata
+     * @var \Frenet\Shipping\Model\ModuleMetadata
      */
-    private $productMetadata;
+    private $moduleMetadata;
 
     public function __construct(
         \Magento\Framework\Data\Form\Element\Factory $factoryElement,
         \Magento\Framework\Data\Form\Element\CollectionFactory $factoryCollection,
         \Magento\Framework\Escaper $escaper,
-        \Frenet\Shipping\Model\ProductMetadata $productMetadata,
+        \Frenet\Shipping\Model\ModuleMetadata $moduleMetadata,
         $data = []
     ) {
         parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
-        $this->productMetadata = $productMetadata;
+        $this->moduleMetadata = $moduleMetadata;
     }
 
     /**
@@ -39,6 +39,6 @@ class Label extends \Magento\Framework\Data\Form\Element\Label
      */
     public function getValue() : string
     {
-        return (string) $this->productMetadata->getVersion() ?: $this->getData('version');
+        return (string) $this->moduleMetadata->getVersion() ?: $this->getData('version');
     }
 }

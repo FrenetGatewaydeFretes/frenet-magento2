@@ -14,11 +14,11 @@ use Magento\Framework\App\Config;
 use Magento\Framework\Composer\ComposerInformation;
 
 /**
- * Class ProductMetadata
+ * Class ModuleMetadata
  *
  * @package Frenet\Shipping\Model
  */
-class ProductMetadata
+class ModuleMetadata
 {
     /**
      * @var string
