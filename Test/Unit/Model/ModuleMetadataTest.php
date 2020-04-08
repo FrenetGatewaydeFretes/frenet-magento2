@@ -45,7 +45,7 @@ class ModuleMetadataTest extends TestCase
     protected function setUp()
     {
         $this->composerInformation = $this->createMock(ComposerInformation::class);
-        $this->productMetadata = $this->getObjectManager()->getObject(ModuleMetadata::class, [
+        $this->productMetadata = $this->getObject(ModuleMetadata::class, [
             'composerInformation' => $this->composerInformation
         ]);
     }

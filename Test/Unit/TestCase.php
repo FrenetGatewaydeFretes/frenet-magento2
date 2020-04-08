@@ -40,4 +40,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
         return $this->objectManager;
     }
+
+    /**
+     * @param string $className
+     * @param array  $arguments
+     *
+     * @return object
+     */
+    protected function getObject(string $className, array $arguments = [])
+    {
+        return $this->getObjectManager()->getObject($className, $arguments);
+    }
 }
