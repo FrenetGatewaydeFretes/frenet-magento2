@@ -16,6 +16,11 @@ class CouponProcessor
      */
     private $checkoutSession;
 
+    /**
+     * CouponProcessor constructor.
+     *
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     */
     public function __construct(
         \Magento\Checkout\Model\Session $checkoutSession
     ) {

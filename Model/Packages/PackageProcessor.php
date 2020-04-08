@@ -64,8 +64,7 @@ class PackageProcessor
     }
 
     /**
-     * @param Package     $package
-     * @param RateRequest $rateRequest
+     * @param Package $package
      *
      * @return array
      */
@@ -120,8 +119,6 @@ class PackageProcessor
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return $this
      */
     private function initServiceQuote() : self

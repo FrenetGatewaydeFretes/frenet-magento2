@@ -28,9 +28,9 @@ class RateRequestService
     }
 
     /**
-     * @return RateRequest|null
+     * @return RateRequest
      */
-    public function getRateRequest() : ?RateRequest
+    public function getRateRequest() : RateRequest
     {
         return $this->rateRequest;
     }

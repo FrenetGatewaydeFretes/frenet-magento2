@@ -16,9 +16,10 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
+use Frenet\Shipping\Service\RateRequestService;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
 
 /**
  * Class CacheManager
@@ -67,6 +68,11 @@ class CacheManager
      */
     private $couponProcessor;
 
+    /**
+     * @var RateRequestService
+     */
+    private $rateRequestService;
+
     public function __construct(
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\App\Cache\StateInterface $cacheState,
@@ -75,7 +81,8 @@ class CacheManager
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         \Frenet\Shipping\Model\Quote\CouponProcessor $couponProcessor,
-        Config $config
+        Config $config,
+        RateRequestService $rateRequestService
     ) {
         $this->serializer = $serializer;
         $this->cacheState = $cacheState;
@@ -85,20 +92,19 @@ class CacheManager
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->couponProcessor = $couponProcessor;
         $this->postcodeNormalizer = $postcodeNormalizer;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
-     * @param RateRequest $request
-     *
-     * @return bool
+     * @return array|bool|string
      */
-    public function load(RateRequest $request)
+    public function load()
     {
         if (!$this->isCacheEnabled()) {
             return false;
         }
 
-        $data = $this->cache->load($this->generateCacheKey($request));
+        $data = $this->cache->load($this->generateCacheKey());
 
         if ($data) {
             $data = $this->prepareAfterLoading($data);
@@ -108,22 +114,26 @@ class CacheManager
     }
 
     /**
-     * @param array       $services
-     * @param RateRequest $request
+     * @param array $services
      *
      * @return bool
      */
-    public function save(array $services, RateRequest $request)
+    public function save(array $services)
     {
         if (!$this->isCacheEnabled()) {
             return false;
         }
 
-        $identifier = $this->generateCacheKey($request);
+        $identifier = $this->generateCacheKey();
         $lifetime = null;
         $tags = [FrenetCacheType::CACHE_TAG];
 
-        return $this->cache->save($this->prepareBeforeSaving($services), $identifier, $tags, $lifetime);
+        return $this->cache->save(
+            $this->prepareBeforeSaving($services),
+            $identifier,
+            $tags,
+            $lifetime
+        );
     }
 
     /**
@@ -131,7 +141,7 @@ class CacheManager
      *
      * @return array
      */
-    private function prepareAfterLoading($data)
+    private function prepareAfterLoading($data) : array
     {
         $newData  = [];
         $services = $this->serializer->unserialize($data);
@@ -164,8 +174,10 @@ class CacheManager
     /**
      * @return string
      */
-    private function generateCacheKey(RateRequest $request)
+    private function generateCacheKey()
     {
+        $request = $this->rateRequestService->getRateRequest();
+
         $destPostcode = $request->getDestPostcode();
         $origPostcode = $this->config->getOriginPostcode();
         $items = [];

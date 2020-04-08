@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Api\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculator;
+use Frenet\Shipping\Service\RateRequestService;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
@@ -37,31 +38,35 @@ class PackageItemDistributor
      */
     private $itemQuantityCalculator;
 
+    /**
+     * @var RateRequestService
+     */
+    private $rateRequestService;
+
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculator $itemQuantityCalculator
+        ItemQuantityCalculator $itemQuantityCalculator,
+        RateRequestService $rateRequestService
     ) {
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return array
      */
-    public function distribute(RateRequest $rateRequest) : array
+    public function distribute() : array
     {
-        return (array) $this->getUnitItems($rateRequest);
+        return (array) $this->getUnitItems();
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return array
      */
-    private function getUnitItems(RateRequest $rateRequest) : array
+    private function getUnitItems() : array
     {
+        $rateRequest = $this->rateRequestService->getRateRequest();
         $unitItems = [];
 
         /** @var QuoteItem $item */

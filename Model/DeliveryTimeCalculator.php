@@ -16,6 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Shipping\Service\RateRequestService;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 
@@ -42,6 +43,11 @@ class DeliveryTimeCalculator
     private $storeManagement;
 
     /**
+     * @var RateRequestService
+     */
+    private $rateRequestService;
+
+    /**
      * DeliveryTimeCalculator constructor.
      *
      * @param \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory
@@ -51,21 +57,23 @@ class DeliveryTimeCalculator
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
-        \Frenet\Shipping\Model\Config $config
+        \Frenet\Shipping\Model\Config $config,
+        RateRequestService $rateRequestService
     ) {
         $this->productResourceFactory = $productResourceFactory;
         $this->storeManagement = $storeManagement;
         $this->config = $config;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
-     * @param RateRequest      $rateRequest
      * @param ServiceInterface $service
      *
      * @return int
      */
-    public function calculate(RateRequest $rateRequest, ServiceInterface $service)
+    public function calculate(ServiceInterface $service)
     {
+        $rateRequest = $this->rateRequestService->getRateRequest();
         $serviceForecast = $service->getDeliveryTime();
         $maxProductForecast = 0;
 

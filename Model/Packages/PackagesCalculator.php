@@ -17,6 +17,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
+use Frenet\Shipping\Service\RateRequestService;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -26,11 +27,6 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
  */
 class PackagesCalculator
 {
-    /**
-     * @var \Magento\Quote\Model\Quote\Address\RateRequest
-     */
-    private $rateRequest;
-
     /**
      * @var PackageManager
      */
@@ -56,28 +52,34 @@ class PackagesCalculator
      */
     private $packageProcessor;
 
+    /**
+     * @var RateRequestService
+     */
+    private $rateRequestService;
+
     public function __construct(
         MultiQuoteValidatorInterface $multiQuoteValidator,
         PackageProcessor $packageProcessor,
         PackageManager $packagesManager,
         PackageLimit $packageLimit,
-        PackageMatching $packageMatching
+        PackageMatching $packageMatching,
+        RateRequestService $rateRequestService
     ) {
         $this->packageManager = $packagesManager;
         $this->multiQuoteValidator = $multiQuoteValidator;
         $this->packageLimit = $packageLimit;
         $this->packageMatching = $packageMatching;
         $this->packageProcessor = $packageProcessor;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return RateRequest[]
      */
-    public function calculate(RateRequest $rateRequest)
+    public function calculate()
     {
-        $this->rateRequest = $rateRequest;
+        /** @var RateRequest $rateRequest */
+        $rateRequest = $this->rateRequestService->getRateRequest();
 
         /**
          * If the package is not overweight then we simply process all the package.
@@ -89,7 +91,7 @@ class PackagesCalculator
         /**
          * If the multi quote is disabled, we remove the limit.
          */
-        if (!$this->multiQuoteValidator->canProcessMultiQuote($rateRequest)) {
+        if (!$this->multiQuoteValidator->canProcessMultiQuote()) {
             $this->packageLimit->removeLimit();
             return $this->processPackages();
         }
@@ -98,7 +100,7 @@ class PackagesCalculator
          * Make a full call first because of the other companies that don't have weight limit like Correios.
          */
         $this->packageLimit->removeLimit();
-        $this->packageManager->process($this->rateRequest);
+        $this->packageManager->process();
         $this->packageManager->unsetCurrentPackage();
 
         /**
@@ -119,7 +121,7 @@ class PackagesCalculator
      */
     private function processPackages()
     {
-        $this->packageManager->process($this->rateRequest);
+        $this->packageManager->process();
         $results = [];
 
         /** @var Package $package */

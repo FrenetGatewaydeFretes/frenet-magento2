@@ -25,8 +25,7 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 interface CalculatorInterface
 {
     /**
-     * @param RateRequest $request
      * @return array
      */
-    public function getQuote(RateRequest $request);
+    public function getQuote();
 }

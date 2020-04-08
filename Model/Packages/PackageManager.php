@@ -16,7 +16,9 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Shipping\Api\QuoteItemValidatorInterface;
+use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
+use Frenet\Shipping\Service\RateRequestService;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
@@ -42,12 +44,12 @@ class PackageManager
     private $packageFactory;
 
     /**
-     * @var \Frenet\Shipping\Api\QuoteItemValidatorInterface
+     * @var QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
 
     /**
-     * @var \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface
+     * @var ItemQuantityCalculatorInterface
      */
     private $itemQuantityCalculator;
 
@@ -62,36 +64,42 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
+     * @var RateRequestService
+     */
+    private $rateRequestService;
+
+    /**
      * PackageManager constructor.
      *
-     * @param \Frenet\Shipping\Api\QuoteItemValidatorInterface             $quoteItemValidator
-     * @param \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator
-     * @param PackageFactory                                               $packageFactory
-     * @param PackageLimit                                                 $packageLimit
-     * @param PackageItemDistributor                                       $packageItemDistributor
+     * @param QuoteItemValidatorInterface     $quoteItemValidator
+     * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
+     * @param PackageFactory                  $packageFactory
+     * @param PackageLimit                    $packageLimit
+     * @param PackageItemDistributor          $packageItemDistributor
+     * @param RateRequestService              $rateRequestService
      */
     public function __construct(
-        \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
-        \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        QuoteItemValidatorInterface $quoteItemValidator,
+        ItemQuantityCalculatorInterface $itemQuantityCalculator,
         PackageFactory $packageFactory,
         PackageLimit $packageLimit,
-        PackageItemDistributor $packageItemDistributor
+        PackageItemDistributor $packageItemDistributor,
+        RateRequestService $rateRequestService
     ) {
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->packageFactory = $packageFactory;
         $this->packageLimit = $packageLimit;
         $this->packageItemDistributor = $packageItemDistributor;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return $this
      */
-    public function process(RateRequest $rateRequest)
+    public function process() : self
     {
-        $items = $this->packageItemDistributor->distribute($rateRequest);
+        $items = $this->packageItemDistributor->distribute();
 
         /** @var QuoteItem $item */
         foreach ($items as $item) {

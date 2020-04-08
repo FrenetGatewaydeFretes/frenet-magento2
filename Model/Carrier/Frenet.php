@@ -3,11 +3,11 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
+ * @package  Frenet\Shipping
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
@@ -17,6 +17,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Carrier;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Quote\Model\Quote\Address\RateResult\Method as MethodInstance;
 use Magento\Shipping\Model\Carrier\AbstractCarrierOnline;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInterface;
@@ -183,14 +184,15 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->rateRequestService->setRateRequest($request);
 
         /** @var array $results */
-        if (!$results = $this->calculator->getQuote($request)) {
+        if (!$results = $this->calculator->getQuote()) {
             $this->rateRequestService->clear();
             return $this->result;
         }
 
-        $this->prepareResult($request, $results);
+        $this->prepareResult($results);
 
         $this->rateRequestService->clear();
+
         return $this->result;
     }
 
@@ -370,7 +372,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      *
      * @return $this
      */
-    private function prepareResult(RateRequest $request, array $services = [])
+    private function prepareResult(array $services = []) : self
     {
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $this->result = $this->_rateFactory->create();
@@ -381,20 +383,26 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
                 continue;
             }
 
-            $deliveryTime = $this->deliveryTimeCalculator->calculate($request, $service);
+            $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
 
-            $methodTitle = $this->prepareMethodTitle(
+            $title = $this->appendInformation(
+                $service->getServiceDescription(),
+                $deliveryTime,
+                $service->getMessage()
+            );
+
+            $description = $this->prepareMethodDescription(
                 $service->getCarrier(),
                 $service->getServiceDescription(),
                 $deliveryTime
             );
 
             $method = $this->prepareMethod(
-                $methodTitle,
                 $service->getServiceCode(),
-                $this->appendInformation($service->getServiceDescription(), $deliveryTime, $service->getMessage()),
-                $service->getShippingPrice(),
-                $service->getShippingPrice()
+                $title,
+                $description,
+                (float) $service->getShippingPrice(),
+                (float) $service->getShippingPrice()
             );
 
             $this->result->append($method);
@@ -416,23 +424,28 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     }
 
     /**
-     * @param string $method
      * @param string $code
-     * @param string $methodTitle
+     * @param string $title
+     * @param string $description
      * @param float  $price
      * @param float  $cost
      *
-     * @return \Magento\Quote\Model\Quote\Address\RateResult\Method
+     * @return MethodInstance
      */
-    private function prepareMethod($method, $code, $methodTitle, $price, $cost)
-    {
-        /** @var \Magento\Quote\Model\Quote\Address\RateResult\Method $methodInstance */
+    private function prepareMethod(
+        string $code,
+        string $title,
+        string $description,
+        float $price,
+        float $cost
+    ) : MethodInstance {
+        /** @var MethodInstance $methodInstance */
         $methodInstance = $this->_rateMethodFactory->create();
         $methodInstance->setCarrier($this->_code)
             ->setCarrierTitle($this->config->getCarrierConfig('title'))
             ->setMethod($code)
-            ->setMethodTitle($methodTitle)
-            ->setMethodDescription($method)
+            ->setMethodTitle($title)
+            ->setMethodDescription($description)
             ->setPrice($price)
             ->setCost($cost);
 
@@ -443,11 +456,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @param string $carrier
      * @param string $description
      * @param int    $deliveryTime
-     * @param string $message
      *
-     * @return string
+     * @return \Magento\Framework\Phrase|string
      */
-    private function prepareMethodTitle($carrier, $description, $deliveryTime = 0)
+    private function prepareMethodDescription(string $carrier, string $description, $deliveryTime = 0)
     {
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
         $title = $this->appendInformation($title, $deliveryTime);

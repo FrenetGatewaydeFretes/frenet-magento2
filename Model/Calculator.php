@@ -19,6 +19,7 @@ namespace Frenet\Shipping\Model;
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Api\CalculatorInterface;
 use Frenet\Shipping\Api\Data\AttributesMappingInterface;
+use Frenet\Shipping\Service\RateRequestService;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -39,6 +40,11 @@ class Calculator implements CalculatorInterface
     private $packagesCalculator;
 
     /**
+     * @var RateRequestService
+     */
+    private $rateRequestService;
+
+    /**
      * Calculator constructor.
      *
      * @param CacheManager                $cacheManager
@@ -46,26 +52,28 @@ class Calculator implements CalculatorInterface
      */
     public function __construct(
         CacheManager $cacheManager,
-        Packages\PackagesCalculator $packagesCalculator
+        Packages\PackagesCalculator $packagesCalculator,
+        RateRequestService $rateRequestService
     ) {
         $this->cacheManager = $cacheManager;
         $this->packagesCalculator = $packagesCalculator;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
      * @inheritdoc
      */
-    public function getQuote(RateRequest $request)
+    public function getQuote()
     {
-        if ($result = $this->cacheManager->load($request)) {
+        if ($result = $this->cacheManager->load()) {
             return $result;
         }
 
         /** @var RateRequest[] $packages */
-        $services = $this->packagesCalculator->calculate($request);
+        $services = $this->packagesCalculator->calculate();
 
         if ($services) {
-            $this->cacheManager->save($services, $request);
+            $this->cacheManager->save($services);
             return $services;
         }
 
