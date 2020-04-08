@@ -17,9 +17,8 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
-use Frenet\Shipping\Service\RateRequestService;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
  * Class CacheManager
@@ -69,9 +68,9 @@ class CacheManager
     private $couponProcessor;
 
     /**
-     * @var RateRequestService
+     * @var RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     public function __construct(
         \Magento\Framework\Serialize\SerializerInterface $serializer,
@@ -82,7 +81,7 @@ class CacheManager
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         \Frenet\Shipping\Model\Quote\CouponProcessor $couponProcessor,
         Config $config,
-        RateRequestService $rateRequestService
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->serializer = $serializer;
         $this->cacheState = $cacheState;
@@ -92,7 +91,7 @@ class CacheManager
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->couponProcessor = $couponProcessor;
         $this->postcodeNormalizer = $postcodeNormalizer;
-        $this->rateRequestService = $rateRequestService;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
@@ -176,7 +175,7 @@ class CacheManager
      */
     private function generateCacheKey()
     {
-        $request = $this->rateRequestService->getRateRequest();
+        $request = $this->rateRequestProvider->getRateRequest();
 
         $destPostcode = $request->getDestPostcode();
         $origPostcode = $this->config->getOriginPostcode();

@@ -14,21 +14,21 @@
 
 namespace Frenet\Shipping\Test\Unit\Service;
 
-use Frenet\Shipping\Service\RateRequestService;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Frenet\Shipping\Test\Unit\TestCase;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class RateRequestServiceTest extends TestCase
+class RateRequestProviderTest extends TestCase
 {
     /**
-     * @var RateRequestService
+     * @var RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     protected function setUp()
     {
-        $this->rateRequestService = $this->getObject(RateRequestService::class);
+        $this->rateRequestProvider = $this->getObject(RateRequestProvider::class);
     }
 
     /**
@@ -39,8 +39,8 @@ class RateRequestServiceTest extends TestCase
         /** @var RateRequest | MockObject $rateRequest */
         $rateRequest = $this->createMock(RateRequest::class);
         $this->assertInstanceOf(
-            RateRequestService::class,
-            $this->rateRequestService->setRateRequest($rateRequest)
+            RateRequestProvider::class,
+            $this->rateRequestProvider->setRateRequest($rateRequest)
         );
     }
 
@@ -52,14 +52,14 @@ class RateRequestServiceTest extends TestCase
         /** @var RateRequest | MockObject $rateRequest */
         $rateRequest = $this->createMock(RateRequest::class);
         $rateRequest->method('getData')->willReturn(9.9988);
-        $this->rateRequestService->setRateRequest($rateRequest);
+        $this->rateRequestProvider->setRateRequest($rateRequest);
         $this->assertInstanceOf(
             RateRequest::class,
-            $this->rateRequestService->getRateRequest()
+            $this->rateRequestProvider->getRateRequest()
         );
         $this->assertEquals(
             9.9988,
-            $this->rateRequestService->getRateRequest()->getData()
+            $this->rateRequestProvider->getRateRequest()->getData()
         );
     }
 
@@ -70,8 +70,8 @@ class RateRequestServiceTest extends TestCase
     {
         /** @var RateRequest | MockObject $rateRequest */
         $rateRequest = $this->createMock(RateRequest::class);
-        $this->rateRequestService->setRateRequest($rateRequest);
-        $this->rateRequestService->clear();
-        $this->assertNull($this->rateRequestService->getRateRequest());
+        $this->rateRequestProvider->setRateRequest($rateRequest);
+        $this->rateRequestProvider->clear();
+        $this->assertNull($this->rateRequestProvider->getRateRequest());
     }
 }

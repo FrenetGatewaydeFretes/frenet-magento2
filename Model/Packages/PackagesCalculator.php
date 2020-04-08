@@ -17,7 +17,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
-use Frenet\Shipping\Service\RateRequestService;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -53,9 +53,9 @@ class PackagesCalculator
     private $packageProcessor;
 
     /**
-     * @var RateRequestService
+     * @var RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     public function __construct(
         MultiQuoteValidatorInterface $multiQuoteValidator,
@@ -63,14 +63,14 @@ class PackagesCalculator
         PackageManager $packagesManager,
         PackageLimit $packageLimit,
         PackageMatching $packageMatching,
-        RateRequestService $rateRequestService
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->packageManager = $packagesManager;
         $this->multiQuoteValidator = $multiQuoteValidator;
         $this->packageLimit = $packageLimit;
         $this->packageMatching = $packageMatching;
         $this->packageProcessor = $packageProcessor;
-        $this->rateRequestService = $rateRequestService;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
@@ -79,7 +79,7 @@ class PackagesCalculator
     public function calculate()
     {
         /** @var RateRequest $rateRequest */
-        $rateRequest = $this->rateRequestService->getRateRequest();
+        $rateRequest = $this->rateRequestProvider->getRateRequest();
 
         /**
          * If the package is not overweight then we simply process all the package.

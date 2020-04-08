@@ -17,11 +17,11 @@ namespace Frenet\Shipping\Service;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Class RateRequestService
+ * Class RateRequestProvider
  *
  * @package Frenet\Shipping\Service
  */
-class RateRequestService
+class RateRequestProvider
 {
     /**
      * @var RateRequest

@@ -55,23 +55,23 @@ class PackageProcessor
     private $quoteCouponProcessor;
 
     /**
-     * @var \Frenet\Shipping\Service\RateRequestService
+     * @var \Frenet\Shipping\Service\RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     public function __construct(
         \Magento\Checkout\Model\Session $checkoutSession,
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Config $config,
         \Frenet\Shipping\Model\ApiService $apiService,
-        \Frenet\Shipping\Service\RateRequestService $rateRequestService,
+        \Frenet\Shipping\Service\RateRequestProvider $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor
     ) {
         $this->apiService = $apiService;
         $this->checkoutSession = $checkoutSession;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->config = $config;
-        $this->rateRequestService = $rateRequestService;
+        $this->rateRequestProvider = $rateRequestProvider;
         $this->quoteCouponProcessor = $quoteCouponProcessor;
     }
 
@@ -136,7 +136,7 @@ class PackageProcessor
     private function initServiceQuote() : self
     {
         /** @var RateRequest $rateRequest */
-        $rateRequest = $this->rateRequestService->getRateRequest();
+        $rateRequest = $this->rateRequestProvider->getRateRequest();
 
         /** @var \Frenet\Command\Shipping\QuoteInterface $quote */
         $this->serviceQuote = $this->apiService->shipping()->quote();

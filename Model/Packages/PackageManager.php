@@ -18,7 +18,7 @@ namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Api\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
-use Frenet\Shipping\Service\RateRequestService;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
@@ -64,9 +64,9 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
-     * @var RateRequestService
+     * @var RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     /**
      * PackageManager constructor.
@@ -76,7 +76,7 @@ class PackageManager
      * @param PackageFactory                  $packageFactory
      * @param PackageLimit                    $packageLimit
      * @param PackageItemDistributor          $packageItemDistributor
-     * @param RateRequestService              $rateRequestService
+     * @param RateRequestProvider              $rateRequestProvider
      */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
@@ -84,14 +84,14 @@ class PackageManager
         PackageFactory $packageFactory,
         PackageLimit $packageLimit,
         PackageItemDistributor $packageItemDistributor,
-        RateRequestService $rateRequestService
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->packageFactory = $packageFactory;
         $this->packageLimit = $packageLimit;
         $this->packageItemDistributor = $packageItemDistributor;
-        $this->rateRequestService = $rateRequestService;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**

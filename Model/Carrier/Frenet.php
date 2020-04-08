@@ -100,9 +100,9 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     private $postcodeValidator;
 
     /**
-     * @var \Frenet\Shipping\Service\RateRequestService
+     * @var \Frenet\Shipping\Service\RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
@@ -129,7 +129,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Frenet\Shipping\Model\DeliveryTimeCalculator $deliveryTimeCalculator,
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         \Frenet\Shipping\Model\Validator\PostcodeValidator $postcodeValidator,
-        \Frenet\Shipping\Service\RateRequestService $rateRequestService,
+        \Frenet\Shipping\Service\RateRequestProvider $rateRequestProvider,
         array $data = []
     ) {
         parent::__construct(
@@ -160,7 +160,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->deliveryTimeCalculator = $deliveryTimeCalculator;
         $this->postcodeNormalizer = $postcodeNormalizer;
         $this->postcodeValidator = $postcodeValidator;
-        $this->rateRequestService = $rateRequestService;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
@@ -181,17 +181,17 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         }
 
         /** This service will be used all the way long. */
-        $this->rateRequestService->setRateRequest($request);
+        $this->rateRequestProvider->setRateRequest($request);
 
         /** @var array $results */
         if (!$results = $this->calculator->getQuote()) {
-            $this->rateRequestService->clear();
+            $this->rateRequestProvider->clear();
             return $this->result;
         }
 
         $this->prepareResult($results);
 
-        $this->rateRequestService->clear();
+        $this->rateRequestProvider->clear();
 
         return $this->result;
     }

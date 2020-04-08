@@ -19,7 +19,7 @@ namespace Frenet\Shipping\Model;
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Api\CalculatorInterface;
 use Frenet\Shipping\Api\Data\AttributesMappingInterface;
-use Frenet\Shipping\Service\RateRequestService;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -40,9 +40,9 @@ class Calculator implements CalculatorInterface
     private $packagesCalculator;
 
     /**
-     * @var RateRequestService
+     * @var RateRequestProvider
      */
-    private $rateRequestService;
+    private $rateRequestProvider;
 
     /**
      * Calculator constructor.
@@ -53,11 +53,11 @@ class Calculator implements CalculatorInterface
     public function __construct(
         CacheManager $cacheManager,
         Packages\PackagesCalculator $packagesCalculator,
-        RateRequestService $rateRequestService
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->cacheManager = $cacheManager;
         $this->packagesCalculator = $packagesCalculator;
-        $this->rateRequestService = $rateRequestService;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
