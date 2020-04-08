@@ -14,6 +14,7 @@
 
 namespace Frenet\Shipping\Service;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -40,11 +41,16 @@ class RateRequestProvider
     }
 
     /**
-     * @return RateRequest|null
+     * @return RateRequest
+     * @throws LocalizedException
      */
-    public function getRateRequest() : ?RateRequest
+    public function getRateRequest() : RateRequest
     {
-        return $this->rateRequest;
+        if ($this->rateRequest) {
+            return $this->rateRequest;
+        }
+
+        throw new LocalizedException(__('Rate Request is not set.'));
     }
 
     /**

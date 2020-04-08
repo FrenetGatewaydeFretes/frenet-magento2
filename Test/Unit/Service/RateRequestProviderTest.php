@@ -16,6 +16,7 @@ namespace Frenet\Shipping\Test\Unit\Service;
 
 use Frenet\Shipping\Service\RateRequestProvider;
 use Frenet\Shipping\Test\Unit\TestCase;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -72,6 +73,8 @@ class RateRequestProviderTest extends TestCase
         $rateRequest = $this->createMock(RateRequest::class);
         $this->rateRequestProvider->setRateRequest($rateRequest);
         $this->rateRequestProvider->clear();
-        $this->assertNull($this->rateRequestProvider->getRateRequest());
+        $this->expectExceptionObject($this->getObject(LocalizedException::class));
+        $this->expectExceptionMessage('Rate Request is not set.');
+        $this->rateRequestProvider->getRateRequest();
     }
 }
