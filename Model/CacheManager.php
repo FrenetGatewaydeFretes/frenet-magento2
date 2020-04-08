@@ -62,6 +62,11 @@ class CacheManager
      */
     private $postcodeNormalizer;
 
+    /**
+     * @var Quote\CouponProcessor
+     */
+    private $couponProcessor;
+
     public function __construct(
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\App\Cache\StateInterface $cacheState,
@@ -69,6 +74,7 @@ class CacheManager
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
+        \Frenet\Shipping\Model\Quote\CouponProcessor $couponProcessor,
         Config $config
     ) {
         $this->serializer = $serializer;
@@ -77,6 +83,7 @@ class CacheManager
         $this->config = $config;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->couponProcessor = $couponProcessor;
         $this->postcodeNormalizer = $postcodeNormalizer;
     }
 
@@ -186,6 +193,7 @@ class CacheManager
             $this->postcodeNormalizer->format($origPostcode),
             $this->postcodeNormalizer->format($destPostcode),
             $items,
+            $this->couponProcessor->getCouponCode(),
             $this->config->isMultiQuoteEnabled() ? 'multi' : null
         ]);
 
