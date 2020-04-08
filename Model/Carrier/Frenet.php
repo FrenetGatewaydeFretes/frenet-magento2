@@ -98,6 +98,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private $postcodeValidator;
 
+    /**
+     * @var \Frenet\Shipping\Service\RateRequestService
+     */
+    private $rateRequestService;
+
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory,
@@ -123,6 +128,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Frenet\Shipping\Model\DeliveryTimeCalculator $deliveryTimeCalculator,
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         \Frenet\Shipping\Model\Validator\PostcodeValidator $postcodeValidator,
+        \Frenet\Shipping\Service\RateRequestService $rateRequestService,
         array $data = []
     ) {
         parent::__construct(
@@ -153,6 +159,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         $this->deliveryTimeCalculator = $deliveryTimeCalculator;
         $this->postcodeNormalizer = $postcodeNormalizer;
         $this->postcodeValidator = $postcodeValidator;
+        $this->rateRequestService = $rateRequestService;
     }
 
     /**
@@ -172,13 +179,18 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             return $errorMessage;
         }
 
+        /** This service will be used all the way long. */
+        $this->rateRequestService->setRateRequest($request);
+
         /** @var array $results */
         if (!$results = $this->calculator->getQuote($request)) {
+            $this->rateRequestService->clear();
             return $this->result;
         }
 
         $this->prepareResult($request, $results);
 
+        $this->rateRequestService->clear();
         return $this->result;
     }
 

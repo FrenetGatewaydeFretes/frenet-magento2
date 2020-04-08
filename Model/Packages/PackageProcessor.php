@@ -42,17 +42,24 @@ class PackageProcessor
      */
     private $quoteCouponProcessor;
 
+    /**
+     * @var \Frenet\Shipping\Service\RateRequestService
+     */
+    private $rateRequestService;
+
     public function __construct(
         \Magento\Checkout\Model\Session $checkoutSession,
         \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Config $config,
         \Frenet\Shipping\Model\ApiService $apiService,
+        \Frenet\Shipping\Service\RateRequestService $rateRequestService,
         CouponProcessor $quoteCouponProcessor
     ) {
         $this->apiService = $apiService;
         $this->checkoutSession = $checkoutSession;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->config = $config;
+        $this->rateRequestService = $rateRequestService;
         $this->quoteCouponProcessor = $quoteCouponProcessor;
     }
 
@@ -62,9 +69,9 @@ class PackageProcessor
      *
      * @return array
      */
-    public function process(Package $package, RateRequest $rateRequest) : array
+    public function process(Package $package) : array
     {
-        $this->initServiceQuote($rateRequest);
+        $this->initServiceQuote();
         $this->serviceQuote->setShipmentInvoiceValue($package->getTotalPrice());
 
         /** @var PackageItem $packageItem */
@@ -117,8 +124,11 @@ class PackageProcessor
      *
      * @return $this
      */
-    private function initServiceQuote(RateRequest $rateRequest) : self
+    private function initServiceQuote() : self
     {
+        /** @var RateRequest $rateRequest */
+        $rateRequest = $this->rateRequestService->getRateRequest();
+
         /** @var \Frenet\Command\Shipping\QuoteInterface $quote */
         $this->serviceQuote = $this->apiService->shipping()->quote();
         $this->serviceQuote->setSellerPostcode($this->config->getOriginPostcode())

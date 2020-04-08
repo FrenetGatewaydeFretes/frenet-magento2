@@ -125,7 +125,7 @@ class PackagesCalculator
         /** @var Package $package */
         foreach ($this->packageManager->getPackages() as $key => $package) {
             /** @var array $services */
-            $services = $this->packageProcessor->process($package, $this->rateRequest);
+            $services = $this->packageProcessor->process($package);
 
             /**
              * If there's only one package then we can simply return the services quote.
