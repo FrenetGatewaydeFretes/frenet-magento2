@@ -16,8 +16,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Api\Data\AttributesMappingInterface;
-use Frenet\Shipping\Api\Data\DimensionsExtractorInterface;
+use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Frenet\Shipping\Model\Catalog\Product\CategoryExtractor;
 use Frenet\Shipping\Model\Quote\ItemPriceCalculator;
 use Frenet\Shipping\Model\WeightConverterInterface;
@@ -73,7 +73,7 @@ class PackageItem
     private $dimensionsExtractor;
 
     /**
-     * @var Frenet\Shipping\Model\Quote\ItemPriceCalculator
+     * @var ItemPriceCalculator
      */
     private $itemPriceCalculator;
 

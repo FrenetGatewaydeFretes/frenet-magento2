@@ -14,19 +14,21 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api\Data;
+namespace Frenet\Shipping\Model\Catalog\Product;
+
+use Magento\Catalog\Api\Data\ProductInterface;
 
 /**
  * Class ProductExtractorInterface
  *
- * @package Frenet\Shipping\Api\Data
+ * @package Frenet\Shipping\Model\Catalog\Product
  */
 interface ProductExtractorInterface extends DimensionsExtractorInterface
 {
     /**
-     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param ProductInterface $product
      *
      * @return $this
      */
-    public function setProduct(\Magento\Catalog\Api\Data\ProductInterface $product);
+    public function setProduct(ProductInterface $product) : self;
 }

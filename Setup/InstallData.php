@@ -16,7 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup;
 
-use Frenet\Shipping\Api\Data\AttributesMappingInterface;
+use Frenet\Shipping\Model\Cache\Type\Frenet;
 use Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
@@ -29,7 +29,7 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 class InstallData implements InstallDataInterface
 {
     /**
-     * @var \Frenet\Shipping\Model\Cache\Type\Frenet
+     * @var Frenet
      */
     protected $cacheType;
 
@@ -46,13 +46,13 @@ class InstallData implements InstallDataInterface
     /**
      * Constructor
      *
-     * @param \Frenet\Shipping\Model\Cache\Type\Frenet $cacheType
+     * @param Frenet $cacheType
      * @param AttributeContainer                       $attributeContainer
      * @param CatalogProductAttributeInstaller         $attributeInstaller
      */
     public function __construct(
-        \Frenet\Shipping\Model\Cache\Type\Frenet $cacheType,
-        \Frenet\Shipping\Setup\AttributeContainer $attributeContainer,
+        Frenet $cacheType,
+        AttributeContainer $attributeContainer,
         CatalogProductAttributeInstaller $attributeInstaller
     ) {
         $this->cacheType = $cacheType;

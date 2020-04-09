@@ -16,7 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Api\Data\DimensionsExtractorInterface;
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**

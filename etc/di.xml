@@ -15,16 +15,16 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Frenet\Shipping\Model\ApiServiceInterface" type="Frenet\Shipping\Model\ApiService"/>
     <preference for="Frenet\Shipping\Model\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>
-    <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
-    <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
     <preference for="Frenet\Shipping\Model\WeightConverterInterface" type="Frenet\Shipping\Model\WeightConverter"/>
     <preference for="Frenet\Shipping\Model\ServiceFinderInterface" type="Frenet\Shipping\Model\ServiceFinder"/>
     <preference for="Frenet\Shipping\Model\TrackingInterface" type="Frenet\Shipping\Model\Tracking"/>
     <preference for="Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface" type="Frenet\Shipping\Model\Quote\MultiQuoteValidator"/>
+    <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
+    <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
+    <preference for="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
+    <preference for="Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
 
     <!-- API Classes -->
-    <preference for="Frenet\Shipping\Api\Data\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
-    <preference for="Frenet\Shipping\Api\Data\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
     <preference for="Frenet\Shipping\Api\QuoteProductInterface" type="Frenet\Shipping\Model\Catalog\Product\View\Quote"/>
 
     <type name="Frenet\Shipping\Model\Calculator">
