@@ -21,7 +21,7 @@
                 <argument name="jsLayout" xsi:type="array">
                     <item name="components" xsi:type="array">
                         <item name="frenet-quote" xsi:type="array">
-                            <item name="component" xsi:type="string">Frenet_Shipping/js/catalog/product/view/quote</item>
+                            <item name="component" xsi:type="string">frenetProductViewQuote</item>
                             <item name="config" xsi:type="array">
                                 <item name="api_url" xsi:type="string"/>
                                 <item name="blockTitle" xsi:type="string" translate="true">Shipping Quote</item>
