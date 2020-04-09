@@ -139,7 +139,7 @@ class PackageProcessor
         $this->serviceQuote = $this->apiService->shipping()->quote();
         $this->serviceQuote->setSellerPostcode($this->config->getOriginPostcode())
             ->setRecipientPostcode($rateRequest->getDestPostcode())
-            ->setRecipientCountry($rateRequest->getCountryId());
+            ->setRecipientCountry($rateRequest->getDestCountryId());
 
         $this->quoteCouponProcessor->applyCouponCode($this->serviceQuote);
 
