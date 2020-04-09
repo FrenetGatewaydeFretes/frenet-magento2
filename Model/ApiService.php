@@ -16,7 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use Frenet\Shipping\Api\ApiServiceInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 /**
  * Class ApiService
@@ -31,7 +31,7 @@ class ApiService implements ApiServiceInterface
     private $api;
 
     /**
-     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     * @var DirectoryList
      */
     private $directoryList;
 
@@ -46,7 +46,7 @@ class ApiService implements ApiServiceInterface
     private $isInitialized = false;
 
     public function __construct(
-        \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
+        DirectoryList $directoryList,
         Config $config
     ) {
         $this->config = $config;
@@ -108,7 +108,7 @@ class ApiService implements ApiServiceInterface
                 ->config()
                 ->debugger()
                 ->isEnabled(true)
-                ->setFilePath($this->directoryList->getPath(\Magento\Framework\App\Filesystem\DirectoryList::LOG))
+                ->setFilePath($this->directoryList->getPath(DirectoryList::LOG))
                 ->setFilename($this->config->getDebugFilename());
         }
     }

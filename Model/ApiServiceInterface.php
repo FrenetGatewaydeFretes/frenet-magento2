@@ -14,11 +14,11 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api;
+namespace Frenet\Shipping\Model;
 
 /**
  * Class ApiServiceInterface
- * @package Frenet\Shipping\Api
+ * @package Frenet\Shipping\Model
  */
 interface ApiServiceInterface
 {

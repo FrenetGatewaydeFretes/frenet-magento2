@@ -15,7 +15,7 @@
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
-use Frenet\Shipping\Model\ApiService;
+use Frenet\Shipping\Model\ApiServiceInterface;
 use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Service\RateRequestProvider;
@@ -29,7 +29,7 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 class PackageProcessor
 {
     /**
-     * @var ApiService
+     * @var ApiServiceInterface
      */
     private $apiService;
 
@@ -61,7 +61,7 @@ class PackageProcessor
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         Config $config,
-        ApiService $apiService,
+        ApiServiceInterface $apiService,
         RateRequestProvider $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor
     ) {
