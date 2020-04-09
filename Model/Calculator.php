@@ -16,9 +16,6 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use Frenet\Command\Shipping\QuoteInterface;
-use Frenet\Shipping\Api\CalculatorInterface;
-use Frenet\Shipping\Api\Data\AttributesMappingInterface;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 

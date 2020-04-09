@@ -14,13 +14,11 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api;
-
-use Magento\Quote\Model\Quote\Address\RateRequest;
+namespace Frenet\Shipping\Model;
 
 /**
  * Class CalculatorInterface
- * @package Frenet\Shipping\Api
+ * @package Frenet\Shipping\Model
  */
 interface CalculatorInterface
 {

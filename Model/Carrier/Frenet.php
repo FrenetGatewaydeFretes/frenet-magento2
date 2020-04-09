@@ -65,7 +65,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     private $result;
 
     /**
-     * @var \Frenet\Shipping\Api\CalculatorInterface
+     * @var \Frenet\Shipping\Model\CalculatorInterface
      */
     private $calculator;
 
@@ -122,7 +122,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
-        \Frenet\Shipping\Api\CalculatorInterface $calculator,
+        \Frenet\Shipping\Model\CalculatorInterface $calculator,
         \Frenet\Shipping\Model\TrackingInterface $trackingService,
         \Frenet\Shipping\Model\ServiceFinderInterface $serviceFinder,
         \Frenet\Shipping\Model\Config $config,
