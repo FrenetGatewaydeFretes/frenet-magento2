@@ -16,6 +16,7 @@ namespace Frenet\Shipping\Service;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 
 /**
  * Class RateRequestProvider
@@ -30,12 +31,12 @@ class RateRequestProvider
     private $rateRequest;
 
     /**
-     * @var \Magento\Quote\Model\Quote\Address\RateRequestFactory
+     * @var RateRequestFactory
      */
     private $rateRequestFactory;
 
     public function __construct(
-        \Magento\Quote\Model\Quote\Address\RateRequestFactory $rateRequestFactory
+        RateRequestFactory $rateRequestFactory
     ) {
         $this->rateRequestFactory = $rateRequestFactory;
     }

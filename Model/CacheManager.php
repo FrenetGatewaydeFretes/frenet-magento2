@@ -17,7 +17,13 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
+use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
+use Frenet\Shipping\Model\Quote\CouponProcessor;
+use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Service\RateRequestProvider;
+use Magento\Framework\App\Cache\StateInterface;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 
 /**
@@ -28,12 +34,12 @@ use Magento\Framework\Serialize\SerializerInterface;
 class CacheManager
 {
     /**
-     * @var \Magento\Framework\App\Cache\StateInterface
+     * @var StateInterface
      */
     private $cacheState;
 
     /**
-     * @var \Magento\Framework\App\CacheInterface
+     * @var CacheInterface
      */
     private $cache;
 
@@ -48,17 +54,17 @@ class CacheManager
     private $config;
 
     /**
-     * @var \Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface
+     * @var QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
 
     /**
-     * @var \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface
+     * @var ItemQuantityCalculatorInterface
      */
     private $itemQuantityCalculator;
 
     /**
-     * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
+     * @var PostcodeNormalizer
      */
     private $postcodeNormalizer;
 
@@ -73,13 +79,13 @@ class CacheManager
     private $rateRequestProvider;
 
     public function __construct(
-        \Magento\Framework\Serialize\SerializerInterface $serializer,
-        \Magento\Framework\App\Cache\StateInterface $cacheState,
-        \Magento\Framework\App\CacheInterface $cache,
-        \Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface $quoteItemValidator,
-        \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
-        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
-        \Frenet\Shipping\Model\Quote\CouponProcessor $couponProcessor,
+        SerializerInterface $serializer,
+        StateInterface $cacheState,
+        CacheInterface $cache,
+        QuoteItemValidatorInterface $quoteItemValidator,
+        ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        PostcodeNormalizer $postcodeNormalizer,
+        CouponProcessor $couponProcessor,
         Config $config,
         RateRequestProvider $rateRequestProvider
     ) {
