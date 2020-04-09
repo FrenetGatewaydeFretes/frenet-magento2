@@ -14,7 +14,7 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Api\QuoteItemValidatorInterface;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiService;
 use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Model\Quote\CouponProcessor;

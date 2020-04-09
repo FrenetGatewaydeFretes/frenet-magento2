@@ -14,19 +14,21 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api;
+namespace Frenet\Shipping\Model\Quote;
+
+use Magento\Quote\Api\Data\CartItemInterface;
 
 /**
  * Class QuoteItemValidatorInterface
  *
- * @package Frenet\Shipping\Api
+ * @package Frenet\Shipping\Model\Quote
  */
 interface QuoteItemValidatorInterface
 {
     /**
-     * @param \Magento\Quote\Api\Data\CartItemInterface $item
+     * @param CartItemInterface $item
      *
      * @return boolean
      */
-    public function validate(\Magento\Quote\Api\Data\CartItemInterface $item);
+    public function validate(CartItemInterface $item);
 }

@@ -48,7 +48,7 @@ class CacheManager
     private $config;
 
     /**
-     * @var \Frenet\Shipping\Api\QuoteItemValidatorInterface
+     * @var \Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
 
@@ -76,7 +76,7 @@ class CacheManager
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\App\Cache\StateInterface $cacheState,
         \Magento\Framework\App\CacheInterface $cache,
-        \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
+        \Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface $quoteItemValidator,
         \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
         \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
         \Frenet\Shipping\Model\Quote\CouponProcessor $couponProcessor,

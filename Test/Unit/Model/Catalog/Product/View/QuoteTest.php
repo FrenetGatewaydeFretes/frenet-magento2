@@ -123,7 +123,7 @@ class QuoteTest extends TestCase
         $this->packageManager->method('createPackage')->willReturn($this->package);
 
 
-        $quoteItemValidator = $this->createMock(\Frenet\Shipping\Api\QuoteItemValidatorInterface::class);
+        $quoteItemValidator = $this->createMock(\Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface::class);
         $quoteItemValidator->method('validate')->willReturn(true);
 
         $config = $this->createMock(\Frenet\Shipping\Model\Config::class);

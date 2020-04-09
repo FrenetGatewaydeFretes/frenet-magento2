@@ -16,7 +16,7 @@
     <preference for="Frenet\Shipping\Api\ServiceApiInterface" type="Frenet\Shipping\Model\ApiService"/>
     <preference for="Frenet\Shipping\Api\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>
     <preference for="Frenet\Shipping\Api\Data\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
-    <preference for="Frenet\Shipping\Api\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
+    <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
     <preference for="Frenet\Shipping\Api\Data\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
     <preference for="Frenet\Shipping\Model\WeightConverterInterface" type="Frenet\Shipping\Model\WeightConverter"/>

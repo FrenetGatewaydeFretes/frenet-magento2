@@ -16,7 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Api\QuoteItemValidatorInterface;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
