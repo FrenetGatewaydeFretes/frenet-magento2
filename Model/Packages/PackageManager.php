@@ -135,6 +135,14 @@ class PackageManager
     }
 
     /**
+     * @return Package
+     */
+    public function createPackage()
+    {
+        return $this->packageFactory->create();
+    }
+
+    /**
      * @param QuoteItem $item
      *
      * @return bool
@@ -176,13 +184,5 @@ class PackageManager
         }
 
         return $this;
-    }
-
-    /**
-     * @return Package
-     */
-    private function createPackage()
-    {
-        return $this->packageFactory->create();
     }
 }

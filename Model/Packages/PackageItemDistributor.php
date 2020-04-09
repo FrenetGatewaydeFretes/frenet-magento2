@@ -18,7 +18,6 @@ namespace Frenet\Shipping\Model\Packages;
 use Frenet\Shipping\Api\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculator;
 use Frenet\Shipping\Service\RateRequestProvider;
-use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
@@ -58,7 +57,7 @@ class PackageItemDistributor
      */
     public function distribute() : array
     {
-        return (array) $this->getUnitItems();
+        return $this->getUnitItems();
     }
 
     /**

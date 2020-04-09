@@ -30,6 +30,25 @@ class RateRequestProvider
     private $rateRequest;
 
     /**
+     * @var \Magento\Quote\Model\Quote\Address\RateRequestFactory
+     */
+    private $rateRequestFactory;
+
+    public function __construct(
+        \Magento\Quote\Model\Quote\Address\RateRequestFactory $rateRequestFactory
+    ) {
+        $this->rateRequestFactory = $rateRequestFactory;
+    }
+
+    /**
+     * @return RateRequest
+     */
+    public function createRateRequest()
+    {
+        return $this->rateRequestFactory->create();
+    }
+
+    /**
      * @param RateRequest $rateRequest
      *
      * @return $this

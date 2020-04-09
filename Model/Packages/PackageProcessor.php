@@ -14,7 +14,11 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\Shipping\Api\QuoteItemValidatorInterface;
+use Frenet\Shipping\Model\ApiService;
+use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -25,7 +29,7 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 class PackageProcessor
 {
     /**
-     * @var \Frenet\Shipping\Model\ApiService
+     * @var ApiService
      */
     private $apiService;
 
@@ -35,17 +39,12 @@ class PackageProcessor
     private $serviceQuote;
 
     /**
-     * @var \Frenet\Shipping\Api\QuoteItemValidatorInterface
+     * @var QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
 
     /**
-     * @var \Magento\Checkout\Model\Session
-     */
-    private $checkoutSession;
-
-    /**
-     * @var \Frenet\Shipping\Model\Config
+     * @var Config
      */
     private $config;
 
@@ -55,20 +54,18 @@ class PackageProcessor
     private $quoteCouponProcessor;
 
     /**
-     * @var \Frenet\Shipping\Service\RateRequestProvider
+     * @var RateRequestProvider
      */
     private $rateRequestProvider;
 
     public function __construct(
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
-        \Frenet\Shipping\Model\Config $config,
-        \Frenet\Shipping\Model\ApiService $apiService,
-        \Frenet\Shipping\Service\RateRequestProvider $rateRequestProvider,
+        QuoteItemValidatorInterface $quoteItemValidator,
+        Config $config,
+        ApiService $apiService,
+        RateRequestProvider $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor
     ) {
         $this->apiService = $apiService;
-        $this->checkoutSession = $checkoutSession;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->config = $config;
         $this->rateRequestProvider = $rateRequestProvider;

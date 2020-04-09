@@ -23,6 +23,7 @@
     <preference for="Frenet\Shipping\Model\ServiceFinderInterface" type="Frenet\Shipping\Model\ServiceFinder"/>
     <preference for="Frenet\Shipping\Model\TrackingInterface" type="Frenet\Shipping\Model\Tracking"/>
     <preference for="Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface" type="Frenet\Shipping\Model\Quote\MultiQuoteValidator"/>
+    <preference for="Frenet\Shipping\Api\QuoteProductInterface" type="Frenet\Shipping\Model\Catalog\Product\View\Quote"/>
 
     <type name="Frenet\Shipping\Model\Calculator">
         <arguments>

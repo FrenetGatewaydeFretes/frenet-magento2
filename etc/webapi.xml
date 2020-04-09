@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway
+
+  @category Frenet
+  @package Frenet\Shipping
+
+  @author Tiago Sampaio <tiago@tiagosampaio.com>
+  @link https://github.com/tiagosampaio
+  @link https://tiagosampaio.com
+
+  Copyright (c) 2020.
+  -->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/frenetShipping/quote/productId/:id/:postcode/:qty" method="GET">
+        <service class="Frenet\Shipping\Api\QuoteProductInterface" method="quoteByProductId"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/frenetShipping/quote/productSku/:sku/:postcode/:qty" method="GET">
+        <service class="Frenet\Shipping\Api\QuoteProductInterface" method="quoteByProductSku"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>
