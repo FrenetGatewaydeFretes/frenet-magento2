@@ -77,7 +77,11 @@ define([
             this.rates.removeAll();
         },
         formatPrice: function (price) {
-            return priceUtils.formatPrice(price)
+            if (price <= 0) {
+                return $.mage.__('Free Shipping');
+            }
+
+            return priceUtils.formatPrice(price);
         },
         activate: function () {
             this.active(true);

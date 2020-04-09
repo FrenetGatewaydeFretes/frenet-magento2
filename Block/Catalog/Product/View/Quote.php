@@ -15,10 +15,24 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Block\Catalog\Product\View;
 
+use Frenet\Shipping\ViewModel\Catalog\Product\View\Quote as ViewModel;
 use Magento\Catalog\Block\Product\View;
 
+/**
+ * Class Quote
+ *
+ * @method ViewModel getViewModel
+ *
+ * @package Frenet\Shipping\Block\Catalog\Product\View
+ */
 class Quote extends View
 {
+    protected function _construct()
+    {
+        parent::_construct();
+        $this->getViewModel()->setBlock($this);
+    }
+
     /**
      * @return array
      */
@@ -30,19 +44,11 @@ class Quote extends View
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
-    public function getApiUrl() : string
+    protected function _beforeToHtml()
     {
-        $productId = $this->getProduct()->getId();
-        return $this->getApiBaseUrl() . "/V1/frenetShipping/quote/productId/{$productId}";
-    }
-
-    /**
-     * @return string
-     */
-    private function getApiBaseUrl() : string
-    {
-        return $this->getBaseUrl() . "/rest";
+        $this->jsLayout['components']['frenet-quote']['config']['api_url'] = $this->getViewModel()->getApiUrl();
+        parent::_beforeToHtml();
     }
 }

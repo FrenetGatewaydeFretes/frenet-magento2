@@ -20,19 +20,7 @@ $product = $block->getProduct();
     <script type="text/x-magento-init">
     {
         "*": {
-            "Magento_Ui/js/core/app": {
-                "components": {
-                    "frenet-quote": {
-                        "component": "Frenet_Shipping/js/catalog/product/view/quote",
-                        "api_url": "<?= $block->escapeJs($block->getApiUrl()) ?>",
-                        "blockTitle": "<?= $block->escapeJs(__('Shipping Quote')) ?>",
-                        "blockDescription": "<?= $block->escapeJs(__('Calculate the shipping quote for this product with Frenet.')) ?>",
-                        "fieldTitle": "<?= $block->escapeJs(__('Postcode')) ?>",
-                        "buttonTitle": "<?= $block->escapeJs(__('Get Quote')) ?>",
-                        "noResultsMessage": "<?= $block->escapeJs(__('Sorry. No quotes were found for this postcode.')) ?>"
-                    }
-                }
-            }
+            "Magento_Ui/js/core/app": <?= $block->getJsLayout() ?>
         }
     }
     </script>
