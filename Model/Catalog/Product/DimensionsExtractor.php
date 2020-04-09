@@ -17,6 +17,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Catalog\Product;
 
 use Frenet\Shipping\Model\Config;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\ResourceModel\ProductFactory;
 
 /**
@@ -64,7 +65,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     /**
      * {@inheritdoc}
      */
-    public function setProduct(\Magento\Catalog\Api\Data\ProductInterface $product)
+    public function setProduct(ProductInterface $product) : ProductExtractorInterface
     {
         if ($this->validateProduct($product)) {
             $this->product = $product;
@@ -170,7 +171,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param ProductInterface $product
      *
      * @return bool
      */
