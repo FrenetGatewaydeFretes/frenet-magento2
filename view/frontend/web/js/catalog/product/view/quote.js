@@ -36,7 +36,17 @@ define([
                 this.loaderStart();
 
                 var apiUrl = this.api_url + '/' + this.postcode() + '/' + this.qty();
-                $.getJSON(apiUrl, {}, this.pushRates.bind(this));
+                $.getJSON(
+                    apiUrl
+                ).done(
+                    /** When the request succeed. */
+                    this.pushRates.bind(this)
+                ).fail(
+                    /** When the request fails. */
+                ).always(
+                    /** When any request finishes. */
+                    this.loaderStop.bind(this)
+                );
             }
 
             if (!this.postcode()) {
@@ -58,7 +68,6 @@ define([
             }
 
             this.displayNoResults(!this.visible());
-            this.loaderStop();
         },
         loaderStart: function () {
             $('#frenet-loader').trigger('processStart');
