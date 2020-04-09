@@ -16,8 +16,6 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use Frenet\Shipping\Api\WeightConverterInterface;
-
 /**
  * Class WeightConverter
  *

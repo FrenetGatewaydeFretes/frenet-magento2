@@ -18,11 +18,14 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 use Frenet\Shipping\Api\QuoteProductInterface;
 use Frenet\Shipping\Model\Packages\Package;
+use Frenet\Shipping\Model\Packages\PackageManager;
 use Frenet\Shipping\Model\Packages\PackageProcessor;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Quote
@@ -32,17 +35,17 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
 class Quote implements QuoteProductInterface
 {
     /**
-     * @var \Magento\Catalog\Api\ProductRepositoryInterface
+     * @var ProductRepositoryInterface
      */
     private $productRepository;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var \Frenet\Shipping\Model\Packages\PackageManager
+     * @var PackageManager
      */
     private $packageManager;
 
@@ -62,12 +65,12 @@ class Quote implements QuoteProductInterface
     private $rateRequestProvider;
 
     public function __construct(
-        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
-        \Frenet\Shipping\Model\Packages\PackageManager $packageManager,
-        \Frenet\Shipping\Model\Packages\PackageProcessor $packageProcessor,
+        ProductRepositoryInterface $productRepository,
+        PackageManager $packageManager,
+        PackageProcessor $packageProcessor,
         QuoteItemConvertor $quoteItemConvertor,
         RateRequestProvider $rateRequestProvider,
-        \Psr\Log\LoggerInterface $logger
+        LoggerInterface $logger
     ) {
         $this->productRepository = $productRepository;
         $this->packageManager = $packageManager;

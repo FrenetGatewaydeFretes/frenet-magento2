@@ -17,6 +17,13 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Api\Data\AttributesMappingInterface;
+use Frenet\Shipping\Api\Data\DimensionsExtractorInterface;
+use Frenet\Shipping\Model\Catalog\Product\CategoryExtractor;
+use Frenet\Shipping\Model\Quote\ItemPriceCalculator;
+use Frenet\Shipping\Model\WeightConverterInterface;
+use Magento\Catalog\Model\ResourceModel\ProductFactory;
+use Magento\Quote\Api\Data\CartItemInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class PackageItem
@@ -26,7 +33,7 @@ use Frenet\Shipping\Api\Data\AttributesMappingInterface;
 class PackageItem
 {
     /**
-     * @var \Magento\Quote\Api\Data\CartItemInterface
+     * @var CartItemInterface
      */
     private $cartItem;
 
@@ -41,27 +48,27 @@ class PackageItem
     private $isInitialized = false;
 
     /**
-     * @var \Magento\Quote\Api\Data\CartItemInterface
+     * @var CartItemInterface
      */
     private $storeManagement;
 
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
+     * @var ProductFactory
      */
     private $productResourceFactory;
 
     /**
-     * @var \Frenet\Shipping\Api\WeightConverterInterface
+     * @var WeightConverterInterface
      */
     private $weightConverter;
 
     /**
-     * @var \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor
+     * @var CategoryExtractor
      */
     private $categoryExtractor;
 
     /**
-     * @var \Frenet\Shipping\Api\Data\DimensionsExtractorInterface
+     * @var DimensionsExtractorInterface
      */
     private $dimensionsExtractor;
 
@@ -73,22 +80,22 @@ class PackageItem
     /**
      * PackageItem constructor.
      *
-     * @param \Magento\Quote\Api\Data\CartItemInterface                $cartItem
-     * @param \Magento\Store\Model\StoreManagerInterface               $storeManagement
-     * @param \Magento\Catalog\Model\ResourceModel\ProductFactory      $productResourceFactory
-     * @param \Frenet\Shipping\Api\WeightConverterInterface            $weightConverter
-     * @param \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor $categoryExtractor
-     * @param \Frenet\Shipping\Api\Data\DimensionsExtractorInterface   $dimensionsExtractor
-     * @param \Frenet\Shipping\Model\Quote\ItemPriceCalculator          $itemPriceCalculator
+     * @param CartItemInterface            $cartItem
+     * @param StoreManagerInterface        $storeManagement
+     * @param ProductFactory               $productResourceFactory
+     * @param WeightConverterInterface     $weightConverter
+     * @param CategoryExtractor            $categoryExtractor
+     * @param DimensionsExtractorInterface $dimensionsExtractor
+     * @param ItemPriceCalculator          $itemPriceCalculator
      */
     public function __construct(
-        \Magento\Quote\Api\Data\CartItemInterface $cartItem,
-        \Magento\Store\Model\StoreManagerInterface $storeManagement,
-        \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
-        \Frenet\Shipping\Api\WeightConverterInterface $weightConverter,
-        \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor $categoryExtractor,
-        \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
-        \Frenet\Shipping\Model\Quote\ItemPriceCalculator $itemPriceCalculator
+        CartItemInterface $cartItem,
+        StoreManagerInterface $storeManagement,
+        ProductFactory $productResourceFactory,
+        WeightConverterInterface $weightConverter,
+        CategoryExtractor $categoryExtractor,
+        DimensionsExtractorInterface $dimensionsExtractor,
+        ItemPriceCalculator $itemPriceCalculator
     ) {
         $this->cartItem = $cartItem;
         $this->storeManagement = $storeManagement;
@@ -100,7 +107,7 @@ class PackageItem
     }
 
     /**
-     * @return \Magento\Quote\Api\Data\CartItemInterface
+     * @return CartItemInterface
      */
     public function getCartItem()
     {
@@ -108,11 +115,11 @@ class PackageItem
     }
 
     /**
-     * @param \Magento\Quote\Api\Data\CartItemInterface $item
+     * @param CartItemInterface $item
      *
      * @return $this
      */
-    public function setCartItem(\Magento\Quote\Api\Data\CartItemInterface $item)
+    public function setCartItem(CartItemInterface $item)
     {
         $this->cartItem = $item;
         return $this;

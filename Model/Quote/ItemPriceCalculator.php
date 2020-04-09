@@ -11,7 +11,6 @@
  *
  * Copyright (c) 2020.
  */
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
