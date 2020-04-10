@@ -75,6 +75,11 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     {
         /** @var QuoteItem $bundle */
         $bundle = $item->getParentItem();
+
+        if (!$bundle->getRowTotal()) {
+            $bundle->calcRowTotal();
+        }
+
         $rowTotal = (float) $bundle->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
 
         return (float) ($rowTotal / count($bundle->getChildren()));

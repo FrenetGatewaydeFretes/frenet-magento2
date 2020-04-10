@@ -47,6 +47,10 @@ class DefaultPriceCalculator implements PriceCalculatorInterface
      */
     public function getFinalPrice(QuoteItem $item) : float
     {
+        if (!$item->getRowTotal()) {
+            $item->calcRowTotal();
+        }
+
         return $item->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
     }
 }

@@ -74,7 +74,7 @@ class PackagesCalculator
     }
 
     /**
-     * @return RateRequest[]
+     * @return PackageItem[]
      */
     public function calculate()
     {
@@ -117,7 +117,7 @@ class PackagesCalculator
     }
 
     /**
-     * @return array
+     * @return PackageItem[]
      */
     private function processPackages()
     {
@@ -126,7 +126,7 @@ class PackagesCalculator
 
         /** @var Package $package */
         foreach ($this->packageManager->getPackages() as $key => $package) {
-            /** @var array $services */
+            /** @var PackageItem[] $services */
             $services = $this->packageProcessor->process($package);
 
             /**

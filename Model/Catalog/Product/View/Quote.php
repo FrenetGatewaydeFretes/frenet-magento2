@@ -17,14 +17,12 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 use Frenet\Shipping\Api\QuoteProductInterface;
-use Frenet\Shipping\Model\Packages\Package;
-use Frenet\Shipping\Model\Packages\PackageManager;
-use Frenet\Shipping\Model\Packages\PackageProcessor;
+use Frenet\Shipping\Model\Calculator;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Address\RateRequest;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -45,38 +43,31 @@ class Quote implements QuoteProductInterface
     private $logger;
 
     /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
-     * @var PackageProcessor
-     */
-    private $packageProcessor;
-
-    /**
-     * @var QuoteItemConvertor
-     */
-    private $quoteItemConvertor;
-
-    /**
      * @var RateRequestProvider
      */
     private $rateRequestProvider;
 
+    /**
+     * @var Calculator
+     */
+    private $calculator;
+
+    /**
+     * @var RateRequestBuilder
+     */
+    private $rateRequestBuilder;
+
     public function __construct(
         ProductRepositoryInterface $productRepository,
-        PackageManager $packageManager,
-        PackageProcessor $packageProcessor,
-        QuoteItemConvertor $quoteItemConvertor,
         RateRequestProvider $rateRequestProvider,
+        Calculator $calculator,
+        RateRequestBuilder $rateRequestBuilder,
         LoggerInterface $logger
     ) {
         $this->productRepository = $productRepository;
-        $this->packageManager = $packageManager;
-        $this->packageProcessor = $packageProcessor;
-        $this->quoteItemConvertor = $quoteItemConvertor;
         $this->rateRequestProvider = $rateRequestProvider;
+        $this->calculator = $calculator;
+        $this->rateRequestBuilder = $rateRequestBuilder;
         $this->logger = $logger;
     }
 
@@ -117,19 +108,10 @@ class Quote implements QuoteProductInterface
      */
     private function quote(ProductInterface $product, string $postcode, int $qty = 1) : array
     {
-        /** @var QuoteItem $item */
-        $item = $this->quoteItemConvertor->convert($product);
-
-        $rateRequest = $this->rateRequestProvider->createRateRequest();
-        $rateRequest->setDestPostcode($postcode);
-        $rateRequest->setDestCountryId('BR');
+        /** @var RateRequest $rateRequest */
+        $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty);
         $this->rateRequestProvider->setRateRequest($rateRequest);
-
-        /** @var Package $package */
-        $package = $this->packageManager->createPackage();
-        $package->addItem($item, $qty);
-
-        $services = $this->packageProcessor->process($package);
+        $services = $this->calculator->getQuote();
 
         return $this->prepareResult($services);
     }

@@ -49,6 +49,11 @@ class ConfigurablePriceCalculator implements PriceCalculatorInterface
     public function getFinalPrice(QuoteItem $item) : float
     {
         $parentItem = $item->getParentItem();
+
+        if (!$parentItem->getRowTotal()) {
+            $parentItem->calcRowTotal();
+        }
+
         return $parentItem->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
     }
 }

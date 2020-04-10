@@ -16,14 +16,17 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Shipping\Model\Packages\PackageItem;
+
 /**
  * Class CalculatorInterface
+ *
  * @package Frenet\Shipping\Model
  */
 interface CalculatorInterface
 {
     /**
-     * @return array
+     * @return PackageItem[]
      */
     public function getQuote();
 }

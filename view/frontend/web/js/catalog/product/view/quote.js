@@ -27,6 +27,12 @@ define([
         defaults: {
             template: 'Frenet_Shipping/catalog/product/view/quote'
         },
+        active: ko.observable(false),
+        displayNoResults: ko.observable(false),
+        visible: ko.observable(false),
+        qty: ko.observable(1),
+        postcode: ko.observable(),
+        rates: ko.observableArray([]),
         updateRates: function () {
             if (!this.active()) {
                 return;
@@ -43,6 +49,7 @@ define([
                     this.pushRates.bind(this)
                 ).fail(
                     /** When the request fails. */
+                    this.loaderStop.bind(this)
                 ).always(
                     /** When any request finishes. */
                     this.loaderStop.bind(this)
@@ -98,11 +105,5 @@ define([
         deactivate: function () {
             this.active(false);
         },
-        active: ko.observable(false),
-        displayNoResults: ko.observable(false),
-        visible: ko.observable(false),
-        qty: ko.observable(1),
-        postcode: ko.observable(),
-        rates: ko.observableArray([]),
     });
 });

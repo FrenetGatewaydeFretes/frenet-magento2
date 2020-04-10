@@ -75,7 +75,7 @@ class PackageProcessor
     /**
      * @param Package $package
      *
-     * @return array
+     * @return PackageItem[]
      */
     public function process(Package $package) : array
     {
