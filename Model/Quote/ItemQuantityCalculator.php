@@ -16,6 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
+use Frenet\Shipping\Model\Catalog\ProductType;
 use Magento\Quote\Model\Quote\Item;
 
 /**
@@ -39,21 +40,21 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
         }
 
         switch ($type) {
-            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
+            case ProductType::TYPE_BUNDLE:
                 $qty = $this->calculateBundleProduct($item);
                 break;
 
-            case \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE:
+            case ProductType::TYPE_GROUPED:
                 $qty = $this->calculateGroupedProduct($item);
                 break;
 
-            case \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE:
+            case ProductType::TYPE_CONFIGURABLE:
                 $qty = $this->calculateConfigurableProduct($item);
                 break;
 
-            case \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL:
-            case \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE:
-            case \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE:
+            case ProductType::TYPE_VIRTUAL:
+            case ProductType::TYPE_DOWNLOADABLE:
+            case ProductType::TYPE_SIMPLE:
             default:
                 $qty = $this->calculateSimpleProduct($item);
         }

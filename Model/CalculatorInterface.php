@@ -28,5 +28,5 @@ interface CalculatorInterface
     /**
      * @return PackageItem[]
      */
-    public function getQuote();
+    public function getQuote() : array;
 }

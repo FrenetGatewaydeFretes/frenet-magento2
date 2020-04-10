@@ -60,7 +60,7 @@ class Calculator implements CalculatorInterface
     /**
      * @inheritdoc
      */
-    public function getQuote()
+    public function getQuote() : array
     {
         if ($result = $this->cacheManager->load()) {
             return $result;
@@ -74,6 +74,6 @@ class Calculator implements CalculatorInterface
             return $services;
         }
 
-        return false;
+        return [];
     }
 }

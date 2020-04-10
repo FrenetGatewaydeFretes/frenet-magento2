@@ -15,9 +15,9 @@
 namespace Frenet\Shipping\Test\Unit\Model\Catalog\Product\View;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
-use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 use Frenet\Shipping\Model\Catalog\Product\View\Quote;
+use Frenet\Shipping\Model\Catalog\ProductType;
 use Frenet\Shipping\Model\Packages\Package;
 use Frenet\Shipping\Model\Packages\PackageItem;
 use Frenet\Shipping\Model\Packages\PackageManager;
@@ -239,7 +239,7 @@ class QuoteTest extends TestCase
         $product->method('getFinalPrice')->willReturn(123.95);
         $product->method('getName')->willReturn('Frenet Testing Product');
         $product->method('getWeight')->willReturn(1);
-        $product->method('getTypeId')->willReturn(\Magento\Catalog\Model\Product\Type::TYPE_SIMPLE);
+        $product->method('getTypeId')->willReturn(ProductType::TYPE_SIMPLE);
 
         $product->method('getCartQty')->will($this->returnValue(1));
 

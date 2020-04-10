@@ -33,6 +33,7 @@ define([
         qty: ko.observable(1),
         postcode: ko.observable(),
         rates: ko.observableArray([]),
+        loader: $('#frenet-loader'),
         updateRates: function () {
             if (!this.active()) {
                 return;
@@ -59,15 +60,15 @@ define([
             if (!this.postcode()) {
                 this.reset();
             }
-
-            this.deactivate();
         },
         pushRates: function (rates) {
             this.rates.removeAll();
-            $.each(rates, this.appendRate.bind(this));
 
             if (rates.length > 0) {
+                $.each(rates, this.appendRate.bind(this));
+
                 this.visible(true);
+                this.deactivate();
             }
 
             if (rates.length === 0) {
@@ -77,10 +78,12 @@ define([
             this.displayNoResults(!this.visible());
         },
         loaderStart: function () {
-            $('#frenet-loader').trigger('processStart');
+            this.loader.show();
+            this.loader.trigger('processStart');
         },
         loaderStop: function () {
-            $('#frenet-loader').trigger('processStop');
+            this.loader.hide();
+            this.loader.trigger('processStop');
         },
         appendRate: function (index, rate) {
             rate.delivery_time = $.mage.__('{0} day(s)').replace('{0}', rate.delivery_time);

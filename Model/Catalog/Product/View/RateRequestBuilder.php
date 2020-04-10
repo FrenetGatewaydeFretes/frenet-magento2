@@ -14,6 +14,7 @@
 
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
+use Frenet\Shipping\Model\Catalog\ProductType;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -101,10 +102,11 @@ class RateRequestBuilder
     {
         $options = [];
 
+        /** @var \Magento\Catalog\Model\Product\Type\AbstractType $typeInstance */
+        $typeInstance = $product->getTypeInstance();
+
         switch ($product->getTypeId()) {
-            case \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE:
-                /** @var \Magento\ConfigurableProduct\Model\Product\Type\Configurable $typeInstance */
-                $typeInstance = $product->getTypeInstance();
+            case ProductType::TYPE_CONFIGURABLE:
                 $configurableOptions = $typeInstance->getConfigurableOptions($product);
 
                 /**
@@ -117,6 +119,41 @@ class RateRequestBuilder
                 }
 
                 $request->setData('super_attribute', $options);
+                break;
+            case ProductType::TYPE_BUNDLE:
+                $bundleOptions = [];
+                $bundleOptionsQty = [];
+
+                /** @var \Magento\Bundle\Model\ResourceModel\Option\Collection $optionsCollection */
+                $optionsCollection = $typeInstance->getOptionsCollection($product);
+
+                /** @var \Magento\Bundle\Model\Option $option */
+                foreach ($optionsCollection as $option) {
+                    /** If the option is not required then we can by pass it. */
+                    if (!$option->getRequired()) {
+                        continue;
+                    }
+
+                    /** @var \Magento\Bundle\Model\Selection $selection */
+                    $selection = $option->getDefaultSelection();
+
+                    if (!$selection) {
+                        /** @var \Magento\Bundle\Model\ResourceModel\Selection\Collection $selections */
+                        $selection = $typeInstance->getSelectionsCollection(
+                            $option->getId(),
+                            $product
+                        )->getFirstItem();
+                    }
+
+                    if (!$selection) {
+                        continue;
+                    }
+
+                    $bundleOptions[$option->getId()] = $selection->getSelectionId();
+                }
+
+                $request->setData('bundle_option', $bundleOptions);
+                $request->setData('bundle_option_qty', $bundleOptionsQty);
                 break;
         }
     }
