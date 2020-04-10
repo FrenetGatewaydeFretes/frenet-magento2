@@ -34,7 +34,7 @@
     <div class="actions">
         <button type="button"
                 id="frenet-postcode-button"
-                data-bind="click: updateRates, attr: {title: buttonTitle}"
+                data-bind="click: updateRates, attr: {title: buttonTitle, disabled: !enabled()}"
                 class="action primary">
             <span data-bind="text: buttonTitle"></span>
         </button>

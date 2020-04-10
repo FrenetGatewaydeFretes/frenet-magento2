@@ -33,7 +33,7 @@ define([
         qty: ko.observable(1),
         postcode: ko.observable(),
         rates: ko.observableArray([]),
-        loader: $('#frenet-loader'),
+        loader: '#frenet-loader',
         updateRates: function () {
             if (!this.active()) {
                 return;
@@ -78,12 +78,12 @@ define([
             this.displayNoResults(!this.visible());
         },
         loaderStart: function () {
-            this.loader.show();
-            this.loader.trigger('processStart');
+            $(this.loader).show();
+            $(this.loader).trigger('processStart');
         },
         loaderStop: function () {
-            this.loader.hide();
-            this.loader.trigger('processStop');
+            $(this.loader).hide();
+            $(this.loader).trigger('processStop');
         },
         appendRate: function (index, rate) {
             rate.delivery_time = $.mage.__('{0} day(s)').replace('{0}', rate.delivery_time);
@@ -102,11 +102,16 @@ define([
 
             return priceUtils.formatPrice(price);
         },
+        enabled: function () {
+            return this.active();
+        },
         activate: function () {
             this.active(true);
+            return this;
         },
         deactivate: function () {
             this.active(false);
+            return this;
         },
     });
 });
