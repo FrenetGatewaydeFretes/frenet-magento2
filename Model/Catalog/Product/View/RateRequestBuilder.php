@@ -63,7 +63,7 @@ class RateRequestBuilder
         $request = $this->prepareProductRequest($product, $qty);
         $candidates = $product->getTypeInstance()->prepareForCartAdvanced($request, $product);
 
-        foreach ($candidates as $candidate) {
+        foreach ((array) $candidates as $candidate) {
             $quote->addProduct($candidate, $qty);
         }
 
@@ -154,6 +154,16 @@ class RateRequestBuilder
 
                 $request->setData('bundle_option', $bundleOptions);
                 $request->setData('bundle_option_qty', $bundleOptionsQty);
+                break;
+            case ProductType::TYPE_GROUPED:
+                $associatedProductsQty = [];
+
+                /** @var \Magento\Catalog\Model\Product $associatedProduct */
+                foreach ($typeInstance->getAssociatedProducts($product) as $associatedProduct) {
+                    $associatedProductsQty[$associatedProduct->getId()] = $associatedProduct->getQty() ?: 1;
+                }
+
+                $request->setData('super_group', $associatedProductsQty);
                 break;
         }
     }
