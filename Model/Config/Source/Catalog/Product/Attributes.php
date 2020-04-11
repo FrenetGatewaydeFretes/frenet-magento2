@@ -21,7 +21,7 @@ namespace Frenet\Shipping\Model\Config\Source\Catalog\Product;
  *
  * @package Frenet\Shipping\Model\Config\Source\Catalog\Product
  */
-class Attributes implements \Magento\Framework\Option\ArrayInterface
+class Attributes implements \Magento\Framework\Data\OptionSourceInterface
 {
     /**
      * @var array
