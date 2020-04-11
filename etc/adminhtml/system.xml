@@ -61,6 +61,9 @@
                 <!-- DEFAULT MEASUREMENTS -->
                 <include path="Frenet_Shipping::system/default_measurements.xml"/>
 
+                <!-- PRODUCT QUOTE OPTIONS -->
+                <include path="Frenet_Shipping::system/product_quote.xml"/>
+
                 <!-- ADDITIONAL LEAD TIME -->
                 <field id="additional_lead_time" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Additional Lead Time</label>

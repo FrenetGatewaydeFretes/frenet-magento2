@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway
+
+  @category Frenet
+  @package Frenet\Shipping
+
+  @author Tiago Sampaio <tiago@tiagosampaio.com>
+  @link https://github.com/tiagosampaio
+  @link https://tiagosampaio.com
+
+  Copyright (c) 2020.
+  -->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="product_quote" translate="label" type="text" sortOrder="210" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Product Quote</label>
+        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Enabled</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <comment>If enabled the product shipping quote will be possible from product page.</comment>
+        </field>
+        <field id="product_types" translate="label" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Enable for Product Types</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Catalog\Product\Quote\ProductTypes</source_model>
+            <comment>These are the product types allowed to be quote in the product page.</comment>
+            <depends>
+                <field id="enabled">1</field>
+            </depends>
+        </field>
+    </group>
+</include>

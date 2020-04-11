@@ -59,6 +59,12 @@
                     <default_width>11</default_width>
                 </default_measurements>
 
+                <!-- PRODUCT QUOTE -->
+                <product_quote>
+                    <enabled>0</enabled>
+                    <product_types>simple,configurable,bundle,grouped</product_types>
+                </product_quote>
+
                 <!-- DEBUG -->
                 <debug>0</debug>
                 <debug_filename>frenet_request_debug.log</debug_filename>
