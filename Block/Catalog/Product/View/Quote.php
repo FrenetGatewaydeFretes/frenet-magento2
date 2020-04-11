@@ -51,4 +51,16 @@ class Quote extends View
         $this->jsLayout['components']['frenet-quote']['config']['api_url'] = $this->getViewModel()->getApiUrl();
         parent::_beforeToHtml();
     }
+
+    /**
+     * @return string
+     */
+    protected function _toHtml() : string
+    {
+        if (!$this->getViewModel()->isProductQuoteAllowed()) {
+            return '';
+        }
+
+        return parent::_toHtml();
+    }
 }

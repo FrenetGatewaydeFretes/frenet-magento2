@@ -15,6 +15,7 @@
 namespace Frenet\Shipping\ViewModel\Catalog\Product\View;
 
 use Frenet\Shipping\Block\Catalog\Product\View\Quote as QuoteBlock;
+use Frenet\Shipping\Model\Config;
 
 /**
  * Class Quote
@@ -33,10 +34,38 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
      */
     private $block;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
+    public function __construct(
+        Config $config
+    ) {
+        $this->config = $config;
+    }
+
     public function setBlock(QuoteBlock $block)
     {
         $this->block = $block;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductQuoteAllowed() : bool
+    {
+        if (!$this->block->getProduct()) {
+            return false;
+        }
+
+        if (!$this->config->isProductQuoteEnabled()) {
+            return false;
+        }
+
+        $typeId = $this->block->getProduct()->getTypeId();
+        return $this->config->isProductQuoteAllowed($typeId);
     }
 
     /**
