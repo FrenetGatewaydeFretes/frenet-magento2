@@ -16,6 +16,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -74,7 +75,7 @@ class PackagesCalculator
     }
 
     /**
-     * @return PackageItem[]
+     * @return Service[]
      */
     public function calculate()
     {
@@ -117,7 +118,7 @@ class PackagesCalculator
     }
 
     /**
-     * @return PackageItem[]
+     * @return Service[]
      */
     private function processPackages()
     {
@@ -126,7 +127,7 @@ class PackagesCalculator
 
         /** @var Package $package */
         foreach ($this->packageManager->getPackages() as $key => $package) {
-            /** @var PackageItem[] $services */
+            /** @var Service[] $services */
             $services = $this->packageProcessor->process($package);
 
             /**

@@ -31,6 +31,9 @@
     padding-top: 0;
     border-top: none !important;
 }
+.box-frenet-quote .text-red {
+    color: red;
+}
 .box-frenet-quote .table .note {
     color: orangered;
 }

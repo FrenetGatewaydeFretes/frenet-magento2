@@ -14,6 +14,7 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiServiceInterface;
 use Frenet\Shipping\Model\Config;
@@ -75,7 +76,7 @@ class PackageProcessor
     /**
      * @param Package $package
      *
-     * @return PackageItem[]
+     * @return Service[]
      */
     public function process(Package $package) : array
     {
@@ -116,7 +117,7 @@ class PackageProcessor
     }
 
     /**
-     * @return array
+     * @return Service[]
      */
     private function callService() : array
     {

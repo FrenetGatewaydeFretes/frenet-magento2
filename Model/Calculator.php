@@ -16,6 +16,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
+use Frenet\Shipping\Model\Packages\PackageItem;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
@@ -66,8 +68,12 @@ class Calculator implements CalculatorInterface
             return $result;
         }
 
-        /** @var RateRequest[] $packages */
+        /** @var Service[] $services */
         $services = $this->packagesCalculator->calculate();
+
+        foreach ($services as $service) {
+            $this->processService($service);
+        }
 
         if ($services) {
             $this->cacheManager->save($services);
@@ -75,5 +81,19 @@ class Calculator implements CalculatorInterface
         }
 
         return [];
+    }
+
+    /**
+     * @param Service $service
+     *
+     * @return Service
+     */
+    private function processService(Service $service) : Service
+    {
+        $service->setData(
+            'service_description',
+            str_replace('|', "\n", $service->getServiceDescription())
+        );
+        return $service;
     }
 }
