@@ -80,17 +80,19 @@ class RateRequestBuilder
         $quote->getShippingAddress()->setPostcode($postcode);
 
         $request = $this->prepareProductRequest($product, $qty, $options);
-        $candidates = $product->getTypeInstance()->prepareForCartAdvanced($request, $product);
+        // $candidates = $product->getTypeInstance()->prepareForCartAdvanced($request, $product);
 
-        if (is_string($candidates)) {
-            throw new LocalizedException(__($candidates));
-        }
+//        if (is_string($candidates)) {
+//            throw new LocalizedException(__($candidates));
+//        }
+
+        $quote->addProduct($product, $request);
 
         /** @var ProductInterface $candidate */
-        foreach ((array) $candidates as $candidate) {
-            $cartQty = $candidate->getCartQty() ?: $qty;
-            $quote->addProduct($candidate, $cartQty);
-        }
+//        foreach ((array) $candidates as $candidate) {
+//            $cartQty = $candidate->getCartQty() ?: $qty;
+
+//        }
 
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestFactory->create();
