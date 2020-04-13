@@ -16,6 +16,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
+use Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface;
 use Frenet\Shipping\Api\QuoteProductInterface;
 use Frenet\Shipping\Model\Calculator;
 use Frenet\Shipping\Service\RateRequestProvider;
@@ -74,23 +75,23 @@ class Quote implements QuoteProductInterface
     /**
      * @inheritDoc
      */
-    public function quoteByProductId(int $id, string $postcode, int $qty = 1) : array
+    public function quoteByProductId(int $productId, string $postcode, int $qty = 1, array $options = []) : array
     {
         try {
-            $product = $this->productRepository->getById($id);
+            $product = $this->productRepository->getById($productId);
         } catch (NoSuchEntityException $exception) {
-            $this->logger->warning(__('Product ID %1 does not exist.', $id));
+            $this->logger->warning(__('Product ID %1 does not exist.', $productId));
 
             return [];
         }
 
-        return $this->quote($product, $postcode, $qty);
+        return $this->quote($product, $postcode, $qty, $options);
     }
 
     /**
      * @inheritDoc
      */
-    public function quoteByProductSku(string $sku, string $postcode, int $qty = 1) : array
+    public function quoteByProductSku(string $sku, string $postcode, int $qty = 1, array $options = []) : array
     {
         try {
             $product = $this->productRepository->get($sku);
@@ -100,16 +101,16 @@ class Quote implements QuoteProductInterface
             return [];
         }
 
-        return $this->quote($product, $postcode, $qty);
+        return $this->quote($product, $postcode, $qty, $options);
     }
 
     /**
      * @inheritDoc
      */
-    private function quote(ProductInterface $product, string $postcode, int $qty = 1) : array
+    private function quote(ProductInterface $product, string $postcode, int $qty = 1, $options = []) : array
     {
         /** @var RateRequest $rateRequest */
-        $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty);
+        $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty, $options);
         $this->rateRequestProvider->setRateRequest($rateRequest);
         $services = $this->calculator->getQuote();
 

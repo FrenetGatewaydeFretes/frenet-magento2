@@ -27,7 +27,7 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     /**
      * @var string
      */
-    const URI_PATH = '/frenetShipping/quote/productId';
+    const URI_PATH = 'frenet/product/quote';
 
     /**
      * @var QuoteBlock
@@ -71,9 +71,9 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     /**
      * @return string
      */
-    public function getApiUrl() : string
+    public function getUrl() : string
     {
-        return $this->getApiBaseUrl() . self::URI_PATH . "/{$this->block->getProduct()->getId()}";
+        return $this->getBaseUrl() . self::URI_PATH;
     }
 
     /**
@@ -81,6 +81,14 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
      */
     private function getApiBaseUrl() : string
     {
-        return $this->block->getBaseUrl() . "rest/V1";
+        return $this->getBaseUrl() . "rest/V1";
+    }
+
+    /**
+     * @return string
+     */
+    private function getBaseUrl() : string
+    {
+        return $this->block->getBaseUrl();
     }
 }

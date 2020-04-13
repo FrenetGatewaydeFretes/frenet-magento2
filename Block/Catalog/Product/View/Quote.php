@@ -48,7 +48,7 @@ class Quote extends View
      */
     protected function _beforeToHtml()
     {
-        $this->jsLayout['components']['frenet-quote']['config']['api_url'] = $this->getViewModel()->getApiUrl();
+        $this->jsLayout['components']['frenet-quote']['config']['url'] = $this->getViewModel()->getUrl();
         parent::_beforeToHtml();
     }
 

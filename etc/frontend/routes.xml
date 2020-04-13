@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway
+
+  @category Frenet
+  @package Frenet\Shipping
+
+  @author Tiago Sampaio <tiago@tiagosampaio.com>
+  @link https://github.com/tiagosampaio
+  @link https://tiagosampaio.com
+
+  Copyright (c) 2020.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <route id="frenet_shipping" frontName="frenet">
+            <module name="Frenet_Shipping" />
+        </route>
+    </router>
+</config>
