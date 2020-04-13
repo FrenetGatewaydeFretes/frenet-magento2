@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -21,7 +20,6 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 /**
  * Class PackageMatching
  *
- * @package Frenet\Shipping\Model\Packages
  * @todo Review this class.
  */
 class PackageMatching

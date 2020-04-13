@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -18,8 +17,6 @@ namespace Frenet\Shipping\Model\Quote;
 
 /**
  * Class MultiQuoteValidatorInterface
- *
- * @package Frenet\Shipping\Model\Quote
  */
 interface MultiQuoteValidatorInterface
 {

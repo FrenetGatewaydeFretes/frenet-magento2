@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -23,8 +22,6 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInte
 
 /**
  * Class Frenet
- *
- * @package Frenet\Shipping\Model\Shipping\Carrier
  */
 class Frenet extends AbstractCarrierOnline implements CarrierInterface
 {

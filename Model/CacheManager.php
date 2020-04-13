@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -22,8 +21,6 @@ use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
 
 /**
  * Class CacheManager
- *
- * @package Frenet\Shipping\Model
  */
 class CacheManager
 {

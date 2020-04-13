@@ -1,4 +1,15 @@
 <?php
+/**
+ * Frenet Shipping Gateway
+ *
+ * @category Frenet
+ *
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
+ */
 
 namespace Frenet\Shipping\Model\Quote;
 
@@ -6,8 +17,6 @@ use Frenet\Command\Shipping\QuoteInterface;
 
 /**
  * Class QuoteCouponProcessor
- *
- * @package Frenet\Shipping\Model\Packages
  */
 class CouponProcessor
 {
@@ -40,7 +49,7 @@ class CouponProcessor
     /**
      * @return string|null
      */
-    public function getCouponCode() : ?string
+    public function getCouponCode()
     {
         return $this->getQuoteCouponCode();
     }
@@ -48,7 +57,7 @@ class CouponProcessor
     /**
      * @return string|null
      */
-    private function getQuoteCouponCode() : ?string
+    private function getQuoteCouponCode()
     {
         try {
             return $this->checkoutSession->getQuote()->getCouponCode();

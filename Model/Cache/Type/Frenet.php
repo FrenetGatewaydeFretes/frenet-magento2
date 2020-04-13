@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -21,8 +20,6 @@ use Magento\Framework\Config\CacheInterface;
 
 /**
  * Class Frenet
- *
- * @package Frenet\Shipping\Cache\Type
  */
 class Frenet extends TagScope implements CacheInterface
 {

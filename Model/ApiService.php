@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -21,7 +20,7 @@ use Frenet\Shipping\Api\ApiServiceInterface;
 /**
  * Class ApiService
  *
- * @package Frenet\Shipping\Model
+ * Used for communication with the API Service.
  */
 class ApiService implements ApiServiceInterface
 {

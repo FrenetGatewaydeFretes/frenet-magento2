@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -19,8 +18,6 @@ use Magento\Catalog\Api\Data\ProductInterface;
 
 /**
  * Class QuoteInterface
- *
- * @package Frenet\Shipping\Model\Catalog\Product\View
  */
 interface QuoteInterface
 {

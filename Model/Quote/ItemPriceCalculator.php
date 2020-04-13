@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -21,8 +20,6 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class ItemPriceCalculator
- *
- * @package Frenet\Shipping\Model\Quote
  */
 class ItemPriceCalculator
 {

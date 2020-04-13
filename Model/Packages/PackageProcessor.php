@@ -1,4 +1,15 @@
 <?php
+/**
+ * Frenet Shipping Gateway
+ *
+ * @category Frenet
+ *
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
+ */
 
 namespace Frenet\Shipping\Model\Packages;
 
@@ -7,8 +18,6 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
  * Class PackageProcessor
- *
- * @package Frenet\Shipping\Model\Packages
  */
 class PackageProcessor
 {
