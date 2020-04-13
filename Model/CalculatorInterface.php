@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -19,9 +18,7 @@ namespace Frenet\Shipping\Model;
 use Frenet\Shipping\Model\Packages\PackageItem;
 
 /**
- * Class CalculatorInterface
- *
- * @package Frenet\Shipping\Model
+ * Interface CalculatorInterface
  */
 interface CalculatorInterface
 {

@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -22,8 +21,6 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 
 /**
  * Class DeliveryTimeCalculator
- *
- * @package Frenet\Shipping\Model
  */
 class DeliveryTimeCalculator
 {

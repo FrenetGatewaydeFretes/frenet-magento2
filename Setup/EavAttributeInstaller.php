@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -20,8 +19,6 @@ use Frenet\Shipping\Model\Catalog\ProductType;
 
 /**
  * Class EavAttributeInstaller
- *
- * @package Frenet\Shipping\Setup
  */
 abstract class EavAttributeInstaller
 {

@@ -1,10 +1,9 @@
 <?php
 /**
  * Frenet Shipping Gateway
- *
+ *  
  * @category Frenet
- * @package Frenet\Shipping
- *
+ *  
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
  * @link https://tiagosampaio.com
@@ -18,8 +17,6 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 
 /**
  * Interface DimensionsExtractorInterface
- *
- * @package Frenet\Shipping\Model\Catalog\Product
  */
 interface DimensionsExtractorInterface
 {

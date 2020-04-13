@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -17,14 +16,10 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
-use Frenet\Shipping\Model\Packages\PackageItem;
 use Frenet\Shipping\Service\RateRequestProvider;
-use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
  * Class Calculator
- *
- * @package Frenet\Shipping\Model
  */
 class Calculator implements CalculatorInterface
 {

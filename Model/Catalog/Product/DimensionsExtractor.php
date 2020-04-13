@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -22,8 +21,6 @@ use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 
 /**
  * Class DataExtractor
- *
- * @package Frenet\Shipping\Model\Catalog\Product
  */
 class DimensionsExtractor implements ProductExtractorInterface
 {

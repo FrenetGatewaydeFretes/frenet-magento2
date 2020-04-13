@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -27,8 +26,6 @@ use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class PackageItem
- *
- * @package Frenet\Shipping\Model\Packages
  */
 class PackageItem
 {
@@ -277,9 +274,8 @@ class PackageItem
 
             return (bool) $value;
         } catch (\Exception $e) {
+            return false;
         }
-
-        return false;
     }
 
     /**

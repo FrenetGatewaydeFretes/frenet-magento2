@@ -1,10 +1,9 @@
 <?php
 /**
  * Frenet Shipping Gateway
- *
+ *  
  * @category Frenet
- * @package Frenet\Shipping
- *
+ *  
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
  * @link https://tiagosampaio.com
@@ -19,9 +18,7 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 use Magento\Catalog\Api\Data\ProductInterface;
 
 /**
- * Class ProductExtractorInterface
- *
- * @package Frenet\Shipping\Model\Catalog\Product
+ * Interface ProductExtractorInterface
  */
 interface ProductExtractorInterface extends DimensionsExtractorInterface
 {

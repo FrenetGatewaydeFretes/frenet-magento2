@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -20,8 +19,6 @@ use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
 
 /**
  * Class AttributeContainer
- *
- * @package Frenet\Shipping\Setup
  */
 class AttributeContainer
 {
@@ -109,7 +106,7 @@ class AttributeContainer
     private function applyTranslations(array $attribute) : array
     {
         foreach ($this->translatable as $translatable) {
-            if (!isseT($attribute[$translatable])) {
+            if (!isset($attribute[$translatable])) {
                 continue;
             }
 
