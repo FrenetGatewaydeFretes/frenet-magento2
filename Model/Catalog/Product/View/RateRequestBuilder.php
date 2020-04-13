@@ -80,19 +80,8 @@ class RateRequestBuilder
         $quote->getShippingAddress()->setPostcode($postcode);
 
         $request = $this->prepareProductRequest($product, $qty, $options);
-        // $candidates = $product->getTypeInstance()->prepareForCartAdvanced($request, $product);
-
-//        if (is_string($candidates)) {
-//            throw new LocalizedException(__($candidates));
-//        }
-
         $quote->addProduct($product, $request);
-
-        /** @var ProductInterface $candidate */
-//        foreach ((array) $candidates as $candidate) {
-//            $cartQty = $candidate->getCartQty() ?: $qty;
-
-//        }
+        $this->fixQuoteItems($quote);
 
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestFactory->create();
@@ -105,17 +94,25 @@ class RateRequestBuilder
 
         /** @var QuoteItem $item */
         foreach ($quote->getAllItems() as $item) {
-            if (!$item->getId()) {
-                $item->setId($item->getProduct()->getId());
-            }
-
-            $cartQty = $item->getProduct()->getCartQty() ?: $qty;
-            $totalWeight += $this->getItemRowWeight($item, $cartQty);
+            $totalWeight += $item->getRowWeight();
         }
 
         $rateRequest->setPackageWeight($totalWeight);
 
         return $rateRequest;
+    }
+
+    private function fixQuoteItems(\Magento\Quote\Model\Quote $quote)
+    {
+        /** @var QuoteItem $item */
+        foreach ($quote->getAllItems() as $item) {
+            if (!$item->getId()) {
+                $item->setId($item->getProduct()->getId());
+            }
+
+            $qty = $item->getProduct()->getCartQty();
+            $item->setRowWeight($this->getItemRowWeight($item, $qty));
+        }
     }
 
     /**
@@ -128,7 +125,6 @@ class RateRequestBuilder
     {
         $this->dimensionsExtractor->setProductByCartItem($item);
         $weight = $this->dimensionsExtractor->getWeight();
-
         return $weight * $qty;
     }
 

@@ -32,7 +32,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     {
         $type = $item->getProductType();
 
-        if ($item->getParentItemId()) {
+        if ($item->getParentItem()) {
             $type = $item->getParentItem()->getProductType();
         }
 
