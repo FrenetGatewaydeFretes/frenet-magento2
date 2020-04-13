@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -17,8 +16,7 @@ namespace Frenet\Shipping\Block\Form\Element;
 
 /**
  * Class Label
- *
- * @package Frenet\Shipping\Block\Form\Element
+ * A customized label for using in admin form.
  */
 class Label extends \Magento\Framework\Data\Form\Element\Label
 {

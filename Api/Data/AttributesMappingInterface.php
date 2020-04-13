@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -18,8 +17,6 @@ namespace Frenet\Shipping\Api\Data;
 
 /**
  * Class AttributesMappingInterface
- *
- * @package Frenet\Shipping\Api
  */
 interface AttributesMappingInterface
 {

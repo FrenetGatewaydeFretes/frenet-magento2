@@ -3,7 +3,6 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
  * @author Tiago Sampaio <tiago@tiagosampaio.com>
  * @link https://github.com/tiagosampaio
@@ -23,8 +22,6 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class PackageItemDistributor
- *
- * @package Frenet\Shipping\Model\Packages
  */
 class PackageItemDistributor
 {
