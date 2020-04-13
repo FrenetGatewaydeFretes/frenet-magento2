@@ -78,6 +78,7 @@ define([
         },
         processFailure: function (result) {
             // console.log("RESULT FAILURE", result);
+            this.reset();
             this.errorMessage(result.message);
             this.error(true);
         },
