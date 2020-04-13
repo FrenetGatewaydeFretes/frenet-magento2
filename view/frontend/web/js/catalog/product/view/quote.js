@@ -30,10 +30,13 @@ define([
         active: ko.observable(false),
         displayNoResults: ko.observable(false),
         visible: ko.observable(false),
+        error: ko.observable(false),
+        errorMessage: ko.observable(''),
         qty: ko.observable(1),
         postcode: ko.observable(),
         rates: ko.observableArray([]),
         loader: '#frenet-loader',
+        form: '#product_addtocart_form',
         updateRates: function () {
             if (!this.active()) {
                 return;
@@ -42,24 +45,50 @@ define([
             if (this.postcode()) {
                 this.loaderStart();
 
-                var apiUrl = this.api_url + '/' + this.postcode() + '/' + this.qty();
-                $.getJSON(
-                    apiUrl
-                ).done(
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    // contentType: 'application/json',
+                    // dataType: 'json',
+                    data: this.getPreparedData()
+                }).done(
                     /** When the request succeed. */
-                    this.pushRates.bind(this)
+                    this.processSuccess.bind(this)
                 ).fail(
                     /** When the request fails. */
-                    this.loaderStop.bind(this)
+                    this.processFailure.bind(this)
                 ).always(
                     /** When any request finishes. */
-                    this.loaderStop.bind(this)
+                    this.processAlways.bind(this)
                 );
             }
 
             if (!this.postcode()) {
                 this.reset();
             }
+        },
+        processSuccess: function (result) {
+            // console.log("RESULT SUCCESS", result);
+            if (result.error) {
+                this.processFailure(result);
+                return;
+            }
+
+            this.pushRates(result.rates);
+        },
+        processFailure: function (result) {
+            // console.log("RESULT FAILURE", result);
+            this.errorMessage(result.message);
+            this.error(true);
+        },
+        processAlways: function (result) {
+            // console.log("RESULT ALWAYS", result);
+            this.loaderStop();
+        },
+        getPreparedData: function () {
+            var data = $(this.form).serializeArray();
+            data.push({name: 'postcode', value: this.postcode()});
+            return data;
         },
         pushRates: function (rates) {
             this.rates.removeAll();
@@ -68,7 +97,8 @@ define([
                 $.each(rates, this.appendRate.bind(this));
 
                 this.visible(true);
-                this.deactivate();
+                this.error(false);
+                // this.deactivate();
             }
 
             if (rates.length === 0) {
@@ -91,6 +121,8 @@ define([
             this.rates.push(rate);
         },
         reset: function () {
+            this.error(false);
+            this.errorMessage('');
             this.visible(false);
             this.displayNoResults(false);
             this.rates.removeAll();

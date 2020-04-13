@@ -40,28 +40,28 @@
         </button>
     </div>
     <div class="table-wrapper">
+        <div data-bind="visible: error">
+            <span class="text-red" data-bind="text: errorMessage"></span>
+        </div>
         <div data-bind="visible: displayNoResults">
             <span data-bind="text: noResultsMessage"></span>
         </div>
         <table data-bind="visible: visible" class="data table">
-            <col width="20%">
-            <col width="10%">
             <col width="60%">
+            <col width="10%">
             <col width="10%">
             <thead>
                 <tr>
-                    <th data-bind="i18n: 'Method Title'"></th>
-                    <th data-bind="i18n: 'Time'"></th>
                     <th data-bind="i18n: 'Description'"></th>
+                    <th data-bind="i18n: 'Time'"></th>
                     <th data-bind="i18n: 'Price'"></th>
                 </tr>
             </thead>
             <tbody>
                 <!-- ko foreach: rates -->
                 <tr>
-                    <td data-bind="text: carrier"></td>
-                    <td data-bind="text: delivery_time"></td>
                     <td data-bind="text: service_description"></td>
+                    <td data-bind="text: delivery_time"></td>
                     <td data-bind="text: shipping_price"></td>
                 </tr>
                 <tr data-bind="visible: message" class="footer">
