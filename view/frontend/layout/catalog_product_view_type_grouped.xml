@@ -15,6 +15,9 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="frenet_product_shipping_quote"/>
     <body>
+        <move element="product.info.frenet.shipping.quote" destination="product.info.main"/>
+        <!--
         <move element="product.info.frenet.shipping.quote" destination="product.info.details" />
+        -->
     </body>
 </page>
