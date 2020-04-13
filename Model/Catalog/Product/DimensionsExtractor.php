@@ -18,7 +18,7 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 
 use Frenet\Shipping\Model\Config;
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Catalog\Model\ResourceModel\ProductFactory;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 
 /**
  * Class DataExtractor
@@ -38,9 +38,9 @@ class DimensionsExtractor implements ProductExtractorInterface
     private $cartItem;
 
     /**
-     * @var ProductFactory
+     * @var ProductResource
      */
-    private $productResourceFactory;
+    private $productResource;
 
     /**
      * @var AttributesMappingInterface
@@ -53,11 +53,11 @@ class DimensionsExtractor implements ProductExtractorInterface
     private $config;
 
     public function __construct(
-        ProductFactory $productResourceFactory,
+        ProductResource $productResource,
         AttributesMappingInterface $attributesMapping,
         Config $config
     ) {
-        $this->productResourceFactory = $productResourceFactory;
+        $this->productResource = $productResource;
         $this->attributesMapping = $attributesMapping;
         $this->config = $config;
     }
@@ -161,7 +161,7 @@ class DimensionsExtractor implements ProductExtractorInterface
             return $this->product->getData($key);
         }
 
-        $value = $this->productResourceFactory->create()->getAttributeRawValue(
+        $value = $this->productResource->getAttributeRawValue(
             $this->product->getId(),
             $key,
             $this->product->getStore()
