@@ -26,7 +26,7 @@ class BundleBuilder implements BuilderInterface
     {
         if ($options && isset($options['bundle_option'], $options['bundle_option'])) {
             $request->setData('bundle_option', $options['bundle_option']);
-            $request->setData('bundle_option_qty', $options['bundle_option']);
+            $request->setData('bundle_option_qty', $options['bundle_option_qty']);
             return;
         }
 

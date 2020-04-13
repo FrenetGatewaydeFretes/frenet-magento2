@@ -88,7 +88,8 @@ class RateRequestBuilder
 
         /** @var ProductInterface $candidate */
         foreach ((array) $candidates as $candidate) {
-            $quote->addProduct($candidate, $qty);
+            $cartQty = $candidate->getCartQty() ?: $qty;
+            $quote->addProduct($candidate, $cartQty);
         }
 
         /** @var RateRequest $rateRequest */
@@ -102,7 +103,12 @@ class RateRequestBuilder
 
         /** @var QuoteItem $item */
         foreach ($quote->getAllItems() as $item) {
-            $totalWeight += $this->getItemRowWeight($item, $qty);
+            if (!$item->getId()) {
+                $item->setId($item->getProduct()->getId());
+            }
+
+            $cartQty = $item->getProduct()->getCartQty() ?: $qty;
+            $totalWeight += $this->getItemRowWeight($item, $cartQty);
         }
 
         $rateRequest->setPackageWeight($totalWeight);
@@ -112,11 +118,11 @@ class RateRequestBuilder
 
     /**
      * @param float $itemWeight
-     * @param float $itemQty
+     * @param float $qty
      *
      * @return float
      */
-    private function getItemRowWeight(QuoteItem $item, float $qty): float
+    private function getItemRowWeight(QuoteItem $item, $qty): float
     {
         $this->dimensionsExtractor->setProductByCartItem($item);
         $weight = $this->dimensionsExtractor->getWeight();
