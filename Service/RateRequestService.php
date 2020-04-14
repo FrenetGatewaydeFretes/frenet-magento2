@@ -39,7 +39,7 @@ class RateRequestService
     /**
      * @return RateRequest|null
      */
-    public function getRateRequest() : ?RateRequest
+    public function getRateRequest()
     {
         return $this->rateRequest;
     }
