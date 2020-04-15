@@ -17,12 +17,17 @@ namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 
+/**
+ * Class DefaultBuilder
+ */
 class DefaultBuilder implements BuilderInterface
 {
     /**
      * @inheritDoc
+     * @codingStandardsIgnoreStart
      */
     public function build(ProductInterface $product, DataObject $request, array $options = [])
     {
+        //@codingStandardsIgnoreEnd
     }
 }
