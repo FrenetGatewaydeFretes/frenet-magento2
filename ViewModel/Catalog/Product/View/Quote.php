@@ -79,14 +79,6 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     /**
      * @return string
      */
-    private function getApiBaseUrl() : string
-    {
-        return $this->getBaseUrl() . "rest/V1";
-    }
-
-    /**
-     * @return string
-     */
     private function getBaseUrl() : string
     {
         return $this->block->getBaseUrl();

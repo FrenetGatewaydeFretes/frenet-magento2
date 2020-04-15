@@ -21,6 +21,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 
 /**
  * Class DeliveryTimeCalculator
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class DeliveryTimeCalculator
 {

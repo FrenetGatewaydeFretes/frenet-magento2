@@ -17,6 +17,10 @@ namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 
+/**
+ * Class ConfigurableBuilder
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 class ConfigurableBuilder implements BuilderInterface
 {
     /**
@@ -40,9 +44,10 @@ class ConfigurableBuilder implements BuilderInterface
      */
     private function buildDefaultOptions(ProductInterface $product, DataObject $request)
     {
+        $options = [];
+
         /** @var \Magento\Catalog\Model\Product\Type\AbstractType $typeInstance */
         $typeInstance = $product->getTypeInstance();
-
         $configurableOptions = $typeInstance->getConfigurableOptions($product);
 
         /**

@@ -65,7 +65,8 @@ class ServiceFinder implements ServiceFinderInterface
 
         /** @var string $name */
         foreach ($names as $name) {
-            if ($service = $this->machServiceByName($services, $name)) {
+            $service = $this->machServiceByName($services, $name);
+            if ($service) {
                 return $service;
             }
         }

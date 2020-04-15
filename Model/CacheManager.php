@@ -15,6 +15,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Framework\Data\Serializer;
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
 use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
@@ -27,6 +29,8 @@ use Magento\Framework\Serialize\SerializerInterface;
 
 /**
  * Class CacheManager
+ * @SuppressWarnings(PHPMD.LongVariable)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class CacheManager
 {
@@ -223,12 +227,12 @@ class CacheManager
     }
 
     /**
-     * @return \Frenet\ObjectType\Entity\Shipping\Quote\Service
+     * @return Service
      */
     private function createServiceInstance()
     {
-        return new \Frenet\ObjectType\Entity\Shipping\Quote\Service(
-            new \Frenet\Framework\Data\Serializer()
+        return new Service(
+            new Serializer()
         );
     }
 }

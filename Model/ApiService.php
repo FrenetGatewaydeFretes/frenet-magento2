@@ -84,6 +84,7 @@ class ApiService implements ApiServiceInterface
      *
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     private function init()
     {

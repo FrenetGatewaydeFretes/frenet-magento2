@@ -26,6 +26,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class PackageItem
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageItem
 {
@@ -38,11 +39,6 @@ class PackageItem
      * @var float
      */
     private $qty;
-
-    /**
-     * @var bool
-     */
-    private $isInitialized = false;
 
     /**
      * @var CartItemInterface
@@ -176,6 +172,7 @@ class PackageItem
      * @param bool $useParentItemIfAvailable
      *
      * @return bool|\Magento\Catalog\Model\Product
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function getProduct($useParentItemIfAvailable = false)
     {

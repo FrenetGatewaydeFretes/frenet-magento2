@@ -23,6 +23,9 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInte
 
 /**
  * Class Frenet
+ * @SuppressWarnings(PHPMD.LongVariable)
+ * @SuppressWarnings(PHPMD.CamelCasePropertyName)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Frenet extends AbstractCarrierOnline implements CarrierInterface
 {
@@ -101,6 +104,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private $rateRequestProvider;
 
+    /**
+     * Frenet constructor.
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory,
@@ -179,9 +186,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
         /** This service will be used all the way long. */
         $this->rateRequestProvider->setRateRequest($request);
+        $results = $this->calculator->getQuote();
 
         /** @var array $results */
-        if (!$results = $this->calculator->getQuote()) {
+        if (!$results) {
             $this->rateRequestProvider->clear();
             return $this->result;
         }
@@ -357,6 +365,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
     /**
      * @inheritdoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
     protected function _doShipmentRequest(\Magento\Framework\DataObject $request)
     {

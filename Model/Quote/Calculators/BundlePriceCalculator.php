@@ -20,7 +20,8 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class DefaultPriceCalculator
- *  */
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 class BundlePriceCalculator implements PriceCalculatorInterface
 {
     /**

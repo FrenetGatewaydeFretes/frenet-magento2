@@ -22,6 +22,7 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class PackagesManager
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageManager
 {

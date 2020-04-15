@@ -17,6 +17,10 @@ namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 
+/**
+ * Class GroupedBuilder
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 class GroupedBuilder implements BuilderInterface
 {
     /**

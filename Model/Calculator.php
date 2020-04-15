@@ -59,7 +59,8 @@ class Calculator implements CalculatorInterface
      */
     public function getQuote() : array
     {
-        if ($result = $this->cacheManager->load()) {
+        $result = $this->cacheManager->load();
+        if ($result) {
             return $result;
         }
 

@@ -19,7 +19,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 
 /**
  * Class PackageMatching
- *
+ * @SuppressWarnings(PHPMD.LongVariable)
  * @todo Review this class.
  */
 class PackageMatching
@@ -72,7 +72,7 @@ class PackageMatching
     private function matchResults()
     {
         /** @var array $result */
-        foreach ($this->results as $resultIndex => $services) {
+        foreach ($this->results as $services) {
             $this->prepareServices($services);
         }
 
@@ -87,8 +87,8 @@ class PackageMatching
     private function prepareServices(array $services)
     {
         /** @var Service $service */
-        foreach ($services as $serviceIndex => $service) {
-            if ($service->getCarrier() != 'Correios') {
+        foreach ($services as $service) {
+            if ($service->getCarrier() !== 'Correios') {
                 continue;
             }
 

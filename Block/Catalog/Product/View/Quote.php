@@ -27,6 +27,9 @@ use Magento\Catalog\Block\Product\View;
  */
 class Quote extends View
 {
+    /**
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
     protected function _construct()
     {
         parent::_construct();
@@ -45,6 +48,7 @@ class Quote extends View
 
     /**
      * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
     protected function _beforeToHtml()
     {
@@ -54,6 +58,7 @@ class Quote extends View
 
     /**
      * @return string
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
     protected function _toHtml() : string
     {

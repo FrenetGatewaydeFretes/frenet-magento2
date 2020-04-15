@@ -67,6 +67,7 @@ class Frenet extends TagScope implements CacheInterface
      * @param bool $flag
      *
      * @return $this
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function setEnabled($flag = true)
     {

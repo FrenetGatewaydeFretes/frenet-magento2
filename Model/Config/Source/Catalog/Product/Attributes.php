@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model\Config\Source\Catalog\Product;
 
 /**
  * Class Attributes
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class Attributes implements \Magento\Framework\Data\OptionSourceInterface
 {

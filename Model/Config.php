@@ -163,7 +163,7 @@ class Config
     /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
-     * @return bool
+     * @return string
      */
     public function getShippingForecastMessage($store = null)
     {
