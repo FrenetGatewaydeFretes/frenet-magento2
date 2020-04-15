@@ -1,8 +1,31 @@
 {
     "name": "frenet/frenet-magento2",
     "description":"Integrate your Magento 2 with Frenet Services in a simple way.",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ],
     "require": {
-        "frenet/frenet-php": "^1.1.0"
+        "frenet/frenet-php": "^1.1.0",
+        "magento/framework": "*",
+        "magento/module-catalog": "*",
+        "magento/module-bundle": "*",
+        "magento/module-configurable-product": "*",
+        "magento/module-grouped-product": "*",
+        "magento/module-downloadable": "*",
+        "magento/module-quote": "*",
+        "magento/module-shipping": "*",
+        "magento/module-directory": "*",
+        "magento/module-checkout": "*",
+        "magento/module-sales": "*"
+    },
+    "require-dev": {
+        "magento/magento-coding-standard": "~4.0.0",
+        "magento/magento2-functional-testing-framework": "*",
+        "phpmd/phpmd": "@stable",
+        "phpunit/phpunit": "~6.5.0"
     },
     "suggest": {},
     "type": "magento2-module",
@@ -25,5 +48,14 @@
             "Frenet\\Shipping\\": ""
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "scripts": {
+        "coding-standard": [
+            "@phpcs",
+            "@phpmd"
+        ],
+        "phpunit" : "vendor/bin/phpunit Test",
+        "phpcs": "vendor/bin/phpcs --standard=Magento2 --severity=1 --extensions=php Service Model Setup Controller Block ViewModel",
+        "phpmd": "vendor/bin/phpmd Service/,Model/,Setup/,Controller/,Block/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode"
+    }
 }
