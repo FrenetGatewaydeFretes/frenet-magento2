@@ -1,0 +1,12 @@
+language: php
+sudo: false
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+install:
+  - composer install --no-interaction --prefer-dist
+  - php vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard
+script:
+  - vendor/bin/composer coding-standard
