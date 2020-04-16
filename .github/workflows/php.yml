@@ -1,0 +1,30 @@
+name: Composer Test Suite
+
+on:
+  push:
+    branches: [ develop-quote-product ]
+  pull_request:
+    branches: [ develop-quote-product ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Creating auth.json File.
+      env:
+        MAGENTO_USERNAME: ${{ secrets.MAGENTO_USERNAME }}
+        MAGENTO_PASSWORD: ${{ secrets.MAGENTO_PASSWORD }}
+      run: echo "{\"http-basic\":{\"repo.magento.com\":{\"username\":\"${MAGENTO_USERNAME}\",\"password\":\"${MAGENTO_PASSWORD}\"}}}" > auth.json
+    
+    - name: Install Dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Add Magento 2 Coding Standard
+      run: php vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard
+    
+    - name: Run Test Suite
+      run: composer coding-standard
