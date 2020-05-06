@@ -26,6 +26,7 @@ use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class CacheManager
@@ -154,7 +155,7 @@ class CacheManager
 
         /** @var array $service */
         foreach ($services as $service) {
-            $newData[] = ($this->createServiceInstance())->setData($service);
+            $newData[] = $this->createServiceInstance()->setData($service);
         }
 
         return $newData;
@@ -188,7 +189,7 @@ class CacheManager
         $origPostcode = $this->config->getOriginPostcode();
         $items = [];
 
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var QuoteItem $item */
         foreach ($request->getAllItems() as $item) {
             if (!$this->quoteItemValidator->validate($item)) {
                 continue;

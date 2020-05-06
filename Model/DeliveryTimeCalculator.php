@@ -17,6 +17,8 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Catalog\Model\Product;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 
 /**
@@ -75,7 +77,7 @@ class DeliveryTimeCalculator
         $serviceForecast = $service->getDeliveryTime();
         $maxProductForecast = 0;
 
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var QuoteItem $item */
         foreach ($rateRequest->getAllItems() as $item) {
             $leadTime = $this->extractProductLeadTime($item->getProduct());
 
@@ -90,11 +92,11 @@ class DeliveryTimeCalculator
     }
 
     /**
-     * @param \Magento\Catalog\Model\Product $product
+     * @param Product $product
      *
      * @return int
      */
-    private function extractProductLeadTime(\Magento\Catalog\Model\Product $product)
+    private function extractProductLeadTime(Product $product)
     {
         $leadTime = max($product->getData('lead_time'), 0);
 

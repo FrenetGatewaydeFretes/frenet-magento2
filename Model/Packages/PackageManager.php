@@ -29,7 +29,7 @@ class PackageManager
     /**
      * @var Package
      */
-    private $currentPackage = null;
+    private $currentPackage;
 
     /**
      * @var Package[]
@@ -62,11 +62,6 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
-     * @var RateRequestProvider
-     */
-    private $rateRequestProvider;
-
-    /**
      * PackageManager constructor.
      *
      * @param QuoteItemValidatorInterface     $quoteItemValidator
@@ -89,7 +84,6 @@ class PackageManager
         $this->packageFactory = $packageFactory;
         $this->packageLimit = $packageLimit;
         $this->packageItemDistributor = $packageItemDistributor;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**

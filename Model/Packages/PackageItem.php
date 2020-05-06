@@ -23,6 +23,9 @@ use Frenet\Shipping\Model\WeightConverterInterface;
 use Magento\Catalog\Model\ResourceModel\ProductFactory;
 use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class PackageItem
@@ -31,7 +34,7 @@ use Magento\Store\Model\StoreManagerInterface;
 class PackageItem
 {
     /**
-     * @var CartItemInterface
+     * @var QuoteItem
      */
     private $cartItem;
 
@@ -41,7 +44,7 @@ class PackageItem
     private $qty;
 
     /**
-     * @var CartItemInterface
+     * @var StoreManagerInterface
      */
     private $storeManagement;
 
@@ -100,7 +103,7 @@ class PackageItem
     }
 
     /**
-     * @return CartItemInterface
+     * @return QuoteItem
      */
     public function getCartItem()
     {
@@ -108,11 +111,11 @@ class PackageItem
     }
 
     /**
-     * @param CartItemInterface $item
+     * @param QuoteItem $item
      *
      * @return $this
      */
-    public function setCartItem(CartItemInterface $item)
+    public function setCartItem(QuoteItem $item)
     {
         $this->cartItem = $item;
         return $this;
@@ -162,16 +165,16 @@ class PackageItem
      *
      * @return $this
      */
-    public function setQty(float $qty)
+    public function setQty($qty)
     {
-        $this->qty = $qty;
+        $this->qty = (float) $qty;
         return $this;
     }
 
     /**
      * @param bool $useParentItemIfAvailable
      *
-     * @return bool|\Magento\Catalog\Model\Product
+     * @return bool|Product
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function getProduct($useParentItemIfAvailable = false)
@@ -182,7 +185,7 @@ class PackageItem
             return $this->getProduct($this->cartItem->getParentItem());
         }
 
-        /** @var \Magento\Catalog\Model\Product $product */
+        /** @var Product $product */
         return $this->cartItem->getProduct();
     }
 
@@ -253,7 +256,7 @@ class PackageItem
      */
     public function isProductFragile()
     {
-        /** @var \Magento\Catalog\Model\Product $product */
+        /** @var Product $product */
         $product = $this->getProduct();
 
         if ($product->hasData(AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE)) {
@@ -261,7 +264,7 @@ class PackageItem
         }
 
         try {
-            /** @var \Magento\Catalog\Model\ResourceModel\Product $resource */
+            /** @var ProductResource $resource */
             $resource = $this->productResourceFactory->create();
             $value = (bool) $resource->getAttributeRawValue(
                 $product->getId(),

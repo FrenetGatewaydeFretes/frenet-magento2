@@ -17,7 +17,9 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 
 use Frenet\Shipping\Model\Config;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class DataExtractor
@@ -25,12 +27,12 @@ use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 class DimensionsExtractor implements ProductExtractorInterface
 {
     /**
-     * @var \Magento\Catalog\Model\Product
+     * @var Product
      */
     private $product;
 
     /**
-     * @var \Magento\Quote\Api\Data\CartItemInterface
+     * @var QuoteItem
      */
     private $cartItem;
 
@@ -62,7 +64,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     /**
      * {@inheritdoc}
      */
-    public function setProduct(ProductInterface $product) : ProductExtractorInterface
+    public function setProduct(Product $product) : ProductExtractorInterface
     {
         if ($this->validateProduct($product)) {
             $this->product = $product;
@@ -72,11 +74,11 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * @param \Magento\Quote\Api\Data\CartItemInterface $cartItem
+     * @param QuoteItem $cartItem
      *
      * @return $this
      */
-    public function setProductByCartItem(\Magento\Quote\Api\Data\CartItemInterface $cartItem)
+    public function setProductByCartItem(QuoteItem $cartItem)
     {
         $this->cartItem = $cartItem;
         $this->setProduct($this->cartItem->getProduct());
@@ -168,11 +170,11 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * @param ProductInterface $product
+     * @param Product $product
      *
      * @return bool
      */
-    private function validateProduct(\Magento\Framework\DataObject $product)
+    private function validateProduct(Product $product)
     {
         if (!$product->getId()) {
             return false;
