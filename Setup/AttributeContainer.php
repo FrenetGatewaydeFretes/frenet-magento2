@@ -15,7 +15,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup;
 
-use Frenet\Shipping\Api\Data\AttributesMappingInterface;
+use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
 
 /**
  * Class AttributeContainer

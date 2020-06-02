@@ -1,0 +1,39 @@
+/**
+ * Frenet Shipping Gateway
+ *
+ * @category Frenet
+ * @package Frenet\Shipping
+ *
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
+ */
+
+.box-frenet-quote {}
+.box-frenet-quote .field {
+    width: 200px;
+}
+.box-frenet-quote .table-wrapper {
+    margin-top: 25px !important;
+}
+.box-frenet-quote .table {
+    /*border: 1px solid #1979c3;*/
+}
+.box-frenet-quote .table td {
+}
+.box-frenet-quote .table thead th {
+    /*background-color: #1979c3;*/
+    /*color: #fff;*/
+}
+.box-frenet-quote .table tr.footer td {
+    padding-top: 0;
+    border-top: none !important;
+}
+.box-frenet-quote .text-red {
+    color: red;
+}
+.box-frenet-quote .table .note {
+    color: orangered;
+}

@@ -21,9 +21,7 @@ namespace Frenet\Shipping\Model\Quote;
 interface MultiQuoteValidatorInterface
 {
     /**
-     * @param Magento\Quote\Model\Quote\Address\RateRequest $rateRequest
-     *
      * @return bool
      */
-    public function canProcessMultiQuote(\Magento\Quote\Model\Quote\Address\RateRequest $rateRequest);
+    public function canProcessMultiQuote() : bool;
 }

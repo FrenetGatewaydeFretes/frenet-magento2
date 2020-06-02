@@ -15,8 +15,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use Frenet\Shipping\Api\CalculatorInterface;
-use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
+use Frenet\Shipping\Service\RateRequestProvider;
 
 /**
  * Class Calculator
@@ -34,6 +34,11 @@ class Calculator implements CalculatorInterface
     private $packagesCalculator;
 
     /**
+     * @var RateRequestProvider
+     */
+    private $rateRequestProvider;
+
+    /**
      * Calculator constructor.
      *
      * @param CacheManager                $cacheManager
@@ -41,29 +46,50 @@ class Calculator implements CalculatorInterface
      */
     public function __construct(
         CacheManager $cacheManager,
-        Packages\PackagesCalculator $packagesCalculator
+        Packages\PackagesCalculator $packagesCalculator,
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->cacheManager = $cacheManager;
         $this->packagesCalculator = $packagesCalculator;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
      * @inheritdoc
      */
-    public function getQuote(RateRequest $request)
+    public function getQuote() : array
     {
-        if ($result = $this->cacheManager->load($request)) {
+        $result = $this->cacheManager->load();
+        if ($result) {
             return $result;
         }
 
-        /** @var RateRequest[] $packages */
-        $services = $this->packagesCalculator->calculate($request);
+        /** @var Service[] $services */
+        $services = $this->packagesCalculator->calculate();
+
+        foreach ($services as $service) {
+            $this->processService($service);
+        }
 
         if ($services) {
-            $this->cacheManager->save($services, $request);
+            $this->cacheManager->save($services);
             return $services;
         }
 
-        return false;
+        return [];
+    }
+
+    /**
+     * @param Service $service
+     *
+     * @return Service
+     */
+    private function processService(Service $service) : Service
+    {
+        $service->setData(
+            'service_description',
+            str_replace('|', "\n", $service->getServiceDescription())
+        );
+        return $service;
     }
 }

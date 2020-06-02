@@ -13,18 +13,17 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api;
+namespace Frenet\Shipping\Model;
 
-use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Shipping\Model\Packages\PackageItem;
 
 /**
- * Class CalculatorInterface
+ * Interface CalculatorInterface
  */
 interface CalculatorInterface
 {
     /**
-     * @param RateRequest $request
-     * @return array
+     * @return PackageItem[]
      */
-    public function getQuote(RateRequest $request);
+    public function getQuote() : array;
 }

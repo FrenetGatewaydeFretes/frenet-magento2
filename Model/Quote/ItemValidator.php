@@ -10,12 +10,12 @@
  *
  * Copyright (c) 2020.
  */
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
-use Frenet\Shipping\Api\QuoteItemValidatorInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Quote\Api\Data\CartItemInterface;
 
 /**
  * Class ItemValidator
@@ -23,11 +23,11 @@ use Frenet\Shipping\Api\QuoteItemValidatorInterface;
 class ItemValidator implements QuoteItemValidatorInterface
 {
     /**
-     * @param \Magento\Quote\Api\Data\CartItemInterface $item
+     * @param CartItemInterface $item
      *
      * @return bool
      */
-    public function validate(\Magento\Quote\Api\Data\CartItemInterface $item)
+    public function validate(CartItemInterface $item)
     {
         if ($this->getProduct($item)->isComposite()) {
             return false;
@@ -43,11 +43,11 @@ class ItemValidator implements QuoteItemValidatorInterface
     /**
      * @param \Magento\Quote\Model\Quote\Item $item
      *
-     * @return bool|\Magento\Catalog\Model\Product
+     * @return bool|Product
      */
-    private function getProduct(\Magento\Quote\Api\Data\CartItemInterface $item)
+    private function getProduct(CartItemInterface $item)
     {
-        /** @var \Magento\Catalog\Model\Product $product */
+        /** @var Product $product */
         $product = $item->getProduct();
         return $product;
     }

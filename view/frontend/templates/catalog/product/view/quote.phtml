@@ -1,0 +1,30 @@
+<?php
+/**
+ * Frenet Shipping Gateway
+ *
+ * @category Frenet
+ * @package Frenet\Shipping
+ *
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
+ */
+
+/** @var $block \Frenet\Shipping\Block\Catalog\Product\View\Quote */
+
+$product = $block->getProduct();
+?>
+<?php if ($product->isSaleable()) :?>
+    <script type="text/x-magento-init">
+    {
+        "*": {
+            "Magento_Ui/js/core/app": <?= $block->getJsLayout() ?>
+        }
+    }
+    </script>
+    <div class="box-frenet-quote" data-bind="scope: 'frenet-quote'">
+        <!-- ko template: getTemplate() --><!-- /ko -->
+    </div>
+<?php endif; ?>

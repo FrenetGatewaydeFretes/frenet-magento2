@@ -13,10 +13,10 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api\Data;
+namespace Frenet\Shipping\Model\Catalog\Product;
 
 /**
- * Class AttributesMappingInterface
+ * Interface AttributesMappingInterface
  */
 interface AttributesMappingInterface
 {

@@ -14,13 +14,14 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Api\QuoteItemValidatorInterface;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculator;
-use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class PackageItemDistributor
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageItemDistributor
 {
@@ -34,31 +35,35 @@ class PackageItemDistributor
      */
     private $itemQuantityCalculator;
 
+    /**
+     * @var RateRequestProvider
+     */
+    private $rateRequestProvider;
+
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculator $itemQuantityCalculator
+        ItemQuantityCalculator $itemQuantityCalculator,
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return array
      */
-    public function distribute(RateRequest $rateRequest) : array
+    public function distribute() : array
     {
-        return (array) $this->getUnitItems($rateRequest);
+        return $this->getUnitItems();
     }
 
     /**
-     * @param RateRequest $rateRequest
-     *
      * @return array
      */
-    private function getUnitItems(RateRequest $rateRequest) : array
+    private function getUnitItems() : array
     {
+        $rateRequest = $this->rateRequestProvider->getRateRequest();
         $unitItems = [];
 
         /** @var QuoteItem $item */

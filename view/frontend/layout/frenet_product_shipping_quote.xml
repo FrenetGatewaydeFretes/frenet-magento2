@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Frenet_Shipping/css/catalog/product/view/quote.css"/>
+    </head>
+    <body>
+        <block class="Frenet\Shipping\Block\Catalog\Product\View\Quote" name="product.info.frenet.shipping.quote" as="frenet.shipping.quote" template="Frenet_Shipping::catalog/product/view/quote.phtml" group="detailed_info">
+            <arguments>
+                <!--
+                <argument name="at_call" xsi:type="string">getDescription</argument>
+                -->
+                <argument name="at_code" xsi:type="string">frenet-quote</argument>
+                <argument name="css_class" xsi:type="string">description</argument>
+                <argument name="at_label" xsi:type="string">none</argument>
+                <argument name="title" translate="true" xsi:type="string">Shipping Quote</argument>
+                <argument name="sort_order" xsi:type="string">100</argument>
+
+                <argument name="view_model" xsi:type="object">Frenet\Shipping\ViewModel\Catalog\Product\View\Quote</argument>
+
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="frenet-quote" xsi:type="array">
+                            <item name="component" xsi:type="string">frenetProductViewQuote</item>
+                            <item name="config" xsi:type="array">
+                                <item name="api_url" xsi:type="string"/>
+                                <item name="blockTitle" xsi:type="string" translate="true">Shipping Quote</item>
+                                <item name="blockDescription" xsi:type="string" translate="true">Calculate the shipping quote for this product with Frenet.</item>
+                                <item name="fieldTitle" xsi:type="string" translate="true">Postcode</item>
+                                <item name="buttonTitle" xsi:type="string" translate="true">Get Quote</item>
+                                <item name="noResultsMessage" xsi:type="string" translate="true">Sorry. No quotes were found for this postcode.</item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </block>
+    </body>
+</page>

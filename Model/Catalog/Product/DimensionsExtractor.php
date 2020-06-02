@@ -15,7 +15,11 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
-use Frenet\Shipping\Api\Data\ProductExtractorInterface;
+use Frenet\Shipping\Model\Config;
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class DataExtractor
@@ -23,36 +27,36 @@ use Frenet\Shipping\Api\Data\ProductExtractorInterface;
 class DimensionsExtractor implements ProductExtractorInterface
 {
     /**
-     * @var \Magento\Catalog\Model\Product
+     * @var Product
      */
     private $product;
 
     /**
-     * @var \Magento\Quote\Api\Data\CartItemInterface
+     * @var QuoteItem
      */
     private $cartItem;
 
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
+     * @var ProductResource
      */
-    private $productResourceFactory;
+    private $productResource;
 
     /**
-     * @var \Frenet\Shipping\Api\Data\AttributesMappingInterface
+     * @var AttributesMappingInterface
      */
     private $attributesMapping;
 
     /**
-     * @var \Frenet\Shipping\Model\Config
+     * @var Config
      */
     private $config;
 
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
-        \Frenet\Shipping\Api\Data\AttributesMappingInterface $attributesMapping,
-        \Frenet\Shipping\Model\Config $config
+        ProductResource $productResource,
+        AttributesMappingInterface $attributesMapping,
+        Config $config
     ) {
-        $this->productResourceFactory = $productResourceFactory;
+        $this->productResource = $productResource;
         $this->attributesMapping = $attributesMapping;
         $this->config = $config;
     }
@@ -60,7 +64,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     /**
      * {@inheritdoc}
      */
-    public function setProduct(\Magento\Catalog\Api\Data\ProductInterface $product)
+    public function setProduct(Product $product) : ProductExtractorInterface
     {
         if ($this->validateProduct($product)) {
             $this->product = $product;
@@ -70,11 +74,11 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * @param \Magento\Quote\Api\Data\CartItemInterface $cartItem
+     * @param QuoteItem $cartItem
      *
      * @return $this
      */
-    public function setProductByCartItem(\Magento\Quote\Api\Data\CartItemInterface $cartItem)
+    public function setProductByCartItem(QuoteItem $cartItem)
     {
         $this->cartItem = $cartItem;
         $this->setProduct($this->cartItem->getProduct());
@@ -156,7 +160,7 @@ class DimensionsExtractor implements ProductExtractorInterface
             return $this->product->getData($key);
         }
 
-        $value = $this->productResourceFactory->create()->getAttributeRawValue(
+        $value = $this->productResource->getAttributeRawValue(
             $this->product->getId(),
             $key,
             $this->product->getStore()
@@ -166,11 +170,11 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param Product $product
      *
      * @return bool
      */
-    private function validateProduct(\Magento\Framework\DataObject $product)
+    private function validateProduct(Product $product)
     {
         if (!$product->getId()) {
             return false;

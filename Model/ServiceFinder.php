@@ -15,30 +15,33 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Sales\Api\ShipmentTrackRepositoryInterface;
+
 /**
  * Class ServiceFinder
  */
 class ServiceFinder implements ServiceFinderInterface
 {
     /**
-     * @var ApiService
+     * @var ApiServiceInterface
      */
     private $apiService;
 
     /**
-     * @var \Magento\Sales\Api\ShipmentTrackRepositoryInterface
+     * @var ShipmentTrackRepositoryInterface
      */
     private $trackRepository;
 
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
+     * @var SearchCriteriaBuilder
      */
     private $criteriaBuilder;
 
     public function __construct(
-        ApiService $apiService,
-        \Magento\Sales\Api\ShipmentTrackRepositoryInterface $trackRepository,
-        \Magento\Framework\Api\SearchCriteriaBuilder $criteriaBuilder
+        ApiServiceInterface $apiService,
+        ShipmentTrackRepositoryInterface $trackRepository,
+        SearchCriteriaBuilder $criteriaBuilder
     ) {
         $this->apiService = $apiService;
         $this->trackRepository = $trackRepository;
@@ -62,7 +65,8 @@ class ServiceFinder implements ServiceFinderInterface
 
         /** @var string $name */
         foreach ($names as $name) {
-            if ($service = $this->machServiceByName($services, $name)) {
+            $service = $this->machServiceByName($services, $name);
+            if ($service) {
                 return $service;
             }
         }

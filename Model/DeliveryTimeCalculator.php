@@ -15,11 +15,15 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Catalog\Model\Product;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 
 /**
  * Class DeliveryTimeCalculator
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class DeliveryTimeCalculator
 {
@@ -39,6 +43,11 @@ class DeliveryTimeCalculator
     private $storeManagement;
 
     /**
+     * @var RateRequestProvider
+     */
+    private $rateRequestProvider;
+
+    /**
      * DeliveryTimeCalculator constructor.
      *
      * @param \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory
@@ -48,25 +57,27 @@ class DeliveryTimeCalculator
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
-        \Frenet\Shipping\Model\Config $config
+        \Frenet\Shipping\Model\Config $config,
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->productResourceFactory = $productResourceFactory;
         $this->storeManagement = $storeManagement;
         $this->config = $config;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
-     * @param RateRequest      $rateRequest
      * @param ServiceInterface $service
      *
      * @return int
      */
-    public function calculate(RateRequest $rateRequest, ServiceInterface $service)
+    public function calculate(ServiceInterface $service)
     {
+        $rateRequest = $this->rateRequestProvider->getRateRequest();
         $serviceForecast = $service->getDeliveryTime();
         $maxProductForecast = 0;
 
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var QuoteItem $item */
         foreach ($rateRequest->getAllItems() as $item) {
             $leadTime = $this->extractProductLeadTime($item->getProduct());
 
@@ -81,11 +92,11 @@ class DeliveryTimeCalculator
     }
 
     /**
-     * @param \Magento\Catalog\Model\Product $product
+     * @param Product $product
      *
      * @return int
      */
-    private function extractProductLeadTime(\Magento\Catalog\Model\Product $product)
+    private function extractProductLeadTime(Product $product)
     {
         $leadTime = max($product->getData('lead_time'), 0);
 

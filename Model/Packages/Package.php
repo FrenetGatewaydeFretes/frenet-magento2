@@ -15,8 +15,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Quote\Model\Quote\Item;
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class Package
@@ -34,7 +34,7 @@ class Package
     private $packageLimit;
 
     /**
-     * @var \Frenet\Shipping\Api\Data\DimensionsExtractorInterface
+     * @var DimensionsExtractorInterface
      */
     private $dimensionsExtractor;
 
@@ -44,7 +44,7 @@ class Package
     private $packageItemFactory;
 
     public function __construct(
-        \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
+        DimensionsExtractorInterface $dimensionsExtractor,
         PackageItemFactory $packageItemFactory,
         PackageLimit $packageLimit
     ) {
@@ -54,12 +54,12 @@ class Package
     }
 
     /**
-     * @param Item $item
-     * @param int  $qty
+     * @param QuoteItem $item
+     * @param int       $qty
      *
      * @return bool
      */
-    public function addItem(Item $item, $qty = 1)
+    public function addItem(QuoteItem $item, $qty = 1)
     {
         if (!$this->canAddItem($item, $qty)) {
             return false;
@@ -96,12 +96,12 @@ class Package
     }
 
     /**
-     * @param Item $item
-     * @param int  $qty
+     * @param QuoteItem $item
+     * @param int       $qty
      *
      * @return bool
      */
-    public function canAddItem(Item $item, $qty = 1)
+    public function canAddItem(QuoteItem $item, $qty = 1)
     {
         $this->dimensionsExtractor->setProductByCartItem($item);
 
@@ -146,21 +146,21 @@ class Package
     }
 
     /**
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return bool
      */
-    private function itemExists(Item $item)
+    private function itemExists(QuoteItem $item)
     {
         return isset($this->items[$item->getId()]);
     }
 
     /**
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    private function getItemQty(Item $item)
+    private function getItemQty(QuoteItem $item)
     {
         if ($this->itemExists($item)) {
             return (float) $this->getItemById($item->getId())->getQty();

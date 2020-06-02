@@ -13,7 +13,7 @@
 
 declare(strict_types = 1);
 
-namespace Frenet\Shipping\Api;
+namespace Frenet\Shipping\Model;
 
 /**
  * Class WeightConverterInterface

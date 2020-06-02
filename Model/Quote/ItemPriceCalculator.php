@@ -10,7 +10,6 @@
  *
  * Copyright (c) 2020.
  */
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
@@ -20,13 +19,14 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class ItemPriceCalculator
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class ItemPriceCalculator
 {
     /**
      * @var ItemQuantityCalculatorInterface
      */
-    private $itemQuantityCalculator;
+    private $itemQtyCalculator;
 
     /**
      * @var PriceCalculatorFactory
@@ -34,10 +34,10 @@ class ItemPriceCalculator
     private $priceCalculatorFactory;
 
     public function __construct(
-        ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        ItemQuantityCalculatorInterface $itemQtyCalculator,
         PriceCalculatorFactory $priceCalculatorFactory
     ) {
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->itemQtyCalculator = $itemQtyCalculator;
         $this->priceCalculatorFactory = $priceCalculatorFactory;
     }
 

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway
+
+  @category Frenet
+  @package Frenet\Shipping
+
+  @author Tiago Sampaio <tiago@tiagosampaio.com>
+  @link https://github.com/tiagosampaio
+  @link https://tiagosampaio.com
+
+  Copyright (c) 2020.
+  -->
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="frenet_product_shipping_quote"/>
+    <body>
+        <move element="product.info.frenet.shipping.quote" destination="product.info.main" />
+        <!--
+        <move element="product.info.frenet.shipping.quote" destination="product.info.details" />
+        -->
+    </body>
+</page>

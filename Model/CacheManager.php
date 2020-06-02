@@ -15,22 +15,33 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Framework\Data\Serializer;
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
+use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
+use Frenet\Shipping\Model\Quote\CouponProcessor;
+use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
+use Frenet\Shipping\Service\RateRequestProvider;
+use Magento\Framework\App\Cache\StateInterface;
+use Magento\Framework\App\CacheInterface;
+use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class CacheManager
+ * @SuppressWarnings(PHPMD.LongVariable)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class CacheManager
 {
     /**
-     * @var \Magento\Framework\App\Cache\StateInterface
+     * @var StateInterface
      */
     private $cacheState;
 
     /**
-     * @var \Magento\Framework\App\CacheInterface
+     * @var CacheInterface
      */
     private $cache;
 
@@ -45,17 +56,17 @@ class CacheManager
     private $config;
 
     /**
-     * @var \Frenet\Shipping\Api\QuoteItemValidatorInterface
+     * @var QuoteItemValidatorInterface
      */
     private $quoteItemValidator;
 
     /**
-     * @var \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface
+     * @var ItemQuantityCalculatorInterface
      */
     private $itemQuantityCalculator;
 
     /**
-     * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
+     * @var PostcodeNormalizer
      */
     private $postcodeNormalizer;
 
@@ -64,15 +75,21 @@ class CacheManager
      */
     private $couponProcessor;
 
+    /**
+     * @var RateRequestProvider
+     */
+    private $rateRequestProvider;
+
     public function __construct(
-        \Magento\Framework\Serialize\SerializerInterface $serializer,
-        \Magento\Framework\App\Cache\StateInterface $cacheState,
-        \Magento\Framework\App\CacheInterface $cache,
-        \Frenet\Shipping\Api\QuoteItemValidatorInterface $quoteItemValidator,
-        \Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface $itemQuantityCalculator,
-        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
-        \Frenet\Shipping\Model\Quote\CouponProcessor $couponProcessor,
-        Config $config
+        SerializerInterface $serializer,
+        StateInterface $cacheState,
+        CacheInterface $cache,
+        QuoteItemValidatorInterface $quoteItemValidator,
+        ItemQuantityCalculatorInterface $itemQuantityCalculator,
+        PostcodeNormalizer $postcodeNormalizer,
+        CouponProcessor $couponProcessor,
+        Config $config,
+        RateRequestProvider $rateRequestProvider
     ) {
         $this->serializer = $serializer;
         $this->cacheState = $cacheState;
@@ -82,20 +99,19 @@ class CacheManager
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->couponProcessor = $couponProcessor;
         $this->postcodeNormalizer = $postcodeNormalizer;
+        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
-     * @param RateRequest $request
-     *
-     * @return bool
+     * @return array|bool|string
      */
-    public function load(RateRequest $request)
+    public function load()
     {
         if (!$this->isCacheEnabled()) {
             return false;
         }
 
-        $data = $this->cache->load($this->generateCacheKey($request));
+        $data = $this->cache->load($this->generateCacheKey());
 
         if ($data) {
             $data = $this->prepareAfterLoading($data);
@@ -105,22 +121,26 @@ class CacheManager
     }
 
     /**
-     * @param array       $services
-     * @param RateRequest $request
+     * @param array $services
      *
      * @return bool
      */
-    public function save(array $services, RateRequest $request)
+    public function save(array $services)
     {
         if (!$this->isCacheEnabled()) {
             return false;
         }
 
-        $identifier = $this->generateCacheKey($request);
+        $identifier = $this->generateCacheKey();
         $lifetime = null;
         $tags = [FrenetCacheType::CACHE_TAG];
 
-        return $this->cache->save($this->prepareBeforeSaving($services), $identifier, $tags, $lifetime);
+        return $this->cache->save(
+            $this->prepareBeforeSaving($services),
+            $identifier,
+            $tags,
+            $lifetime
+        );
     }
 
     /**
@@ -128,14 +148,14 @@ class CacheManager
      *
      * @return array
      */
-    private function prepareAfterLoading($data)
+    private function prepareAfterLoading($data) : array
     {
         $newData  = [];
         $services = $this->serializer->unserialize($data);
 
         /** @var array $service */
         foreach ($services as $service) {
-            $newData[] = ($this->createServiceInstance())->setData($service);
+            $newData[] = $this->createServiceInstance()->setData($service);
         }
 
         return $newData;
@@ -161,13 +181,15 @@ class CacheManager
     /**
      * @return string
      */
-    private function generateCacheKey(RateRequest $request)
+    private function generateCacheKey()
     {
+        $request = $this->rateRequestProvider->getRateRequest();
+
         $destPostcode = $request->getDestPostcode();
         $origPostcode = $this->config->getOriginPostcode();
         $items = [];
 
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var QuoteItem $item */
         foreach ($request->getAllItems() as $item) {
             if (!$this->quoteItemValidator->validate($item)) {
                 continue;
@@ -206,12 +228,12 @@ class CacheManager
     }
 
     /**
-     * @return \Frenet\ObjectType\Entity\Shipping\Quote\Service
+     * @return Service
      */
     private function createServiceInstance()
     {
-        return new \Frenet\ObjectType\Entity\Shipping\Quote\Service(
-            new \Frenet\Framework\Data\Serializer()
+        return new Service(
+            new Serializer()
         );
     }
 }

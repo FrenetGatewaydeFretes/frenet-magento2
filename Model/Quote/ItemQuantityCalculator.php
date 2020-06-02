@@ -15,7 +15,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
-use Magento\Quote\Model\Quote\Item;
+use Frenet\Shipping\Model\Catalog\ProductType;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class ItemQuantityCalculator
@@ -23,34 +24,34 @@ use Magento\Quote\Model\Quote\Item;
 class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
 {
     /**
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    public function calculate(Item $item)
+    public function calculate(QuoteItem $item)
     {
         $type = $item->getProductType();
 
-        if ($item->getParentItemId()) {
+        if ($item->getParentItem()) {
             $type = $item->getParentItem()->getProductType();
         }
 
         switch ($type) {
-            case \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE:
+            case ProductType::TYPE_BUNDLE:
                 $qty = $this->calculateBundleProduct($item);
                 break;
 
-            case \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE:
+            case ProductType::TYPE_GROUPED:
                 $qty = $this->calculateGroupedProduct($item);
                 break;
 
-            case \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE:
+            case ProductType::TYPE_CONFIGURABLE:
                 $qty = $this->calculateConfigurableProduct($item);
                 break;
 
-            case \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL:
-            case \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE:
-            case \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE:
+            case ProductType::TYPE_VIRTUAL:
+            case ProductType::TYPE_DOWNLOADABLE:
+            case ProductType::TYPE_SIMPLE:
             default:
                 $qty = $this->calculateSimpleProduct($item);
         }
@@ -59,32 +60,32 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     }
 
     /**
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    private function calculateSimpleProduct(Item $item)
+    private function calculateSimpleProduct(QuoteItem $item)
     {
         return (float) $item->getQty();
     }
 
     /**
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    private function calculateBundleProduct(Item $item)
+    private function calculateBundleProduct(QuoteItem $item)
     {
         $bundleQty = (float) $item->getParentItem()->getQty();
         return (float) $item->getQty() * $bundleQty;
     }
 
     /**
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    private function calculateGroupedProduct(Item $item)
+    private function calculateGroupedProduct(QuoteItem $item)
     {
         return (float) $item->getQty();
     }
@@ -92,11 +93,11 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     /**
      * The right quantity for configurable products are on the parent item.
      *
-     * @param Item $item
+     * @param QuoteItem $item
      *
      * @return float
      */
-    private function calculateConfigurableProduct(Item $item)
+    private function calculateConfigurableProduct(QuoteItem $item)
     {
         return (float) $item->getParentItem()->getQty();
     }

@@ -15,15 +15,26 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Api\Data\AttributesMappingInterface;
+use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
+use Frenet\Shipping\Model\Catalog\Product\CategoryExtractor;
+use Frenet\Shipping\Model\Quote\ItemPriceCalculator;
+use Frenet\Shipping\Model\WeightConverterInterface;
+use Magento\Catalog\Model\ResourceModel\ProductFactory;
+use Magento\Quote\Api\Data\CartItemInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class PackageItem
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageItem
 {
     /**
-     * @var \Magento\Quote\Api\Data\CartItemInterface
+     * @var QuoteItem
      */
     private $cartItem;
 
@@ -33,59 +44,54 @@ class PackageItem
     private $qty;
 
     /**
-     * @var bool
-     */
-    private $isInitialized = false;
-
-    /**
-     * @var \Magento\Quote\Api\Data\CartItemInterface
+     * @var StoreManagerInterface
      */
     private $storeManagement;
 
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
+     * @var ProductFactory
      */
     private $productResourceFactory;
 
     /**
-     * @var \Frenet\Shipping\Api\WeightConverterInterface
+     * @var WeightConverterInterface
      */
     private $weightConverter;
 
     /**
-     * @var \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor
+     * @var CategoryExtractor
      */
     private $categoryExtractor;
 
     /**
-     * @var \Frenet\Shipping\Api\Data\DimensionsExtractorInterface
+     * @var DimensionsExtractorInterface
      */
     private $dimensionsExtractor;
 
     /**
-     * @var Frenet\Shipping\Model\Quote\ItemPriceCalculator
+     * @var ItemPriceCalculator
      */
     private $itemPriceCalculator;
 
     /**
      * PackageItem constructor.
      *
-     * @param \Magento\Quote\Api\Data\CartItemInterface                $cartItem
-     * @param \Magento\Store\Model\StoreManagerInterface               $storeManagement
-     * @param \Magento\Catalog\Model\ResourceModel\ProductFactory      $productResourceFactory
-     * @param \Frenet\Shipping\Api\WeightConverterInterface            $weightConverter
-     * @param \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor $categoryExtractor
-     * @param \Frenet\Shipping\Api\Data\DimensionsExtractorInterface   $dimensionsExtractor
-     * @param \Frenet\Shipping\Model\Quote\ItemPriceCalculator          $itemPriceCalculator
+     * @param CartItemInterface            $cartItem
+     * @param StoreManagerInterface        $storeManagement
+     * @param ProductFactory               $productResourceFactory
+     * @param WeightConverterInterface     $weightConverter
+     * @param CategoryExtractor            $categoryExtractor
+     * @param DimensionsExtractorInterface $dimensionsExtractor
+     * @param ItemPriceCalculator          $itemPriceCalculator
      */
     public function __construct(
-        \Magento\Quote\Api\Data\CartItemInterface $cartItem,
-        \Magento\Store\Model\StoreManagerInterface $storeManagement,
-        \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
-        \Frenet\Shipping\Api\WeightConverterInterface $weightConverter,
-        \Frenet\Shipping\Model\Catalog\Product\CategoryExtractor $categoryExtractor,
-        \Frenet\Shipping\Api\Data\DimensionsExtractorInterface $dimensionsExtractor,
-        \Frenet\Shipping\Model\Quote\ItemPriceCalculator $itemPriceCalculator
+        CartItemInterface $cartItem,
+        StoreManagerInterface $storeManagement,
+        ProductFactory $productResourceFactory,
+        WeightConverterInterface $weightConverter,
+        CategoryExtractor $categoryExtractor,
+        DimensionsExtractorInterface $dimensionsExtractor,
+        ItemPriceCalculator $itemPriceCalculator
     ) {
         $this->cartItem = $cartItem;
         $this->storeManagement = $storeManagement;
@@ -97,7 +103,7 @@ class PackageItem
     }
 
     /**
-     * @return \Magento\Quote\Api\Data\CartItemInterface
+     * @return QuoteItem
      */
     public function getCartItem()
     {
@@ -105,11 +111,11 @@ class PackageItem
     }
 
     /**
-     * @param \Magento\Quote\Api\Data\CartItemInterface $item
+     * @param QuoteItem $item
      *
      * @return $this
      */
-    public function setCartItem(\Magento\Quote\Api\Data\CartItemInterface $item)
+    public function setCartItem(QuoteItem $item)
     {
         $this->cartItem = $item;
         return $this;
@@ -159,16 +165,17 @@ class PackageItem
      *
      * @return $this
      */
-    public function setQty(float $qty)
+    public function setQty($qty)
     {
-        $this->qty = $qty;
+        $this->qty = (float) $qty;
         return $this;
     }
 
     /**
      * @param bool $useParentItemIfAvailable
      *
-     * @return bool|\Magento\Catalog\Model\Product
+     * @return bool|Product
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function getProduct($useParentItemIfAvailable = false)
     {
@@ -178,7 +185,7 @@ class PackageItem
             return $this->getProduct($this->cartItem->getParentItem());
         }
 
-        /** @var \Magento\Catalog\Model\Product $product */
+        /** @var Product $product */
         return $this->cartItem->getProduct();
     }
 
@@ -249,7 +256,7 @@ class PackageItem
      */
     public function isProductFragile()
     {
-        /** @var \Magento\Catalog\Model\Product $product */
+        /** @var Product $product */
         $product = $this->getProduct();
 
         if ($product->hasData(AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE)) {
@@ -257,7 +264,7 @@ class PackageItem
         }
 
         try {
-            /** @var \Magento\Catalog\Model\ResourceModel\Product $resource */
+            /** @var ProductResource $resource */
             $resource = $this->productResourceFactory->create();
             $value = (bool) $resource->getAttributeRawValue(
                 $product->getId(),

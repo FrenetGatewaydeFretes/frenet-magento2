@@ -163,7 +163,7 @@ class Config
     /**
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
-     * @return bool
+     * @return string
      */
     public function getShippingForecastMessage($store = null)
     {
@@ -198,6 +198,41 @@ class Config
     public function getDebugFilename($store = null)
     {
         return (string) $this->getCarrierConfig('debug_filename', $store);
+    }
+
+    /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
+     * @return bool
+     */
+    public function isProductQuoteEnabled($store = null)
+    {
+        return (bool) $this->getCarrierConfig('product_quote/enabled', $store);
+    }
+
+    /**
+     * @param string $productTypeId
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
+     * @return bool
+     */
+    public function isProductQuoteAllowed(string $productTypeId, $store = null) : bool
+    {
+        $allowedTypes = $this->getProductQuoteProductTypes($store);
+        return in_array($productTypeId, $allowedTypes);
+    }
+
+    /**
+     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     *
+     * @return array
+     */
+    public function getProductQuoteProductTypes($store = null) : array
+    {
+        return explode(
+            ',',
+            $this->getCarrierConfig('product_quote/product_types', $store)
+        );
     }
 
     /**

@@ -15,6 +15,8 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup;
 
+use Frenet\Shipping\Model\Catalog\ProductType;
+
 /**
  * Class EavAttributeInstaller
  */
@@ -81,7 +83,7 @@ abstract class EavAttributeInstaller
             'default'      => null,
             'note'         => null,
             'input'        => 'text',
-            'apply_to'     => implode(',', $this->getProductTypes()),
+            'apply_to'     => implode(',', ProductType::PRODUCT_TYPES),
             'type'         => 'text',
             'group'        => $this->getAttributeGroup(),
             'backend'      => null,
@@ -101,19 +103,5 @@ abstract class EavAttributeInstaller
     private function getAttributeGroup()
     {
         return __('Shipping Quote');
-    }
-
-    /**
-     * @return array
-     */
-    private function getProductTypes()
-    {
-        return [
-            \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE,
-            \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL,
-            \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE,
-            \Magento\Catalog\Model\Product\Type::TYPE_BUNDLE,
-            \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE,
-        ];
     }
 }

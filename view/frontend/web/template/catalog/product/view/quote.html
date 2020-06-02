@@ -1,0 +1,78 @@
+<!--
+  Frenet Shipping Gateway
+
+  @category Frenet
+  @package Frenet\Shipping
+
+  @author Tiago Sampaio <tiago@tiagosampaio.com>
+  @link https://github.com/tiagosampaio
+  @link https://tiagosampaio.com
+
+  Copyright (c) 2020.
+  -->
+
+<div class="fieldset">
+    <h2 data-bind="text: blockTitle"></h2>
+    <p data-bind="text: blockDescription"></p>
+    <div class="field">
+        <label class="label" for="frenet-postcode-field">
+            <span data-bind="text: fieldTitle"></span>
+        </label>
+        <div class="control">
+            <input type="text"
+                   name="postcode"
+                   id="frenet-postcode-field"
+                   min="0"
+                   value=""
+                   maxlength="9"
+                   class="input-text postcode"
+                   data-validate="required: true"
+                   data-bind="value: postcode, event: {change: activate}, attr: {title: fieldTitle}"
+            />
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button"
+                id="frenet-postcode-button"
+                data-bind="click: updateRates, attr: {title: buttonTitle, disabled: !enabled()}"
+                class="action primary">
+            <span data-bind="text: buttonTitle"></span>
+        </button>
+    </div>
+    <div class="table-wrapper">
+        <div data-bind="visible: error">
+            <span class="text-red" data-bind="text: errorMessage"></span>
+        </div>
+        <div data-bind="visible: displayNoResults">
+            <span data-bind="text: noResultsMessage"></span>
+        </div>
+        <table data-bind="visible: visible" class="data table">
+            <col width="60%">
+            <col width="10%">
+            <col width="10%">
+            <thead>
+                <tr>
+                    <th data-bind="i18n: 'Description'"></th>
+                    <th data-bind="i18n: 'Time'"></th>
+                    <th data-bind="i18n: 'Price'"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ko foreach: rates -->
+                <tr>
+                    <td data-bind="text: service_description"></td>
+                    <td data-bind="text: delivery_time"></td>
+                    <td data-bind="text: shipping_price"></td>
+                </tr>
+                <tr data-bind="visible: message" class="footer">
+                    <td colspan="4">
+                        <small class="note" data-bind="text: message"></small>
+                    </td>
+                </tr>
+                <!-- /ko -->
+            </tbody>
+        </table>
+    </div>
+    <div id="frenet-loader" data-mage-init='{"loader": {}}'>
+    </div>
+</div>
