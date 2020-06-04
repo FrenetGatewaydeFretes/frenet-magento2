@@ -69,15 +69,13 @@ class PackageManager
      * @param PackageFactory                  $packageFactory
      * @param PackageLimit                    $packageLimit
      * @param PackageItemDistributor          $packageItemDistributor
-     * @param RateRequestProvider              $rateRequestProvider
      */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         ItemQuantityCalculatorInterface $itemQuantityCalculator,
         PackageFactory $packageFactory,
         PackageLimit $packageLimit,
-        PackageItemDistributor $packageItemDistributor,
-        RateRequestProvider $rateRequestProvider
+        PackageItemDistributor $packageItemDistributor
     ) {
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;

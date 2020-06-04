@@ -7,20 +7,10 @@
             "url": "https://repo.magento.com/"
         }
     ],
+    "version": "2.2.0",
     "require": {
         "php": ">=7.0.0",
-        "frenet/frenet-php": "^1.1.0",
-        "magento/framework": "*",
-        "magento/module-catalog": "*",
-        "magento/module-bundle": "*",
-        "magento/module-configurable-product": "*",
-        "magento/module-grouped-product": "*",
-        "magento/module-downloadable": "*",
-        "magento/module-quote": "*",
-        "magento/module-shipping": "*",
-        "magento/module-directory": "*",
-        "magento/module-checkout": "*",
-        "magento/module-sales": "*"
+        "frenet/frenet-php": "^1.1.0"
     },
     "require-dev": {
         "magento/magento-coding-standard": "~4.0.0",
