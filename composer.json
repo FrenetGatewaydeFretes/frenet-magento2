@@ -7,7 +7,7 @@
             "url": "https://repo.magento.com/"
         }
     ],
-    "version": "2.2.0",
+    "version": "2.1.6",
     "require": {
         "php": ">=7.0.0",
         "frenet/frenet-php": "^1.1.0"

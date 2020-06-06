@@ -16,7 +16,6 @@ namespace Frenet\Shipping\Controller\Product;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\ResultFactory;
 
 /**
@@ -24,7 +23,7 @@ use Magento\Framework\Controller\ResultFactory;
  *
  * @package Frenet\Shipping\Controller\Catalog\Product
  */
-class Quote extends Action implements HttpPostActionInterface
+class Quote extends Action
 {
     /**
      * @var \Frenet\Shipping\Api\QuoteProductInterface
