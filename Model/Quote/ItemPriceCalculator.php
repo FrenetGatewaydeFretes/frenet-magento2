@@ -15,7 +15,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Shipping\Model\Quote\Calculators\PriceCalculatorFactory;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class ItemPriceCalculator

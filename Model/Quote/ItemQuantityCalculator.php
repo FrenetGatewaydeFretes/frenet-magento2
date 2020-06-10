@@ -16,7 +16,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Shipping\Model\Catalog\ProductType;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class ItemQuantityCalculator

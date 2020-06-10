@@ -4,21 +4,19 @@
  *
  * @category Frenet
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
-
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Service\RateRequestProvider;
-use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Catalog\Model\Product;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 
 /**
@@ -33,9 +31,9 @@ class DeliveryTimeCalculator
     private $config;
 
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\ProductFactory
+     * @var \Magento\Catalog\Model\ResourceModel\Product
      */
-    private $productResourceFactory;
+    private $productResource;
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -50,17 +48,18 @@ class DeliveryTimeCalculator
     /**
      * DeliveryTimeCalculator constructor.
      *
-     * @param \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory
-     * @param \Magento\Store\Model\StoreManagerInterface          $storeManagement
-     * @param Config                                              $config
+     * @param \Magento\Catalog\Model\ResourceModel\Product $productResource
+     * @param \Magento\Store\Model\StoreManagerInterface   $storeManagement
+     * @param Config                                       $config
+     * @param RateRequestProvider                          $rateRequestProvider
      */
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\ProductFactory $productResourceFactory,
+        \Magento\Catalog\Model\ResourceModel\Product $productResource,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Frenet\Shipping\Model\Config $config,
         RateRequestProvider $rateRequestProvider
     ) {
-        $this->productResourceFactory = $productResourceFactory;
+        $this->productResource = $productResource;
         $this->storeManagement = $storeManagement;
         $this->config = $config;
         $this->rateRequestProvider = $rateRequestProvider;
@@ -101,9 +100,11 @@ class DeliveryTimeCalculator
         $leadTime = max($product->getData('lead_time'), 0);
 
         if (!$leadTime) {
-            $leadTime = $this->productResourceFactory
-                ->create()
-                ->getAttributeRawValue($product->getId(), 'lead_time', $this->storeManagement->getStore());
+            $leadTime = $this->productResource->getAttributeRawValue(
+                $product->getId(),
+                'lead_time',
+                $this->storeManagement->getStore()
+            );
         }
 
         return (int) $leadTime;

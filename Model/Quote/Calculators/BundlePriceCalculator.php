@@ -16,7 +16,7 @@ namespace Frenet\Shipping\Model\Quote\Calculators;
 
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Magento\Bundle\Model\Product\Price;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class DefaultPriceCalculator

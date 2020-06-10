@@ -15,7 +15,7 @@
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Quote\Api\Data\CartItemInterface;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 class QuoteItemConvertor
 {
@@ -34,9 +34,9 @@ class QuoteItemConvertor
      * @param ProductInterface $product
      * @param int              $qty
      *
-     * @return CartItemInterface
+     * @return QuoteItem
      */
-    public function convert(ProductInterface $product, int $qty = 1) : CartItemInterface
+    public function convert(ProductInterface $product, int $qty = 1) : QuoteItem
     {
         return $this->createCartItem($product, $qty);
     }
@@ -45,9 +45,9 @@ class QuoteItemConvertor
      * @param ProductInterface $product
      * @param int              $qty
      *
-     * @return CartItemInterface
+     * @return QuoteItem
      */
-    private function createCartItem(ProductInterface $product, int $qty) : CartItemInterface
+    private function createCartItem(ProductInterface $product, int $qty) : QuoteItem
     {
         $item = $this->itemFactory->create();
 

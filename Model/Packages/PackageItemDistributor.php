@@ -17,7 +17,7 @@ namespace Frenet\Shipping\Model\Packages;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculator;
 use Frenet\Shipping\Service\RateRequestProvider;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class PackageItemDistributor

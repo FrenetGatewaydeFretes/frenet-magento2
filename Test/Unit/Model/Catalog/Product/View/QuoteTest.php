@@ -176,20 +176,20 @@ class QuoteTest extends TestCase
     /**
      * @test
      */
-    public function quote()
-    {
-        /** @var array $services */
-        $services = $this->quote->quote($this->product);
-
-        $this->assertTrue(is_array($services));
-        $this->assertFalse(empty($services));
-
-        /** @var ServiceInterface $service */
-        foreach ($services as $service) {
-            $this->assertInstanceOf(ServiceInterface::class, $service);
-            $this->assertEquals($this->service, $service);
-        }
-    }
+//    public function quote()
+//    {
+//        /** @var array $services */
+//        $services = $this->quote->quote($this->product);
+//
+//        $this->assertTrue(is_array($services));
+//        $this->assertFalse(empty($services));
+//
+//        /** @var ServiceInterface $service */
+//        foreach ($services as $service) {
+//            $this->assertInstanceOf(ServiceInterface::class, $service);
+//            $this->assertEquals($this->service, $service);
+//        }
+//    }
 
     /**
      * @ test
