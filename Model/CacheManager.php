@@ -19,11 +19,6 @@ use Frenet\Framework\Data\Serializer;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
-use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
-use Frenet\Shipping\Model\Quote\CouponProcessor;
-use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
@@ -51,36 +46,6 @@ class CacheManager
     private $serializer;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var QuoteItemValidatorInterface
-     */
-    private $quoteItemValidator;
-
-    /**
-     * @var ItemQuantityCalculatorInterface
-     */
-    private $itemQuantityCalculator;
-
-    /**
-     * @var PostcodeNormalizer
-     */
-    private $postcodeNormalizer;
-
-    /**
-     * @var Quote\CouponProcessor
-     */
-    private $couponProcessor;
-
-    /**
-     * @var RateRequestProvider
-     */
-    private $rateRequestProvider;
-
-    /**
      * @var CacheKeyGeneratorInterface
      */
     private $cacheKeyGenerator;
@@ -89,23 +54,11 @@ class CacheManager
         SerializerInterface $serializer,
         StateInterface $cacheState,
         CacheInterface $cache,
-        QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculatorInterface $itemQuantityCalculator,
-        PostcodeNormalizer $postcodeNormalizer,
-        CouponProcessor $couponProcessor,
-        Config $config,
-        RateRequestProvider $rateRequestProvider,
         CacheKeyGeneratorInterface $cacheKeyGenerator
     ) {
         $this->serializer = $serializer;
         $this->cacheState = $cacheState;
         $this->cache = $cache;
-        $this->config = $config;
-        $this->quoteItemValidator = $quoteItemValidator;
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
-        $this->couponProcessor = $couponProcessor;
-        $this->postcodeNormalizer = $postcodeNormalizer;
-        $this->rateRequestProvider = $rateRequestProvider;
         $this->cacheKeyGenerator = $cacheKeyGenerator;
     }
 
