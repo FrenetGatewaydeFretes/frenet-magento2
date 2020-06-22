@@ -36,6 +36,6 @@ class MultiQuoteGenerator implements CacheKeyGeneratorInterface
      */
     public function generate()
     {
-        return $this->config->isMultiQuoteEnabled() ? 'multi' : '';
+        return $this->config->isMultiQuoteEnabled() ? 'multi' : 'single';
     }
 }

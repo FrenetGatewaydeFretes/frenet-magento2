@@ -27,7 +27,6 @@ use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class CacheManager
@@ -139,7 +138,6 @@ class CacheManager
             return false;
         }
 
-//        $identifier = $this->generateCacheKey();
         $identifier = $this->cacheKeyGenerator->generate();
         $lifetime = null;
         $tags = [FrenetCacheType::CACHE_TAG];
@@ -185,47 +183,6 @@ class CacheManager
         }
 
         return $this->serializer->serialize($newData);
-    }
-
-    /**
-     * @return string
-     */
-    private function generateCacheKey()
-    {
-        $request = $this->rateRequestProvider->getRateRequest();
-
-        $destPostcode = $request->getDestPostcode();
-        $origPostcode = $this->config->getOriginPostcode();
-        $items = [];
-
-        /** @var QuoteItem $item */
-        foreach ($request->getAllItems() as $item) {
-            if (!$this->quoteItemValidator->validate($item)) {
-                continue;
-            }
-
-            $productId = (int) $item->getProductId();
-
-            if ($item->getParentItem()) {
-                $productId = $item->getParentItem()->getProductId() . '-' . $productId;
-            }
-
-            $qty = (float) $this->itemQuantityCalculator->calculate($item);
-
-            $items[$productId] = $qty;
-        }
-
-        ksort($items);
-
-        $cacheKey = $this->serializer->serialize([
-            $this->postcodeNormalizer->format($origPostcode),
-            $this->postcodeNormalizer->format($destPostcode),
-            $items,
-            $this->couponProcessor->getCouponCode(),
-            $this->config->isMultiQuoteEnabled() ? 'multi' : null
-        ]);
-
-        return $cacheKey;
     }
 
     /**

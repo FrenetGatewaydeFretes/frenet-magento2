@@ -60,14 +60,7 @@ class TotalsCollector
      */
     public function calculateQuoteDiscounts(Quote $quote = null) : float
     {
-        $totalDiscount = 0.0000;
-        $quote = $this->getQuote($quote);
-
-        foreach ($this->getDiscounts() as $discount) {
-            $totalDiscount += (float) $quote->getData($discount);
-        }
-
-        return $totalDiscount;
+        return $this->iterateCollectors($this->getDiscounts(), $quote);
     }
 
     /**
@@ -77,14 +70,26 @@ class TotalsCollector
      */
     public function calculateQuoteAdditions(Quote $quote = null) : float
     {
-        $totalAddition = 0.0000;
+        return $this->iterateCollectors($this->getAdditions(), $quote);
+    }
+
+    /**
+     * @param array      $collectors
+     * @param Quote|null $quote
+     *
+     * @return float
+     */
+    private function iterateCollectors(array $collectors = [], Quote $quote = null) : float
+    {
+        $total = 0.0000;
         $quote = $this->getQuote($quote);
 
-        foreach ($this->getAdditions() as $addition) {
-            $totalAddition += (float) $quote->getData($addition);
+        /** @var Totals\CollectorInterface $collector */
+        foreach ($collectors as $collector) {
+            $total += (float) $collector->collect($quote);
         }
 
-        return $totalAddition;
+        return $total;
     }
 
     /**
