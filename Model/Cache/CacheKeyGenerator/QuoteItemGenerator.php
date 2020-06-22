@@ -42,18 +42,18 @@ class QuoteItemGenerator implements CacheKeyGeneratorInterface
     /**
      * @var ItemQuantityCalculatorInterface
      */
-    private $itemQuantityCalculator;
+    private $itemQtyCalculator;
 
     public function __construct(
         SerializerInterface $serializer,
         RateRequestProvider $requestProvider,
         QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculatorInterface $itemQuantityCalculator
+        ItemQuantityCalculatorInterface $itemQtyCalculator
     ) {
         $this->serializer = $serializer;
         $this->requestProvider = $requestProvider;
         $this->quoteItemValidator = $quoteItemValidator;
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->itemQtyCalculator = $itemQtyCalculator;
     }
 
     /**
@@ -75,7 +75,7 @@ class QuoteItemGenerator implements CacheKeyGeneratorInterface
                 $productId = $item->getParentItem()->getProductId() . '-' . $productId;
             }
 
-            $qty = (float) $this->itemQuantityCalculator->calculate($item);
+            $qty = (float) $this->itemQtyCalculator->calculate($item);
 
             $items[$productId] = $qty;
         }
