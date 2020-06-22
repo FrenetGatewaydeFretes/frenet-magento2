@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\Framework\Data\Serializer;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
+use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
 use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
@@ -80,6 +81,11 @@ class CacheManager
      */
     private $rateRequestProvider;
 
+    /**
+     * @var CacheKeyGeneratorInterface
+     */
+    private $cacheKeyGenerator;
+
     public function __construct(
         SerializerInterface $serializer,
         StateInterface $cacheState,
@@ -89,7 +95,8 @@ class CacheManager
         PostcodeNormalizer $postcodeNormalizer,
         CouponProcessor $couponProcessor,
         Config $config,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProvider $rateRequestProvider,
+        CacheKeyGeneratorInterface $cacheKeyGenerator
     ) {
         $this->serializer = $serializer;
         $this->cacheState = $cacheState;
@@ -100,6 +107,7 @@ class CacheManager
         $this->couponProcessor = $couponProcessor;
         $this->postcodeNormalizer = $postcodeNormalizer;
         $this->rateRequestProvider = $rateRequestProvider;
+        $this->cacheKeyGenerator = $cacheKeyGenerator;
     }
 
     /**
@@ -111,7 +119,7 @@ class CacheManager
             return false;
         }
 
-        $data = $this->cache->load($this->generateCacheKey());
+        $data = $this->cache->load($this->cacheKeyGenerator->generate());
 
         if ($data) {
             $data = $this->prepareAfterLoading($data);
@@ -131,7 +139,8 @@ class CacheManager
             return false;
         }
 
-        $identifier = $this->generateCacheKey();
+//        $identifier = $this->generateCacheKey();
+        $identifier = $this->cacheKeyGenerator->generate();
         $lifetime = null;
         $tags = [FrenetCacheType::CACHE_TAG];
 
