@@ -78,6 +78,7 @@ class PackagesCalculator
     {
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
+        $this->packageManager->resetPackages();
 
         /**
          * If the package is not overweight then we simply process all the package.

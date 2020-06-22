@@ -124,6 +124,16 @@ class PackageManager
     }
 
     /**
+     * @return $this
+     */
+    public function resetPackages() : self
+    {
+        $this->packages = [];
+        $this->unsetCurrentPackage();
+        return $this;
+    }
+
+    /**
      * @return Package
      */
     public function createPackage()
