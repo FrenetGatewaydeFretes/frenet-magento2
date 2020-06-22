@@ -18,6 +18,7 @@ use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiServiceInterface;
 use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
+use Frenet\Shipping\Model\TotalsCollector;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
@@ -56,18 +57,25 @@ class PackageProcessor
      */
     private $rateRequestProvider;
 
+    /**
+     * @var TotalsCollector
+     */
+    private $totalsCollector;
+
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         Config $config,
         ApiServiceInterface $apiService,
         RateRequestProvider $rateRequestProvider,
-        CouponProcessor $quoteCouponProcessor
+        CouponProcessor $quoteCouponProcessor,
+        TotalsCollector $totalsCollector
     ) {
         $this->apiService = $apiService;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->config = $config;
         $this->rateRequestProvider = $rateRequestProvider;
         $this->quoteCouponProcessor = $quoteCouponProcessor;
+        $this->totalsCollector = $totalsCollector;
     }
 
     /**
@@ -78,7 +86,7 @@ class PackageProcessor
     public function process(Package $package) : array
     {
         $this->initServiceQuote();
-        $this->serviceQuote->setShipmentInvoiceValue($package->getTotalPrice());
+        $this->calculateShipmentInvoiceValue($package);
 
         /** @var PackageItem $packageItem */
         foreach ($package->getItems() as $packageItem) {
@@ -90,6 +98,20 @@ class PackageProcessor
         }
 
         return $this->callService();
+    }
+
+    /**
+     * @param Package $package
+     *
+     * @return $this
+     */
+    private function calculateShipmentInvoiceValue(Package $package)
+    {
+        $totalPrice = $package->getTotalPrice();
+        $totalPrice += $this->totalsCollector->calculateQuoteAdditions();
+        $totalPrice -= $this->totalsCollector->calculateQuoteDiscounts();
+        $this->serviceQuote->setShipmentInvoiceValue($totalPrice);
+        return $this;
     }
 
     /**
