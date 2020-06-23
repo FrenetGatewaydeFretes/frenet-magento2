@@ -14,6 +14,8 @@
 namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Command\Shipping\QuoteInterface;
+use Frenet\Shipping\Service\RateRequestProvider;
+use Magento\Checkout\Model\Session as CheckoutSession;
 
 /**
  * Class QuoteCouponProcessor
@@ -21,19 +23,26 @@ use Frenet\Command\Shipping\QuoteInterface;
 class CouponProcessor
 {
     /**
-     * @var \Magento\Checkout\Model\Session
+     * @var CheckoutSession
      */
     private $checkoutSession;
 
     /**
+     * @var RateRequestProvider
+     */
+    private $requestProvider;
+
+    /**
      * CouponProcessor constructor.
      *
-     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param CheckoutSession $checkoutSession
      */
     public function __construct(
-        \Magento\Checkout\Model\Session $checkoutSession
+        CheckoutSession $checkoutSession,
+        RateRequestProvider $requestProvider
     ) {
         $this->checkoutSession = $checkoutSession;
+        $this->requestProvider = $requestProvider;
     }
 
     /**
@@ -65,9 +74,32 @@ class CouponProcessor
     private function getQuoteCouponCode()
     {
         try {
-            return $this->checkoutSession->getQuote()->getCouponCode();
+            return $this->getQuote()->getCouponCode();
         } catch (\Exception $exception) {
             return null;
         }
+    }
+
+    /**
+     * @return \Magento\Quote\Api\Data\CartInterface|\Magento\Quote\Model\Quote
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function getQuote()
+    {
+        /**
+         * For some reason the quote from checkout session was creating a new quote.
+         * When this occurs the message "Request Rate is not set" is displayed when placing order.
+         * This is a workaround to solve the problem.
+         */
+        $allItems = $this->requestProvider->getRateRequest()->getAllItems();
+        /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
+        foreach ($allItems as $item) {
+            if ($item->getQuote()) {
+                return $item->getQuote();
+            }
+        }
+
+        return $this->checkoutSession->getQuote();
     }
 }
