@@ -38,3 +38,6 @@
 "Calculate the shipping quote for this product with Frenet.","Calcule o preço e prazo de entrega estimados para este produto com a Frenet."
 "Method Title","Título do Método"
 "Free Shipping","Entrega Grátis"
+"(Installed via Composer)","(Instalado via Composer)"
+"(Installed in app/code)","(Instalado em app/code)"
+"Unknown Module Version","Versão Desconhecida"
