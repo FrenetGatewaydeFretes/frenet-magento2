@@ -38,7 +38,7 @@ class FrenetTest extends TestCase
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
 
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
         $item = $objectManager->getObject(\Magento\Quote\Model\Quote\Item::class);
 
         /** @var \Magento\Directory\Model\Currency $currency */

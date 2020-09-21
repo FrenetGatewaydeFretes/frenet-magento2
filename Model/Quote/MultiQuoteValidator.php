@@ -69,7 +69,7 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
             return false;
         }
 
-        /** @var \Magento\Quote\Model\Quote\Item|\Magento\Quote\Api\Data\CartItemInterface $item */
+        /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
         foreach ($rateRequest->getAllItems() as $item) {
             /**
              * If any single product is overweight then the multi quote cannot be done.

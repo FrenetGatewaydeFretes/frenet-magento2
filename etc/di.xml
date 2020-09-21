@@ -22,6 +22,7 @@
     <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
+    <preference for="Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface" type="Frenet\Shipping\Model\Cache\CacheKeyGenerator"/>
 
     <!-- API Classes -->
     <preference for="Frenet\Shipping\Api\QuoteProductInterface" type="Frenet\Shipping\Model\Catalog\Product\View\Quote"/>
@@ -66,6 +67,17 @@
                 <item name="grouped" xsi:type="object">Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder\GroupedBuilder</item>
                 <item name="configurable" xsi:type="object">Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder\ConfigurableBuilder</item>
                 <item name="bundle" xsi:type="object">Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder\BundleBuilder</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface">
+        <arguments>
+            <argument name="generators" xsi:type="array">
+                <item name="postcode" xsi:type="object">Frenet\Shipping\Model\Cache\CacheKeyGenerator\PostcodeGenerator</item>
+                <item name="quote_item" xsi:type="object">Frenet\Shipping\Model\Cache\CacheKeyGenerator\QuoteItemGenerator</item>
+                <item name="discount_coupon" xsi:type="object">Frenet\Shipping\Model\Cache\CacheKeyGenerator\CouponGenerator</item>
+                <item name="multi_quote" xsi:type="object">Frenet\Shipping\Model\Cache\CacheKeyGenerator\MultiQuoteGenerator</item>
             </argument>
         </arguments>
     </type>

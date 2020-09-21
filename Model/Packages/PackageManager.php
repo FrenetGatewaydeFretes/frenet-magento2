@@ -17,8 +17,7 @@ namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class PackagesManager
@@ -121,6 +120,16 @@ class PackageManager
     public function unsetCurrentPackage()
     {
         $this->currentPackage = null;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function resetPackages() : self
+    {
+        $this->packages = [];
+        $this->unsetCurrentPackage();
         return $this;
     }
 

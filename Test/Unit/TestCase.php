@@ -90,11 +90,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @return \Magento\Quote\Model\Quote\Item
+     * @return \Magento\Quote\Model\Quote\Item\AbstractItem
      */
     private function mockQuoteItem()
     {
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
         $item = $this->getObject(\Magento\Quote\Model\Quote\Item::class, [
             'item_id'                               => "5",
             'quote_id'                              => "3",

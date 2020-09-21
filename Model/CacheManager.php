@@ -17,16 +17,11 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\Framework\Data\Serializer;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
+use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
-use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
-use Frenet\Shipping\Model\Quote\CouponProcessor;
-use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Quote\Model\Quote\Item as QuoteItem;
 
 /**
  * Class CacheManager
@@ -51,55 +46,20 @@ class CacheManager
     private $serializer;
 
     /**
-     * @var Config
+     * @var CacheKeyGeneratorInterface
      */
-    private $config;
-
-    /**
-     * @var QuoteItemValidatorInterface
-     */
-    private $quoteItemValidator;
-
-    /**
-     * @var ItemQuantityCalculatorInterface
-     */
-    private $itemQuantityCalculator;
-
-    /**
-     * @var PostcodeNormalizer
-     */
-    private $postcodeNormalizer;
-
-    /**
-     * @var Quote\CouponProcessor
-     */
-    private $couponProcessor;
-
-    /**
-     * @var RateRequestProvider
-     */
-    private $rateRequestProvider;
+    private $cacheKeyGenerator;
 
     public function __construct(
         SerializerInterface $serializer,
         StateInterface $cacheState,
         CacheInterface $cache,
-        QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculatorInterface $itemQuantityCalculator,
-        PostcodeNormalizer $postcodeNormalizer,
-        CouponProcessor $couponProcessor,
-        Config $config,
-        RateRequestProvider $rateRequestProvider
+        CacheKeyGeneratorInterface $cacheKeyGenerator
     ) {
         $this->serializer = $serializer;
         $this->cacheState = $cacheState;
         $this->cache = $cache;
-        $this->config = $config;
-        $this->quoteItemValidator = $quoteItemValidator;
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
-        $this->couponProcessor = $couponProcessor;
-        $this->postcodeNormalizer = $postcodeNormalizer;
-        $this->rateRequestProvider = $rateRequestProvider;
+        $this->cacheKeyGenerator = $cacheKeyGenerator;
     }
 
     /**
@@ -111,7 +71,7 @@ class CacheManager
             return false;
         }
 
-        $data = $this->cache->load($this->generateCacheKey());
+        $data = $this->cache->load($this->cacheKeyGenerator->generate());
 
         if ($data) {
             $data = $this->prepareAfterLoading($data);
@@ -131,7 +91,7 @@ class CacheManager
             return false;
         }
 
-        $identifier = $this->generateCacheKey();
+        $identifier = $this->cacheKeyGenerator->generate();
         $lifetime = null;
         $tags = [FrenetCacheType::CACHE_TAG];
 
@@ -176,47 +136,6 @@ class CacheManager
         }
 
         return $this->serializer->serialize($newData);
-    }
-
-    /**
-     * @return string
-     */
-    private function generateCacheKey()
-    {
-        $request = $this->rateRequestProvider->getRateRequest();
-
-        $destPostcode = $request->getDestPostcode();
-        $origPostcode = $this->config->getOriginPostcode();
-        $items = [];
-
-        /** @var QuoteItem $item */
-        foreach ($request->getAllItems() as $item) {
-            if (!$this->quoteItemValidator->validate($item)) {
-                continue;
-            }
-
-            $productId = (int) $item->getProductId();
-
-            if ($item->getParentItem()) {
-                $productId = $item->getParentItem()->getProductId() . '-' . $productId;
-            }
-
-            $qty = (float) $this->itemQuantityCalculator->calculate($item);
-
-            $items[$productId] = $qty;
-        }
-
-        ksort($items);
-
-        $cacheKey = $this->serializer->serialize([
-            $this->postcodeNormalizer->format($origPostcode),
-            $this->postcodeNormalizer->format($destPostcode),
-            $items,
-            $this->couponProcessor->getCouponCode(),
-            $this->config->isMultiQuoteEnabled() ? 'multi' : null
-        ]);
-
-        return $cacheKey;
     }
 
     /**

@@ -15,15 +15,17 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
+use Magento\Quote\Model\Quote\Item\AbstractItem;
+
 /**
  * Class ItemQuantityCalculatorInterface
  */
 interface ItemQuantityCalculatorInterface
 {
     /**
-     * @param \Magento\Quote\Model\Quote\Item $item
+     * @param AbstractItem $item
      *
      * @return integer
      */
-    public function calculate(\Magento\Quote\Model\Quote\Item $item);
+    public function calculate(AbstractItem $item);
 }

@@ -15,7 +15,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Quote;
 
 use Magento\Catalog\Model\Product;
-use Magento\Quote\Api\Data\CartItemInterface;
+use Magento\Quote\Model\Quote\Item\AbstractItem;
 
 /**
  * Class ItemValidator
@@ -23,11 +23,9 @@ use Magento\Quote\Api\Data\CartItemInterface;
 class ItemValidator implements QuoteItemValidatorInterface
 {
     /**
-     * @param CartItemInterface $item
-     *
-     * @return bool
+     * @inheritDoc
      */
-    public function validate(CartItemInterface $item)
+    public function validate(AbstractItem $item)
     {
         if ($this->getProduct($item)->isComposite()) {
             return false;
@@ -41,11 +39,11 @@ class ItemValidator implements QuoteItemValidatorInterface
     }
 
     /**
-     * @param \Magento\Quote\Model\Quote\Item $item
+     * @param AbstractItem $item
      *
      * @return bool|Product
      */
-    private function getProduct(CartItemInterface $item)
+    private function getProduct(AbstractItem $item)
     {
         /** @var Product $product */
         $product = $item->getProduct();
