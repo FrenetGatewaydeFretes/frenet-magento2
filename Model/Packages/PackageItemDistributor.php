@@ -74,7 +74,7 @@ class PackageItemDistributor
 
             $qty = $this->itemQuantityCalculator->calculate($item);
 
-            for ($i = 1; $i <= $qty; $i++) {
+            for ($idx = 1; $idx <= $qty; $idx++) {
                 $unitItems[] = $item;
             }
         }
