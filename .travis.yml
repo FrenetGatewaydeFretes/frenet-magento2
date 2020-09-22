@@ -5,6 +5,7 @@ php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4
 install:
   - echo "{\"http-basic\":{\"repo.magento.com\":{\"username\":\"${MAGENTO_USERNAME}\",\"password\":\"${MAGENTO_PASSWORD}\"}}}" > auth.json
   - composer install --no-interaction --prefer-dist
