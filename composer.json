@@ -11,6 +11,7 @@
     "require": {
         "php": ">=7.0.0",
         "frenet/frenet-php": "^1.1.0",
+        "symfony/finder": "*",
         "magento/framework": ">=101.0.4",
         "magento/module-catalog": ">=102.0.4",
         "magento/module-quote": ">=101.0.3",
