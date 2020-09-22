@@ -16,8 +16,10 @@ namespace Frenet\Shipping\Model;
 
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Composer\ComposerInformation;
 use Magento\Framework\Serialize\Serializer\Json;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Class ModuleMetadata
@@ -64,14 +66,21 @@ class ModuleMetadata
      */
     private Json $serializer;
 
+    /**
+     * @var DirectoryList
+     */
+    private DirectoryList $directoryList;
+
     public function __construct(
         ComposerInformation $composerInformation,
         CacheInterface $cache,
-        Json $serializer
+        Json $serializer,
+        DirectoryList $directoryList
     ) {
         $this->composerInformation = $composerInformation;
         $this->cache = $cache;
         $this->serializer = $serializer;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -180,15 +189,23 @@ class ModuleMetadata
      */
     private function getLocalComposerInfo()
     {
-        $composerJson = dirname(__DIR__) . '/composer.json';
+        $mageAppDir = $this->directoryList->getPath(DirectoryList::APP);
+        $moduleDir = implode(DIRECTORY_SEPARATOR, [$mageAppDir, 'code', 'Frenet', 'Shipping']);
 
-        if (!file_exists($composerJson) && is_readable($composerJson)) {
+        $finder = new Finder();
+        $finder->files()->name('composer.json')->depth(0)->in($moduleDir);
+
+        if (!$finder->hasResults()) {
             return [];
         }
 
-        $content = file_get_contents($composerJson);
-        $metadata = (array) $this->serializer->unserialize($content);
+        $content = [];
 
-        return $metadata;
+        /** @var  $file */
+        foreach ($finder as $file) {
+            $content = $file->getContents();
+            break;
+        }
+        return (array) $this->serializer->unserialize($content);
     }
 }
