@@ -64,12 +64,12 @@ class ModuleMetadata
     /**
      * @var SerializerInterface
      */
-    private SerializerInterface $serializer;
+    private $serializer;
 
     /**
      * @var DirectoryList
      */
-    private DirectoryList $directoryList;
+    private $directoryList;
 
     public function __construct(
         ComposerInformation $composerInformation,
