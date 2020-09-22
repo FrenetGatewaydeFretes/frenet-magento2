@@ -18,7 +18,7 @@ use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Composer\ComposerInformation;
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Serialize\SerializerInterface;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -62,9 +62,9 @@ class ModuleMetadata
     private $cache;
 
     /**
-     * @var Json
+     * @var SerializerInterface
      */
-    private Json $serializer;
+    private SerializerInterface $serializer;
 
     /**
      * @var DirectoryList
@@ -74,7 +74,7 @@ class ModuleMetadata
     public function __construct(
         ComposerInformation $composerInformation,
         CacheInterface $cache,
-        Json $serializer,
+        SerializerInterface $serializer,
         DirectoryList $directoryList
     ) {
         $this->composerInformation = $composerInformation;
