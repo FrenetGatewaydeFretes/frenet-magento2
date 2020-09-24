@@ -23,7 +23,7 @@ Abra o terminal e navegue até o diretório raíz da sua instalação do Magento
 
 ```
 > composer require frenet/frenet-magento2        // Faz a requisição do módulo da Frenet
-> php bin/magento module:enable Frenet_Shipping  // Ativa o módulo
+> php bin/magento module:enable Frenet_Shipping  // Ativa o módulo no Magento
 > php bin/magento setup:upgrade                  // Registra a extensão
 > php bin/magento setup:di:compile               // Recompila o projeto Magento
 ```
