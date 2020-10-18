@@ -51,6 +51,14 @@ class DefaultPriceCalculator implements PriceCalculatorInterface
             $item->calcRowTotal();
         }
 
+        /**
+         * If the item price is still not calculated then fallback to product final price.
+         */
+        if (!$item->getRowTotal()) {
+            $basePrice = $item->getProduct()->getFinalPrice($item->getQty());
+            $item->setRowTotal($basePrice * $item->getQty());
+        }
+
         return $item->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
     }
 }
