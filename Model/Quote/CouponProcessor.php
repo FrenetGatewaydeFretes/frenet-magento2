@@ -50,7 +50,7 @@ class CouponProcessor
      *
      * @return $this
      */
-    public function applyCouponCode(QuoteInterface $quote) : self
+    public function applyCouponCode(QuoteInterface $quote): self
     {
         /** Add coupon code if exists. */
         if ($this->getQuoteCouponCode()) {
@@ -99,7 +99,6 @@ class CouponProcessor
                 return $item->getQuote();
             }
         }
-
         return $this->checkoutSession->getQuote();
     }
 }

@@ -117,7 +117,6 @@ class PackageItem
     public function setCartItem(QuoteItem $item)
     {
         $this->cartItem = $item;
-
         return $this;
     }
 
@@ -157,7 +156,6 @@ class PackageItem
     public function getTotalPrice()
     {
         $this->initProduct();
-
         return (float) $this->getFinalPrice() * $this->getQty();
     }
 
@@ -169,7 +167,6 @@ class PackageItem
     public function setQty($qty)
     {
         $this->qty = (float) $qty;
-
         return $this;
     }
 
@@ -205,7 +202,6 @@ class PackageItem
     public function getWeight()
     {
         $this->initProduct();
-
         return $this->weightConverter->convertToKg($this->dimensionsExtractor->getWeight());
     }
 
@@ -215,7 +211,6 @@ class PackageItem
     public function getTotalWeight()
     {
         $this->initProduct();
-
         return (float) ($this->getWeight() * $this->getQty());
     }
 
@@ -225,7 +220,6 @@ class PackageItem
     public function getLength()
     {
         $this->initProduct();
-
         return $this->dimensionsExtractor->getLength();
     }
 
@@ -235,7 +229,6 @@ class PackageItem
     public function getHeight()
     {
         $this->initProduct();
-
         return $this->dimensionsExtractor->getHeight();
     }
 
@@ -245,7 +238,6 @@ class PackageItem
     public function getWidth()
     {
         $this->initProduct();
-
         return $this->dimensionsExtractor->getWidth();
     }
 
@@ -255,7 +247,6 @@ class PackageItem
     public function getProductCategories()
     {
         $this->initProduct();
-
         return $this->categoryExtractor->getProductCategories($this->getProduct(true));
     }
 
@@ -292,7 +283,6 @@ class PackageItem
     private function initProduct()
     {
         $this->dimensionsExtractor->setProductByCartItem($this->cartItem);
-
         return $this;
     }
 }

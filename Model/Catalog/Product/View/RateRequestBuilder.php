@@ -16,7 +16,6 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface;
 use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
-use Frenet\Shipping\Model\Catalog\ProductType;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
@@ -24,6 +23,9 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
+/**
+ * Class RateRequestBuilder
+ */
 class RateRequestBuilder
 {
     /**
@@ -72,9 +74,9 @@ class RateRequestBuilder
      * @param array            $options
      *
      * @return RateRequest
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function build(ProductInterface $product, string $postcode, int $qty = 1, array $options = []) : RateRequest
+    public function build(ProductInterface $product, string $postcode, int $qty = 1, array $options = []): RateRequest
     {
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
@@ -135,7 +137,7 @@ class RateRequestBuilder
      *
      * @return DataObject
      */
-    private function prepareProductRequest(ProductInterface $product, int $qty = 1, array $options = []) : DataObject
+    private function prepareProductRequest(ProductInterface $product, int $qty = 1, array $options = []): DataObject
     {
         /** @var DataObject $request */
         $request = $this->dataObjectFactory->create();
@@ -149,7 +151,7 @@ class RateRequestBuilder
     /**
      * @return \Magento\Quote\Model\Quote
      */
-    private function createQuote() : \Magento\Quote\Model\Quote
+    private function createQuote(): \Magento\Quote\Model\Quote
     {
         return $this->quoteFactory->create();
     }
@@ -159,7 +161,7 @@ class RateRequestBuilder
      *
      * @return RateRequestBuilder\BuilderInterface
      */
-    private function getBuilder(string $type) : RateRequestBuilder\BuilderInterface
+    private function getBuilder(string $type): RateRequestBuilder\BuilderInterface
     {
         if (isset($this->builders[$type])) {
             return $this->builders[$type];

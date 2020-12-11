@@ -24,11 +24,6 @@ use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 class ItemPriceCalculator
 {
     /**
-     * @var ItemQuantityCalculatorInterface
-     */
-    private $itemQtyCalculator;
-
-    /**
      * @var PriceCalculatorFactory
      */
     private $priceCalculatorFactory;
@@ -37,7 +32,6 @@ class ItemPriceCalculator
         ItemQuantityCalculatorInterface $itemQtyCalculator,
         PriceCalculatorFactory $priceCalculatorFactory
     ) {
-        $this->itemQtyCalculator = $itemQtyCalculator;
         $this->priceCalculatorFactory = $priceCalculatorFactory;
     }
 

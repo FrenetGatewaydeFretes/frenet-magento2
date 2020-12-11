@@ -43,7 +43,6 @@ class PackageLimit
         if (null === $this->maxWeight) {
             return self::PACKAGE_MAX_WEIGHT;
         }
-
         return (float) $this->maxWeight;
     }
 
@@ -54,7 +53,7 @@ class PackageLimit
      */
     public function setMaxWeight(float $weight)
     {
-        $this->maxWeight = $weight;
+        $this->maxWeight = (float) $weight;
         return $this;
     }
 

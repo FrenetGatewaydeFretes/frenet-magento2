@@ -20,8 +20,6 @@ use Frenet\Shipping\Model\Catalog\ProductType;
 
 /**
  * Class ProductTypes
- *
- * @package Frenet\Shipping\Model\Config\Source\Catalog\Product\Quote
  */
 class ProductTypes implements \Magento\Framework\Data\OptionSourceInterface
 {

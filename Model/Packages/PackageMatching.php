@@ -71,7 +71,7 @@ class PackageMatching
      */
     private function matchResults()
     {
-        /** @var array $result */
+        /** @var array $services */
         foreach ($this->results as $services) {
             $this->prepareServices($services);
         }

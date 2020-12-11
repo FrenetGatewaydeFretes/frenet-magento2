@@ -4,14 +4,14 @@
  *
  * @category Frenet
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
@@ -211,12 +211,12 @@ class Config
     }
 
     /**
-     * @param string $productTypeId
+     * @param string                                            $productTypeId
      * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
      *
      * @return bool
      */
-    public function isProductQuoteAllowed(string $productTypeId, $store = null) : bool
+    public function isProductQuoteAllowed(string $productTypeId, $store = null): bool
     {
         $allowedTypes = $this->getProductQuoteProductTypes($store);
         return in_array($productTypeId, $allowedTypes);
@@ -227,7 +227,7 @@ class Config
      *
      * @return array
      */
-    public function getProductQuoteProductTypes($store = null) : array
+    public function getProductQuoteProductTypes($store = null): array
     {
         return explode(
             ',',

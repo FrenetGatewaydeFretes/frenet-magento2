@@ -1,4 +1,15 @@
 <?php
+/**
+ * Frenet Shipping Gateway
+ *
+ * @category Frenet
+ *
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
+ *
+ * Copyright (c) 2020.
+ */
 
 namespace Frenet\Shipping\Model;
 
@@ -7,8 +18,6 @@ use Magento\Quote\Model\Quote;
 
 /**
  * Class TotalsCollector
- *
- * @package Frenet\Shipping\Model
  */
 class TotalsCollector
 {
@@ -88,7 +97,6 @@ class TotalsCollector
         foreach ($collectors as $collector) {
             $total += (float) $collector->collect($quote);
         }
-
         return $total;
     }
 
@@ -102,7 +110,6 @@ class TotalsCollector
         if (!$quote) {
             return $this->checkoutSession->getQuote();
         }
-
         return $quote;
     }
 }

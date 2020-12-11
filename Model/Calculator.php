@@ -4,14 +4,14 @@
  *
  * @category Frenet
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
@@ -57,7 +57,7 @@ class Calculator implements CalculatorInterface
     /**
      * @inheritdoc
      */
-    public function getQuote() : array
+    public function getQuote(): array
     {
         $result = $this->cacheManager->load();
         if ($result) {
@@ -84,7 +84,7 @@ class Calculator implements CalculatorInterface
      *
      * @return Service
      */
-    private function processService(Service $service) : Service
+    private function processService(Service $service): Service
     {
         $service->setData(
             'service_description',

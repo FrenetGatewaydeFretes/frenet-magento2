@@ -3,11 +3,10 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
@@ -54,7 +53,7 @@ class RateRequestProvider
      *
      * @return $this
      */
-    public function setRateRequest(RateRequest $rateRequest) : self
+    public function setRateRequest(RateRequest $rateRequest): self
     {
         $this->rateRequest = $rateRequest;
         return $this;
@@ -64,7 +63,7 @@ class RateRequestProvider
      * @return RateRequest
      * @throws LocalizedException
      */
-    public function getRateRequest() : RateRequest
+    public function getRateRequest(): RateRequest
     {
         if ($this->rateRequest) {
             return $this->rateRequest;
@@ -76,7 +75,7 @@ class RateRequestProvider
     /**
      * @return $this
      */
-    public function clear() : self
+    public function clear(): self
     {
         $this->rateRequest = null;
         return $this;

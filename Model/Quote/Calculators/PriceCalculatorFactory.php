@@ -10,6 +10,7 @@
  *
  * Copyright (c) 2020.
  */
+
 declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote\Calculators;
@@ -42,7 +43,7 @@ class PriceCalculatorFactory
      *
      * @return PriceCalculatorInterface
      */
-    public function create(QuoteItem $item) : PriceCalculatorInterface
+    public function create(QuoteItem $item): PriceCalculatorInterface
     {
         return $this->getCalculatorInstance($item);
     }
@@ -52,14 +53,12 @@ class PriceCalculatorFactory
      *
      * @return mixed
      */
-    private function getCalculatorInstance(QuoteItem $item) : PriceCalculatorInterface
+    private function getCalculatorInstance(QuoteItem $item): PriceCalculatorInterface
     {
         $type = $this->getCalculatorType($item);
-
         if (isset($this->calculators[$type])) {
             return $this->calculators[$type];
         }
-
         return $this->calculators[$this->getDefaultCalculatorType()];
     }
 
@@ -68,21 +67,19 @@ class PriceCalculatorFactory
      *
      * @return string
      */
-    private function getCalculatorType(QuoteItem $item) : string
+    private function getCalculatorType(QuoteItem $item): string
     {
         $type = $item->getProductType();
-
-        if ($item->getParentItemId()) {
+        if ($item->getParentItemId() && $item->getParentItem()) {
             $type = $item->getParentItem()->getProductType();
         }
-
         return $type;
     }
 
     /**
      * @return string
      */
-    private function getDefaultCalculatorType() : string
+    private function getDefaultCalculatorType(): string
     {
         return self::DEFAULT_CALCULATOR_TYPE;
     }

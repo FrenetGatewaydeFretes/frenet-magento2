@@ -290,7 +290,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * @param $trackingNumbers
      *
-     * @return mixed
+     * @return \Magento\Shipping\Model\Tracking\Result
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getTracking($trackingNumbers)
@@ -299,9 +299,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             $trackingNumbers = [$trackingNumbers];
         }
 
-        $this->prepareTracking($trackingNumbers);
-
-        return $this->result;
+        return $this->prepareTracking($trackingNumbers);
     }
 
     /**
@@ -315,7 +313,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         /** @var \Magento\Shipping\Model\Tracking\Result $result */
         $result = $this->_trackFactory->create();
 
-        /** @var string $trackingNumber */
+        /**
+         * @var string $trackingNumber
+         * @todo It's currently appending only one tracking per time. Find a solution to append more than one.
+         */
         foreach ($trackingNumbers as $trackingNumber) {
             /** @var \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface $service */
             $service = $this->serviceFinder->findByTrackingNumber($trackingNumber);
@@ -343,8 +344,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      *
      * @return void
      */
-    private function prepareTrackingInformation($status, $trackingNumber, $shippingServiceCode)
-    {
+    private function prepareTrackingInformation(
+        \Magento\Shipping\Model\Tracking\Result\Status $status,
+        $trackingNumber,
+        $shippingServiceCode
+    ) {
         /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface $trackingInfo */
         $trackingInfo = $this->trackingService->track($trackingNumber, $shippingServiceCode);
 

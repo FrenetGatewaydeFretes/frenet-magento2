@@ -26,18 +26,18 @@ class DefaultPriceCalculator implements PriceCalculatorInterface
     /**
      * @var ItemQuantityCalculatorInterface
      */
-    private $itemQuantityCalculator;
+    private $itemQtyCalculator;
 
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator
     ) {
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->itemQtyCalculator = $itemQuantityCalculator;
     }
 
     /**
      * @inheritDoc
      */
-    public function getPrice(QuoteItem $item) : float
+    public function getPrice(QuoteItem $item): float
     {
         return $item->getPrice();
     }
@@ -45,7 +45,7 @@ class DefaultPriceCalculator implements PriceCalculatorInterface
     /**
      * @inheritDoc
      */
-    public function getFinalPrice(QuoteItem $item) : float
+    public function getFinalPrice(QuoteItem $item): float
     {
         if (!$item->getRowTotal()) {
             $item->calcRowTotal();
@@ -59,6 +59,6 @@ class DefaultPriceCalculator implements PriceCalculatorInterface
             $item->setRowTotal($basePrice * $item->getQty());
         }
 
-        return $item->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
+        return $item->getRowTotal() / $this->itemQtyCalculator->calculate($item);
     }
 }
