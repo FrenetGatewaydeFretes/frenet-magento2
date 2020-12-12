@@ -52,6 +52,10 @@
     },
     "minimum-stability": "stable",
     "scripts": {
+        "tests": [
+            "@coding-standard",
+            "@phpunit"
+        ],
         "coding-standard": [
             "@phpcs",
             "@phpmd"
