@@ -10,7 +10,8 @@
  *
  * Copyright (c) 2020.
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
@@ -72,7 +73,7 @@ class Quote implements QuoteProductInterface
     /**
      * @inheritDoc
      */
-    public function quoteByProductId(int $productId, string $postcode, int $qty = 1, array $options = []) : array
+    public function quoteByProductId(int $productId, string $postcode, int $qty = 1, array $options = []): array
     {
         try {
             $product = $this->productRepository->getById($productId);
@@ -88,7 +89,7 @@ class Quote implements QuoteProductInterface
     /**
      * @inheritDoc
      */
-    public function quoteByProductSku(string $sku, string $postcode, int $qty = 1, array $options = []) : array
+    public function quoteByProductSku(string $sku, string $postcode, int $qty = 1, array $options = []): array
     {
         try {
             $product = $this->productRepository->get($sku);
@@ -104,7 +105,7 @@ class Quote implements QuoteProductInterface
     /**
      * @inheritDoc
      */
-    private function quote(ProductInterface $product, string $postcode, int $qty = 1, $options = []) : array
+    private function quote(ProductInterface $product, string $postcode, int $qty = 1, $options = []): array
     {
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty, $options);
@@ -119,7 +120,7 @@ class Quote implements QuoteProductInterface
      *
      * @return array
      */
-    private function prepareResult(array $services) : array
+    private function prepareResult(array $services): array
     {
         $result = [];
 
@@ -140,15 +141,15 @@ class Quote implements QuoteProductInterface
      *
      * @return array
      */
-    private function prepareService(ServiceInterface $service) : array
+    private function prepareService(ServiceInterface $service): array
     {
         return [
-            'service_code'        => $service->getServiceCode(),
-            'carrier'             => $service->getCarrier(),
-            'message'             => $service->getMessage(),
-            'delivery_time'       => $service->getDeliveryTime(),
+            'service_code' => $service->getServiceCode(),
+            'carrier' => $service->getCarrier(),
+            'message' => $service->getMessage(),
+            'delivery_time' => $service->getDeliveryTime(),
             'service_description' => $service->getServiceDescription(),
-            'shipping_price'      => $service->getShippingPrice(),
+            'shipping_price' => $service->getShippingPrice(),
         ];
     }
 }

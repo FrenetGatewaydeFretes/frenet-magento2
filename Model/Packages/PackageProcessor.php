@@ -119,7 +119,7 @@ class PackageProcessor
      *
      * @return $this
      */
-    private function addPackageItemToQuote(PackageItem $packageItem) : self
+    private function addPackageItemToQuote(PackageItem $packageItem): self
     {
         $this->serviceQuote->addShippingItem(
             $packageItem->getSku(),
@@ -138,7 +138,7 @@ class PackageProcessor
     /**
      * @return Service[]
      */
-    private function callService() : array
+    private function callService(): array
     {
         /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
         $result = $this->serviceQuote->execute();
@@ -150,7 +150,7 @@ class PackageProcessor
     /**
      * @return $this
      */
-    private function initServiceQuote() : self
+    private function initServiceQuote(): self
     {
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();

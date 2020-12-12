@@ -7,7 +7,7 @@
             "url": "https://repo.magento.com/"
         }
     ],
-    "version": "2.1.9",
+    "version": "2.2.0",
     "require": {
         "php": ">=7.0.0",
         "frenet/frenet-php": "^1.1.0",
@@ -57,7 +57,13 @@
             "@phpmd"
         ],
         "phpunit" : "vendor/bin/phpunit Test",
-        "phpcs": "vendor/bin/phpcs --standard=Magento2 --severity=8 --extensions=php Service Model Setup Controller Block ViewModel",
-        "phpmd": "vendor/bin/phpmd Service/,Model/,Setup/,Controller/,Block/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode"
+        "phpmd": "vendor/bin/phpmd Service/,Model/,Setup/,Controller/,Block/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode",
+        "phpcs-configure": [
+            "vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard"
+        ],
+        "phpcs": [
+            "@phpcs-configure",
+            "vendor/bin/phpcs --standard=Magento2 --severity=8 --extensions=php Service Model Setup Controller Block ViewModel"
+        ]
     }
 }

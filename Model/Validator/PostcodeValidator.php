@@ -4,20 +4,20 @@
  *
  * @category Frenet
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Validator;
 
 /**
  * Class PostcodeValidator
- *  */
+ */
 class PostcodeValidator
 {
     /**
@@ -36,7 +36,7 @@ class PostcodeValidator
      *
      * @return bool
      */
-    public function validate(string $postcode = null) : bool
+    public function validate(string $postcode = null): bool
     {
         if (empty($postcode)) {
             return false;

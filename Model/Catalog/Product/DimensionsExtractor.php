@@ -4,19 +4,18 @@
  *
  * @category Frenet
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
 use Frenet\Shipping\Model\Config;
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
@@ -64,7 +63,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     /**
      * {@inheritdoc}
      */
-    public function setProduct(Product $product) : ProductExtractorInterface
+    public function setProduct(Product $product): ProductExtractorInterface
     {
         if ($this->validateProduct($product)) {
             $this->product = $product;

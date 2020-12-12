@@ -3,11 +3,11 @@
  * Frenet Shipping Gateway
  *
  * @category Frenet
- * @package Frenet\Shipping
+ * @package  Frenet\Shipping
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
@@ -23,8 +23,6 @@ use Magento\Downloadable\Model\Product\Type as Downloadable;
 
 /**
  * Class ProductType
- *
- * @package Frenet\Shipping\Model\Catalog
  */
 class ProductType
 {
@@ -75,7 +73,7 @@ class ProductType
      *
      * @return bool
      */
-    public function isTypeSimple(ProductInterface $product) : bool
+    public function isTypeSimple(ProductInterface $product): bool
     {
         return $this->isType($product, self::TYPE_SIMPLE);
     }
@@ -85,7 +83,7 @@ class ProductType
      *
      * @return bool
      */
-    public function isTypeVirtual(ProductInterface $product) : bool
+    public function isTypeVirtual(ProductInterface $product): bool
     {
         return $this->isType($product, self::TYPE_VIRTUAL);
     }
@@ -95,7 +93,7 @@ class ProductType
      *
      * @return bool
      */
-    public function isTypeConfigurable(ProductInterface $product) : bool
+    public function isTypeConfigurable(ProductInterface $product): bool
     {
         return $this->isType($product, self::TYPE_CONFIGURABLE);
     }
@@ -105,7 +103,7 @@ class ProductType
      *
      * @return bool
      */
-    public function isTypeBundle(ProductInterface $product) : bool
+    public function isTypeBundle(ProductInterface $product): bool
     {
         return $this->isType($product, self::TYPE_BUNDLE);
     }
@@ -115,7 +113,7 @@ class ProductType
      *
      * @return bool
      */
-    public function isTypeGrouped(ProductInterface $product) : bool
+    public function isTypeGrouped(ProductInterface $product): bool
     {
         return $this->isType($product, self::TYPE_GROUPED);
     }
@@ -125,7 +123,7 @@ class ProductType
      *
      * @return bool
      */
-    public function isTypeDownloadable(ProductInterface $product) : bool
+    public function isTypeDownloadable(ProductInterface $product): bool
     {
         return $this->isType($product, self::TYPE_DOWNLOADABLE);
     }
@@ -136,7 +134,7 @@ class ProductType
      *
      * @return bool
      */
-    private function isType(ProductInterface $product, string $typeId) : bool
+    private function isType(ProductInterface $product, string $typeId): bool
     {
         return $product->getTypeId() === $typeId;
     }

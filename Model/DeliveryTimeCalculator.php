@@ -69,6 +69,7 @@ class DeliveryTimeCalculator
      * @param ServiceInterface $service
      *
      * @return int
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function calculate(ServiceInterface $service)
     {
@@ -94,6 +95,7 @@ class DeliveryTimeCalculator
      * @param Product $product
      *
      * @return int
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function extractProductLeadTime(Product $product)
     {

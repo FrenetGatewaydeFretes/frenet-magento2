@@ -27,7 +27,7 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     /**
      * @var ItemQuantityCalculatorInterface
      */
-    private $itemQuantityCalculator;
+    private $itemQtyCalculator;
 
     /**
      * BundlePriceCalculator constructor.
@@ -37,13 +37,13 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator
     ) {
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
+        $this->itemQtyCalculator = $itemQuantityCalculator;
     }
 
     /**
      * @inheritDoc
      */
-    public function getPrice(QuoteItem $item) : float
+    public function getPrice(QuoteItem $item): float
     {
         if ($this->isPriceTypeFixed($item)) {
             return $this->calculatePartialValue($item);
@@ -55,13 +55,13 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     /**
      * @inheritDoc
      */
-    public function getFinalPrice(QuoteItem $item) : float
+    public function getFinalPrice(QuoteItem $item): float
     {
         if ($this->isPriceTypeFixed($item)) {
             return $this->calculatePartialValue($item);
         }
 
-        return $item->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
+        return $item->getRowTotal() / $this->itemQtyCalculator->calculate($item);
     }
 
     /**
@@ -80,7 +80,7 @@ class BundlePriceCalculator implements PriceCalculatorInterface
             $bundle->calcRowTotal();
         }
 
-        $rowTotal = (float) $bundle->getRowTotal() / $this->itemQuantityCalculator->calculate($item);
+        $rowTotal = (float) $bundle->getRowTotal() / $this->itemQtyCalculator->calculate($item);
 
         return (float) ($rowTotal / count($bundle->getChildren()));
     }
@@ -90,7 +90,7 @@ class BundlePriceCalculator implements PriceCalculatorInterface
      *
      * @return bool
      */
-    private function isPriceTypeFixed(QuoteItem $item) : bool
+    private function isPriceTypeFixed(QuoteItem $item): bool
     {
         /** @var QuoteItem $bundle */
         $bundle = $this->getBundleItem($item);
@@ -107,7 +107,7 @@ class BundlePriceCalculator implements PriceCalculatorInterface
      *
      * @return QuoteItem
      */
-    private function getBundleItem(QuoteItem $item) : QuoteItem
+    private function getBundleItem(QuoteItem $item): QuoteItem
     {
         return $item->getParentItem();
     }

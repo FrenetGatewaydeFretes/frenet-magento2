@@ -53,7 +53,7 @@ class PackageItemDistributor
     /**
      * @return array
      */
-    public function distribute() : array
+    public function distribute(): array
     {
         return $this->getUnitItems();
     }
@@ -61,7 +61,7 @@ class PackageItemDistributor
     /**
      * @return array
      */
-    private function getUnitItems() : array
+    private function getUnitItems(): array
     {
         $rateRequest = $this->rateRequestProvider->getRateRequest();
         $unitItems = [];
@@ -71,14 +71,11 @@ class PackageItemDistributor
             if (!$this->quoteItemValidator->validate($item)) {
                 continue;
             }
-
             $qty = $this->itemQuantityCalculator->calculate($item);
-
             for ($idx = 1; $idx <= $qty; $idx++) {
                 $unitItems[] = $item;
             }
         }
-
         return $unitItems;
     }
 }

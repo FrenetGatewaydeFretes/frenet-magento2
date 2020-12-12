@@ -86,7 +86,7 @@ class PackageManager
     /**
      * @return $this
      */
-    public function process() : self
+    public function process(): self
     {
         $items = $this->packageItemDistributor->distribute();
 
@@ -101,7 +101,7 @@ class PackageManager
     /**
      * @return Package[]
      */
-    public function getPackages() : array
+    public function getPackages(): array
     {
         return $this->packages;
     }

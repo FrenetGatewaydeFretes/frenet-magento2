@@ -4,14 +4,14 @@
  *
  * @category Frenet
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
+ * @author   Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link     https://github.com/tiagosampaio
+ * @link     https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
@@ -77,6 +77,7 @@ class ServiceFinder implements ServiceFinderInterface
     /**
      * @param \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface[] $services
      * @param string                                                     $name
+     *
      * @return bool|\Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface
      */
     private function machServiceByName(array $services, $name)
@@ -93,6 +94,7 @@ class ServiceFinder implements ServiceFinderInterface
 
     /**
      * @param string $trackingNumber
+     *
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -116,6 +118,7 @@ class ServiceFinder implements ServiceFinderInterface
 
     /**
      * @param string $trackingNumber
+     *
      * @return \Magento\Sales\Api\Data\ShipmentTrackInterface
      */
     private function getShipmentTrack($trackingNumber)

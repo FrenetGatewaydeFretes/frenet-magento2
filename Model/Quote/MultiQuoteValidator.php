@@ -53,7 +53,7 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
     /**
      * @inheritDoc
      */
-    public function canProcessMultiQuote() : bool
+    public function canProcessMultiQuote(): bool
     {
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
@@ -78,7 +78,6 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
                 return false;
             }
         }
-
         return true;
     }
 }
