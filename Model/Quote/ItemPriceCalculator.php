@@ -29,7 +29,6 @@ class ItemPriceCalculator
     private $priceCalculatorFactory;
 
     public function __construct(
-        ItemQuantityCalculatorInterface $itemQtyCalculator,
         PriceCalculatorFactory $priceCalculatorFactory
     ) {
         $this->priceCalculatorFactory = $priceCalculatorFactory;
