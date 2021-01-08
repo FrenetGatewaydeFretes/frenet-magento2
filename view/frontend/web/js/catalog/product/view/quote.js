@@ -138,6 +138,10 @@ define([
         enabled: function () {
             return this.active();
         },
+        onPostcodeChange: function () {
+            this.activate();
+            this.updateRates();
+        },
         activate: function () {
             this.active(true);
             return this;
