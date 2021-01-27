@@ -28,9 +28,12 @@ class BundleBuilder implements BuilderInterface
      */
     public function build(ProductInterface $product, DataObject $request, array $options = [])
     {
-        if ($options && isset($options['bundle_option'], $options['bundle_option'])) {
-            $request->setData('bundle_option', $options['bundle_option']);
-            $request->setData('bundle_option_qty', $options['bundle_option_qty']);
+        if ($options && isset($options['bundle_option'])) {
+            $option = $options['bundle_option'];
+            $qty    = $options['bundle_option_qty'] ?? 1;
+
+            $request->setData('bundle_option', $option);
+            $request->setData('bundle_option_qty', $qty);
             return;
         }
 
