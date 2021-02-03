@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Frenet Shipping Gateway
  *
@@ -10,7 +11,6 @@
  *
  * Copyright (c) 2020.
  */
-
 declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product\View;
@@ -20,6 +20,7 @@ use Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface;
 use Frenet\Shipping\Api\QuoteProductInterface;
 use Frenet\Shipping\Model\Calculator;
 use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Model\DeliveryTimeCalculator;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -56,18 +57,25 @@ class Quote implements QuoteProductInterface
      */
     private $rateRequestBuilder;
 
+    /**
+     * @var DeliveryTimeCalculator
+     */
+    private $deliveryTimeCalculator;
+
     public function __construct(
         ProductRepositoryInterface $productRepository,
         RateRequestProvider $rateRequestProvider,
         Calculator $calculator,
         RateRequestBuilder $rateRequestBuilder,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeliveryTimeCalculator $deliveryTimeCalculator
     ) {
         $this->productRepository = $productRepository;
         $this->rateRequestProvider = $rateRequestProvider;
         $this->calculator = $calculator;
         $this->rateRequestBuilder = $rateRequestBuilder;
         $this->logger = $logger;
+        $this->deliveryTimeCalculator = $deliveryTimeCalculator;
     }
 
     /**
@@ -143,11 +151,13 @@ class Quote implements QuoteProductInterface
      */
     private function prepareService(ServiceInterface $service): array
     {
+        $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
+
         return [
             'service_code' => $service->getServiceCode(),
             'carrier' => $service->getCarrier(),
             'message' => $service->getMessage(),
-            'delivery_time' => $service->getDeliveryTime(),
+            'delivery_time' => $deliveryTime,
             'service_description' => $service->getServiceDescription(),
             'shipping_price' => $service->getShippingPrice(),
         ];
