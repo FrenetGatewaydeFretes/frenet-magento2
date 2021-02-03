@@ -16,13 +16,14 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
-use Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface;
 use Frenet\Shipping\Api\QuoteProductInterface;
 use Frenet\Shipping\Model\Calculator;
+use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Frenet\Shipping\Model\DeliveryTimeCalculator;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Psr\Log\LoggerInterface;
@@ -62,13 +63,19 @@ class Quote implements QuoteProductInterface
      */
     private $deliveryTimeCalculator;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
     public function __construct(
         ProductRepositoryInterface $productRepository,
         RateRequestProvider $rateRequestProvider,
         Calculator $calculator,
         RateRequestBuilder $rateRequestBuilder,
         LoggerInterface $logger,
-        DeliveryTimeCalculator $deliveryTimeCalculator
+        DeliveryTimeCalculator $deliveryTimeCalculator,
+        Config $config
     ) {
         $this->productRepository = $productRepository;
         $this->rateRequestProvider = $rateRequestProvider;
@@ -76,6 +83,7 @@ class Quote implements QuoteProductInterface
         $this->rateRequestBuilder = $rateRequestBuilder;
         $this->logger = $logger;
         $this->deliveryTimeCalculator = $deliveryTimeCalculator;
+        $this->config = $config;
     }
 
     /**
@@ -115,7 +123,6 @@ class Quote implements QuoteProductInterface
      */
     private function quote(ProductInterface $product, string $postcode, int $qty = 1, $options = []): array
     {
-        /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty, $options);
         $this->rateRequestProvider->setRateRequest($rateRequest);
         $services = $this->calculator->getQuote();
@@ -132,7 +139,6 @@ class Quote implements QuoteProductInterface
     {
         $result = [];
 
-        /** @var ServiceInterface $service */
         foreach ($services as $service) {
             if (true === $service->isError()) {
                 continue;
@@ -148,16 +154,19 @@ class Quote implements QuoteProductInterface
      * @param ServiceInterface $service
      *
      * @return array
+     * @throws LocalizedException
      */
     private function prepareService(ServiceInterface $service): array
     {
         $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
+        $forecast = str_replace('{{d}}', $deliveryTime, $this->config->getShippingForecastMessage());
 
         return [
             'service_code' => $service->getServiceCode(),
             'carrier' => $service->getCarrier(),
             'message' => $service->getMessage(),
             'delivery_time' => $deliveryTime,
+            'delivery_description' => $forecast,
             'service_description' => $service->getServiceDescription(),
             'shipping_price' => $service->getShippingPrice(),
         ];

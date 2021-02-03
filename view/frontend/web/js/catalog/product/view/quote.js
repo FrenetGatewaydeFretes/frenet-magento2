@@ -117,7 +117,6 @@ define([
             $(this.loader).trigger('processStop');
         },
         appendRate: function (index, rate) {
-            rate.delivery_time = $.mage.__('{0} day(s)').replace('{0}', rate.delivery_time);
             rate.shipping_price = this.formatPrice(rate.shipping_price);
             this.rates.push(rate);
         },
