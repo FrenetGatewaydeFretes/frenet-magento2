@@ -7,21 +7,20 @@
             "url": "https://repo.magento.com/"
         }
     ],
-    "version": "2.2.5",
     "require": {
-        "php": ">=7.0.0",
+        "php": "^7.0",
         "frenet/frenet-php": "^1.1.0",
-        "symfony/finder": "*",
-        "magento/framework": ">=101.0.4",
-        "magento/module-catalog": ">=102.0.4",
-        "magento/module-quote": ">=101.0.3",
-        "magento/module-shipping": ">=100.2.4",
-        "magento/module-directory": ">=100.2.3",
-        "magento/module-bundle": ">=100.2.3",
-        "magento/module-grouped-product": ">=100.2.2",
-        "magento/module-configurable-product": ">=100.2.4",
-        "magento/module-downloadable": ">=100.2.3",
-        "magento/module-store": ">=100.2.3"
+        "symfony/finder": "^v5.0.0",
+        "magento/framework": "^101.0.4",
+        "magento/module-catalog": "^102.0.4",
+        "magento/module-quote": "^101.0.3",
+        "magento/module-shipping": "^100.2.4",
+        "magento/module-directory": "^100.2.3",
+        "magento/module-bundle": "^100.2.3",
+        "magento/module-grouped-product": "^100.2.2",
+        "magento/module-configurable-product": "^100.2.4",
+        "magento/module-downloadable": "^100.2.3",
+        "magento/module-store": "^100.2.3"
     },
     "require-dev": {
         "magento/magento-coding-standard": "~4.0.0",
@@ -29,6 +28,7 @@
         "phpmd/phpmd": "@stable",
         "phpunit/phpunit": "~6.5.0"
     },
+    "license": "proprietary",
     "suggest": {},
     "type": "magento2-module",
     "authors": [
