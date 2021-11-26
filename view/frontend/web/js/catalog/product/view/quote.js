@@ -19,7 +19,8 @@ define([
     'jquery/ui',
     'mage/translate',
     'loader',
-    'domReady'
+    'domReady',
+    'mage/validation'
 ], function ($, ko, uiElement, priceUtils) {
     'use strict';
 
@@ -39,6 +40,12 @@ define([
         form: '#product_addtocart_form',
         updateRates: function () {
             if (!this.active()) {
+                return;
+            }
+
+            /** Check if all options are selected before making the quote request. */
+            if (!$(this.form).valid()) {
+                this.reset();
                 return;
             }
 
