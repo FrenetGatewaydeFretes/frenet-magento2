@@ -179,7 +179,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     {
         if (!$this->canCollectRates()) {
             $errorMessage = $this->getErrorMessage();
-            $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
+            $this->_logger->debug("Frenet canCollectRates: {$errorMessage->getErrorMessage()}");
 
             return $errorMessage;
         }
