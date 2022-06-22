@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Frenet Shipping Gateway
  *
@@ -82,7 +83,12 @@ class RateRequestBuilder
         $quote->getShippingAddress()->setPostcode($postcode);
 
         $request = $this->prepareProductRequest($product, $qty, $options);
+        // Options fix error
+        if ($options && isset($options['options'])) {
+            $request->setData('options', $options['options']);
+        }
         $quote->addProduct($product, $request);
+
         $this->fixQuoteItems($quote);
 
         /** @var RateRequest $rateRequest */
