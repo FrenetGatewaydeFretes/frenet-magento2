@@ -140,8 +140,16 @@ class PackageProcessor
      */
     private function callService(): array
     {
+        $requestOptions = [];
+        if ($timeout = (int) $this->config->getCarrierConfig('timeout')) {
+            $requestOptions['timeout'] = $timeout;
+        }
+
         /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
-        $result = $this->serviceQuote->execute();
+        $result = $this->serviceQuote
+            ->setRequestOptions($requestOptions)
+            ->execute();
+
         $services = $result->getShippingServices();
 
         return $services ?: [];
