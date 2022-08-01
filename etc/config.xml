@@ -38,6 +38,7 @@
                 <sallowspecific>0</sallowspecific>
                 <show_shipping_forecast>1</show_shipping_forecast>
                 <shipping_forecast_message>{{d}} dia(s)</shipping_forecast_message>
+                <timeout>0</timeout>
 
                 <!-- ATTRIBUTES MAPPING -->
                 <attributes_mapping>

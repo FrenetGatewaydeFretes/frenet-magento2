@@ -46,6 +46,10 @@
                         <field id="show_shipping_forecast">1</field>
                     </depends>
                 </field>
+                <field id="timeout" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Timeout (in seconds)</label>
+                    <comment>Kill the request after the specified time to prevent checkout crashes. Use 0 to disable this.</comment>
+                </field>
 
                 <!-- MULTI QUOTE ENABLED -->
                 <field id="multi_quote" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">

@@ -41,3 +41,5 @@
 "(Installed via Composer)","(Instalado via Composer)"
 "(Installed in app/code)","(Instalado em app/code)"
 "Unknown Module Version","Versão Desconhecida"
+"Timeout (in seconds)","Timeout (em segundos)"
+"Kill the request after the specified time to prevent checkout crashes. Use 0 to disable this.","Mata a requisição após o tempo especificado para prevenir que o checkout saia do ar em caso de indisponibilidade da API. Use 0 para desabilitar esse recurso."
