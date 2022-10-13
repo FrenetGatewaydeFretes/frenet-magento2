@@ -19,11 +19,13 @@ use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Model\Packages\PackageLimit;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Shipping\Model\FrenetMagentoAbstract;
+use \Psr\Log\LoggerInterface;
 
 /**
  * Class MultiQuoteValidator
  */
-class MultiQuoteValidator implements MultiQuoteValidatorInterface
+class MultiQuoteValidator extends FrenetMagentoAbstract implements MultiQuoteValidatorInterface
 {
     /**
      * @var Config
@@ -40,11 +42,19 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
      */
     private $rateRequestProvider;
 
+    /**
+     * @param Config                    $config
+     * @param PackageLimit              $packageLimit
+     * @param RateRequestProvider       $rateRequestProvider
+     * @param \Psr\Log\LoggerInterface  $logger
+     */
     public function __construct(
         Config $config,
         PackageLimit $packageLimit,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProvider $rateRequestProvider,
+        \Psr\Log\LoggerInterface $logger
     ) {
+        parent::__construct($logger);
         $this->config = $config;
         $this->packageLimit = $packageLimit;
         $this->rateRequestProvider = $rateRequestProvider;
@@ -55,6 +65,7 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
      */
     public function canProcessMultiQuote(): bool
     {
+        $this->_logger->debug("multi-quote-pre-canProcessMultiQuote: ");//.var_export($this->rateRequestProvider, true));
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
 

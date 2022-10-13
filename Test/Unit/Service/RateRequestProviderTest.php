@@ -19,13 +19,26 @@ use Frenet\Shipping\Test\Unit\TestCase;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\MockObject\MockObject;
+use \Psr\Log\LoggerInterface;
 
 class RateRequestProviderTest extends TestCase
 {
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $_logger;
+
     /**
      * @var RateRequestProvider
      */
     private $rateRequestProvider;
+
+    public function __construct(
+        \Psr\Log\LoggerInterface $logger
+    ) {
+        $this->_logger = $logger;
+    }
 
     protected function setUp()
     {
@@ -50,6 +63,7 @@ class RateRequestProviderTest extends TestCase
      */
     public function getRateRequest()
     {
+        $this->_logger->debug("rate-request-provider-pre-getRateRequest: ");//.var_export($this->rateRequestProvider, true));
         /** @var RateRequest | MockObject $rateRequest */
         $rateRequest = $this->createMock(RateRequest::class);
         $rateRequest->method('getData')->willReturn(9.9988);

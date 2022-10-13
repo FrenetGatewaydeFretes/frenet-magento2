@@ -16,13 +16,15 @@ namespace Frenet\Shipping\Service;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
+use Frenet\Shipping\Model\FrenetMagentoAbstract;
+use \Psr\Log\LoggerInterface;
 
 /**
  * Class RateRequestProvider
  *
  * @package Frenet\Shipping\Service
  */
-class RateRequestProvider
+class RateRequestProvider extends FrenetMagentoAbstract
 {
     /**
      * @var RateRequest
@@ -34,9 +36,15 @@ class RateRequestProvider
      */
     private $rateRequestFactory;
 
+    /**
+     * @param RateRequestFactory        $rateRequestFactory
+     * @param \Psr\Log\LoggerInterface  $logger
+     */
     public function __construct(
-        RateRequestFactory $rateRequestFactory
+        RateRequestFactory $rateRequestFactory,
+        \Psr\Log\LoggerInterface $logger
     ) {
+        parent::__construct($logger);
         $this->rateRequestFactory = $rateRequestFactory;
     }
 
@@ -65,6 +73,7 @@ class RateRequestProvider
      */
     public function getRateRequest(): RateRequest
     {
+        $this->_logger->debug("rate-request-pre-getRateRequest: ");//.var_export($this->rateRequestProvider, true));
         if ($this->rateRequest) {
             return $this->rateRequest;
         }

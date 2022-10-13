@@ -19,11 +19,13 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Frenet\Shipping\Model\FrenetMagentoAbstract;
+use \Psr\Log\LoggerInterface;
 
 /**
  * Class PackagesDistributor
  */
-class PackagesCalculator
+class PackagesCalculator extends FrenetMagentoAbstract
 {
     /**
      * @var PackageManager
@@ -55,14 +57,26 @@ class PackagesCalculator
      */
     private $rateRequestProvider;
 
+
+    /**
+     * @param MultiQuoteValidatorInterface $multiQuoteValidator
+     * @param PackageProcessor $packageProcessor
+     * @param PackageManager $packagesManager
+     * @param PackageLimit $packageLimit
+     * @param PackageMatching $packageMatching
+     * @param RateRequestProvider $rateRequestProvider
+     * @param \Psr\Log\LoggerInterface $logger
+     */
     public function __construct(
         MultiQuoteValidatorInterface $multiQuoteValidator,
         PackageProcessor $packageProcessor,
         PackageManager $packagesManager,
         PackageLimit $packageLimit,
         PackageMatching $packageMatching,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProvider $rateRequestProvider,
+        \Psr\Log\LoggerInterface $logger
     ) {
+        parent::__construct($logger);
         $this->packageManager = $packagesManager;
         $this->multiQuoteValidator = $multiQuoteValidator;
         $this->packageLimit = $packageLimit;
@@ -77,7 +91,11 @@ class PackagesCalculator
     public function calculate()
     {
         /** @var RateRequest $rateRequest */
+        $this->_logger->debug("packages-calculator:pre-calculate: ");//.var_export($this->rateRequestProvider, true));
         $rateRequest = $this->rateRequestProvider->getRateRequest();
+        $this->_logger->debug("calculate: ".var_export($rateRequest, true));
+        return [];
+
         $this->packageManager->resetPackages();
 
         /**

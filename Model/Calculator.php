@@ -17,11 +17,12 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Service\RateRequestProvider;
+use \Psr\Log\LoggerInterface;
 
 /**
  * Class Calculator
  */
-class Calculator implements CalculatorInterface
+class Calculator extends FrenetMagentoAbstract implements CalculatorInterface
 {
     /**
      * @var CacheManager
@@ -43,12 +44,16 @@ class Calculator implements CalculatorInterface
      *
      * @param CacheManager                $cacheManager
      * @param Packages\PackagesCalculator $packagesCalculator
+     * @param RateRequestProvider         $rateRequestProvider
+     * @param \Psr\Log\LoggerInterface    $logger
      */
     public function __construct(
         CacheManager $cacheManager,
         Packages\PackagesCalculator $packagesCalculator,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProvider $rateRequestProvider,
+        \Psr\Log\LoggerInterface $logger
     ) {
+        parent::__construct($logger);
         $this->cacheManager = $cacheManager;
         $this->packagesCalculator = $packagesCalculator;
         $this->rateRequestProvider = $rateRequestProvider;
@@ -60,12 +65,17 @@ class Calculator implements CalculatorInterface
     public function getQuote(): array
     {
         $result = $this->cacheManager->load();
+        $this->_logger->debug("getQuote:cacheManager->load");
+        // $this->_logger->debug(var_export($result, true));
         if ($result) {
+            $this->_logger->debug("getQuote:withcache result");
             return $result;
         }
 
         /** @var Service[] $services */
         $services = $this->packagesCalculator->calculate();
+        $this->_logger->debug("services: ".var_export($services, true));
+        return [];
 
         foreach ($services as $service) {
             $this->processService($service);
