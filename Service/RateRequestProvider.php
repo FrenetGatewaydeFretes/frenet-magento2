@@ -53,6 +53,7 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function createRateRequest()
     {
+        $this->_logger->debug("rate-request-pos-createRateRequest");
         return $this->rateRequestFactory->create();
     }
 
@@ -63,6 +64,7 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function setRateRequest(RateRequest $rateRequest): self
     {
+        $this->_logger->debug("rate-request-pos-setRateRequest");
         $this->rateRequest = $rateRequest;
         return $this;
     }
@@ -75,9 +77,11 @@ class RateRequestProvider extends FrenetMagentoAbstract
     {
         $this->_logger->debug("rate-request-pre-getRateRequest: ");//.var_export($this->rateRequestProvider, true));
         if ($this->rateRequest) {
+            $this->_logger->debug("rate-request-pos-getRateRequest".var_export(debug_backtrace(), true));
             return $this->rateRequest;
         }
 
+        $this->_logger->debug("rate-request-notfound-getRateRequest: ");
         throw new LocalizedException(__('Rate Request is not set.'));
     }
 
@@ -86,6 +90,7 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function clear(): self
     {
+        $this->_logger->debug("rate-request-pos-clear");
         $this->rateRequest = null;
         return $this;
     }

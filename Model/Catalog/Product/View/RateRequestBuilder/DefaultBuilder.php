@@ -16,18 +16,32 @@ namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
+use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Model\FrenetMagentoAbstract;
+use \Psr\Log\LoggerInterface;
 
 /**
  * Class DefaultBuilder
  */
-class DefaultBuilder implements BuilderInterface
+class DefaultBuilder extends FrenetMagentoAbstract implements BuilderInterface
 {
+
+    /**
+     * @param \Psr\Log\LoggerInterface    $logger
+     */
+    public function __construct(
+        \Psr\Log\LoggerInterface $logger
+    ) {
+        parent::__construct($logger);
+    }
+
     /**
      * @inheritDoc
      * @codingStandardsIgnoreStart
      */
     public function build(ProductInterface $product, DataObject $request, array $options = [])
     {
+        $this->_logger->debug("default-builder-buid-pre");
         //@codingStandardsIgnoreEnd
     }
 }

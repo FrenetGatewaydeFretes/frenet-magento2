@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Model\FrenetMagentoAbstract;
 use \Psr\Log\LoggerInterface;
 
 /**
