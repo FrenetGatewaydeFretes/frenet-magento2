@@ -12,6 +12,9 @@
   -->
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Frenet\Command\Shipping\QuoteInterface" type="Frenet\Command\Shipping\Quote"/>
+
+
     <preference for="Frenet\Shipping\Model\ApiServiceInterface" type="Frenet\Shipping\Model\ApiService"/>
     <preference for="Frenet\Shipping\Model\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>
     <preference for="Frenet\Shipping\Model\WeightConverterInterface" type="Frenet\Shipping\Model\WeightConverter"/>

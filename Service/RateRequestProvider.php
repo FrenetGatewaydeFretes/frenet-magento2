@@ -75,13 +75,10 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function getRateRequest(): RateRequest
     {
-        $this->_logger->debug("rate-request-pre-getRateRequest: ");//.var_export($this->rateRequestProvider, true));
         if ($this->rateRequest) {
-            $this->_logger->debug("rate-request-pos-getRateRequest".var_export(debug_backtrace(), true));
             return $this->rateRequest;
         }
 
-        $this->_logger->debug("rate-request-notfound-getRateRequest: ");
         throw new LocalizedException(__('Rate Request is not set.'));
     }
 

@@ -93,9 +93,6 @@ class PackagesCalculator extends FrenetMagentoAbstract
         /** @var RateRequest $rateRequest */
         $this->_logger->debug("packages-calculator:pre-calculate: ");//.var_export($this->rateRequestProvider, true));
         $rateRequest = $this->rateRequestProvider->getRateRequest();
-        $this->_logger->debug("calculate: ".var_export($rateRequest, true));
-        return [];
-
         $this->packageManager->resetPackages();
 
         /**
