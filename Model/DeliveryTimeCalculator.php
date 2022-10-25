@@ -18,14 +18,12 @@ use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Catalog\Model\Product;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
 
 /**
  * Class DeliveryTimeCalculator
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-class DeliveryTimeCalculator extends FrenetMagentoAbstract
+class DeliveryTimeCalculator
 {
     /**
      * @var \Frenet\Shipping\Model\Config
@@ -54,16 +52,13 @@ class DeliveryTimeCalculator extends FrenetMagentoAbstract
      * @param \Magento\Store\Model\StoreManagerInterface   $storeManagement
      * @param Config                                       $config
      * @param RateRequestProvider                          $rateRequestProvider
-     * @param \Psr\Log\LoggerInterface                     $logger
      */
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Product $productResource,
         \Magento\Store\Model\StoreManagerInterface $storeManagement,
         \Frenet\Shipping\Model\Config $config,
-        RateRequestProvider $rateRequestProvider,
-        \Psr\Log\LoggerInterface $logger
+        RateRequestProvider $rateRequestProvider
     ) {
-        parent::__construct($logger);
         $this->productResource = $productResource;
         $this->storeManagement = $storeManagement;
         $this->config = $config;
@@ -78,7 +73,6 @@ class DeliveryTimeCalculator extends FrenetMagentoAbstract
      */
     public function calculate(ServiceInterface $service)
     {
-        $this->_logger->debug("deliverytime-calculator:pre-calculate: ");//.var_export($this->rateRequestProvider, true));
         $rateRequest = $this->rateRequestProvider->getRateRequest();
         $serviceForecast = $service->getDeliveryTime();
         $maxProductForecast = 0;

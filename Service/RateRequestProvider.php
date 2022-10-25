@@ -16,15 +16,13 @@ namespace Frenet\Shipping\Service;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
 
 /**
  * Class RateRequestProvider
  *
  * @package Frenet\Shipping\Service
  */
-class RateRequestProvider extends FrenetMagentoAbstract
+class RateRequestProvider
 {
     /**
      * @var RateRequest
@@ -36,15 +34,9 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     private $rateRequestFactory;
 
-    /**
-     * @param RateRequestFactory        $rateRequestFactory
-     * @param \Psr\Log\LoggerInterface  $logger
-     */
     public function __construct(
-        RateRequestFactory $rateRequestFactory,
-        \Psr\Log\LoggerInterface $logger
+        RateRequestFactory $rateRequestFactory
     ) {
-        parent::__construct($logger);
         $this->rateRequestFactory = $rateRequestFactory;
     }
 
@@ -53,7 +45,6 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function createRateRequest()
     {
-        $this->_logger->debug("rate-request-pos-createRateRequest");
         return $this->rateRequestFactory->create();
     }
 
@@ -64,7 +55,6 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function setRateRequest(RateRequest $rateRequest): self
     {
-        $this->_logger->debug("rate-request-pos-setRateRequest");
         $this->rateRequest = $rateRequest;
         return $this;
     }
@@ -87,7 +77,6 @@ class RateRequestProvider extends FrenetMagentoAbstract
      */
     public function clear(): self
     {
-        $this->_logger->debug("rate-request-pos-clear");
         $this->rateRequest = null;
         return $this;
     }

@@ -18,14 +18,12 @@ use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculator;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
 
 /**
  * Class PackageItemDistributor
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-class PackageItemDistributor extends FrenetMagentoAbstract
+class PackageItemDistributor
 {
     /**
      * @var QuoteItemValidatorInterface
@@ -42,19 +40,11 @@ class PackageItemDistributor extends FrenetMagentoAbstract
      */
     private $rateRequestProvider;
 
-    /**
-     * @param QuoteItemValidatorInterface   $quoteItemValidator,
-     * @param ItemQuantityCalculator        $itemQuantityCalculator,
-     * @param RateRequestProvider           $rateRequestProvider,
-     * @param \Psr\Log\LoggerInterface      $logger
-     */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         ItemQuantityCalculator $itemQuantityCalculator,
-        RateRequestProvider $rateRequestProvider,
-        \Psr\Log\LoggerInterface $logger
+        RateRequestProvider $rateRequestProvider
     ) {
-        parent::__construct($logger);
         $this->quoteItemValidator = $quoteItemValidator;
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->rateRequestProvider = $rateRequestProvider;
@@ -73,7 +63,6 @@ class PackageItemDistributor extends FrenetMagentoAbstract
      */
     private function getUnitItems(): array
     {
-        $this->_logger->debug("packages-item-distributor:getunitItems: ");//.var_export($this->rateRequestProvider, true));
         $rateRequest = $this->rateRequestProvider->getRateRequest();
         $unitItems = [];
 

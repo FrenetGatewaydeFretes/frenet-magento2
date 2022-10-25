@@ -20,10 +20,8 @@ use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Framework\Serialize\SerializerInterface;
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
 
-class PostcodeGenerator extends FrenetMagentoAbstract implements CacheKeyGeneratorInterface
+class PostcodeGenerator implements CacheKeyGeneratorInterface
 {
     /**
      * @var RateRequestProvider
@@ -45,21 +43,12 @@ class PostcodeGenerator extends FrenetMagentoAbstract implements CacheKeyGenerat
      */
     private $postcodeNormalizer;
 
-    /**
-     * @param PostcodeNormalizer        $postcodeNormalizer
-     * @param SerializerInterface       $serializer
-     * @param RateRequestProvider       $requestProvider
-     * @param Config                    $config
-     * @param \Psr\Log\LoggerInterface  $logger
-     */
     public function __construct(
         PostcodeNormalizer $postcodeNormalizer,
         SerializerInterface $serializer,
         RateRequestProvider $requestProvider,
-        Config $config,
-        \Psr\Log\LoggerInterface $logger
+        Config $config
     ) {
-        parent::__construct($logger);
         $this->serializer = $serializer;
         $this->requestProvider = $requestProvider;
         $this->config = $config;
@@ -71,7 +60,6 @@ class PostcodeGenerator extends FrenetMagentoAbstract implements CacheKeyGenerat
      */
     public function generate()
     {
-        $this->_logger->debug("postcode-generator:pre-calculate: ");//.var_export($this->rateRequestProvider, true));
         $destPostcode = $this->requestProvider->getRateRequest()->getDestPostcode();
         $origPostcode = $this->config->getOriginPostcode();
 

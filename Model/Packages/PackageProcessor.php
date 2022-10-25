@@ -21,13 +21,11 @@ use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Model\TotalsCollector;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
 
 /**
  * Class PackageProcessor
  */
-class PackageProcessor extends FrenetMagentoAbstract
+class PackageProcessor
 {
     /**
      * @var ApiServiceInterface
@@ -64,25 +62,14 @@ class PackageProcessor extends FrenetMagentoAbstract
      */
     private $totalsCollector;
 
-    /**
-     * @param QuoteItemValidatorInterface   $quoteItemValidator
-     * @param Config                        $config
-     * @param ApiServiceInterface           $apiService
-     * @param RateRequestProvider           $rateRequestProvider
-     * @param CouponProcessor               $quoteCouponProcessor
-     * @param TotalsCollector               $totalsCollector
-     * @param \Psr\Log\LoggerInterface      $logger
-     */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         Config $config,
         ApiServiceInterface $apiService,
         RateRequestProvider $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor,
-        TotalsCollector $totalsCollector,
-        \Psr\Log\LoggerInterface $logger
+        TotalsCollector $totalsCollector
     ) {
-        parent::__construct($logger);
         $this->apiService = $apiService;
         $this->quoteItemValidator = $quoteItemValidator;
         $this->config = $config;
@@ -165,7 +152,6 @@ class PackageProcessor extends FrenetMagentoAbstract
      */
     private function initServiceQuote(): self
     {
-        $this->_logger->debug("packages-processor:pre-initServiceQuote: ");//.var_export($this->rateRequestProvider, true));
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
 

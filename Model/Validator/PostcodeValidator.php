@@ -15,13 +15,10 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Validator;
 
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
-
 /**
  * Class PostcodeValidator
  */
-class PostcodeValidator extends FrenetMagentoAbstract
+class PostcodeValidator
 {
     /**
      * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
@@ -29,10 +26,8 @@ class PostcodeValidator extends FrenetMagentoAbstract
     private $postcodeNormalizer;
 
     public function __construct(
-        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer,
-        \Psr\Log\LoggerInterface $logger
+        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer
     ) {
-        parent::__construct($logger);
         $this->postcodeNormalizer = $postcodeNormalizer;
     }
 
@@ -43,7 +38,6 @@ class PostcodeValidator extends FrenetMagentoAbstract
      */
     public function validate(string $postcode = null): bool
     {
-        $this->_logger->debug("postcode-validator-validate-pre");
         if (empty($postcode)) {
             return false;
         }

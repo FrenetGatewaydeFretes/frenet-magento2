@@ -16,13 +16,11 @@ namespace Frenet\Shipping\Model\Quote;
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Frenet\Shipping\Model\FrenetMagentoAbstract;
-use \Psr\Log\LoggerInterface;
 
 /**
  * Class QuoteCouponProcessor
  */
-class CouponProcessor extends FrenetMagentoAbstract
+class CouponProcessor
 {
     /**
      * @var CheckoutSession
@@ -37,16 +35,12 @@ class CouponProcessor extends FrenetMagentoAbstract
     /**
      * CouponProcessor constructor.
      *
-     * @param CheckoutSession           $checkoutSession
-     * @param RateRequestProvider       $requestProvider
-     * @param \Psr\Log\LoggerInterface  $logger
+     * @param CheckoutSession $checkoutSession
      */
     public function __construct(
         CheckoutSession $checkoutSession,
-        RateRequestProvider $requestProvider,
-        \Psr\Log\LoggerInterface $logger
+        RateRequestProvider $requestProvider
     ) {
-        parent::__construct($logger);
         $this->checkoutSession = $checkoutSession;
         $this->requestProvider = $requestProvider;
     }
@@ -98,7 +92,6 @@ class CouponProcessor extends FrenetMagentoAbstract
          * When this occurs the message "Request Rate is not set" is displayed when placing order.
          * This is a workaround to solve the problem.
          */
-        $this->_logger->debug("coupon-processor:pre-getQuote: ");//.var_export($this->rateRequestProvider, true));
         $allItems = $this->requestProvider->getRateRequest()->getAllItems();
         /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
         foreach ($allItems as $item) {

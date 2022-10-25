@@ -177,31 +177,26 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     public function collectRates(RateRequest $request)
     {
-        try {
-            if (!$this->canCollectRates()) {
-                $errorMessage = $this->getErrorMessage();
-                $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
+        if (!$this->canCollectRates()) {
+            $errorMessage = $this->getErrorMessage();
+            $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
 
-                return $errorMessage;
-            }
-
-            /** This service will be used all the way long. */
-            $this->rateRequestProvider->setRateRequest($request);
-            $results = $this->calculator->getQuote();
-
-            /** @var array $results */
-            if (!$results) {
-                $this->rateRequestProvider->clear();
-                return $this->result;
-            }
-
-            $this->prepareResult($results);
-
-            $this->rateRequestProvider->clear();
-        } catch (\RuntimeException $e) {
-            $messageError = $e->getMessage();
-            $this->_logger->debug($messageError);
+            return $errorMessage;
         }
+
+        /** This service will be used all the way long. */
+        $this->rateRequestProvider->setRateRequest($request);
+        $results = $this->calculator->getQuote();
+
+        /** @var array $results */
+        if (!$results) {
+            $this->rateRequestProvider->clear();
+            return $this->result;
+        }
+
+        $this->prepareResult($results);
+
+        $this->rateRequestProvider->clear();
 
         return $this->result;
     }
@@ -513,6 +508,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function getDeliveryTimeMessage($deliveryTime = 0)
     {
-        return str_replace('{{d}}', "".$deliveryTime, $this->config->getShippingForecastMessage());
+        return str_replace('{{d}}', (int) $deliveryTime, $this->config->getShippingForecastMessage());
     }
 }
