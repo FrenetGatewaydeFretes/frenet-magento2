@@ -177,28 +177,37 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     public function collectRates(RateRequest $request)
     {
-        if (!$this->canCollectRates()) {
-            $errorMessage = $this->getErrorMessage();
-            $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
+        try {
+            
+            if (!$this->canCollectRates()) {
+                $errorMessage = $this->getErrorMessage();
+                $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
 
-            return $errorMessage;
-        }
+                return $errorMessage;
+            }
 
-        /** This service will be used all the way long. */
-        $this->rateRequestProvider->setRateRequest($request);
-        $results = $this->calculator->getQuote();
+            /** This service will be used all the way long. */
+            $this->rateRequestProvider->setRateRequest($request);
+            $results = $this->calculator->getQuote();
 
-        /** @var array $results */
-        if (!$results) {
+            /** @var array $results */
+            if (!$results) {
+                $this->rateRequestProvider->clear();
+                return $this->result;
+            }
+
+            $this->prepareResult($results);
+
             $this->rateRequestProvider->clear();
+
             return $this->result;
+        } catch (Exception $e) {
+            $errorMessage = $e->getMessage();
+            $errorStack = $e->getTraceAsString();
+            $this->_logger->critical("Error Frenet canCollectRates: " . $errorMessage." > ". $errorStack);
         }
 
-        $this->prepareResult($results);
-
-        $this->rateRequestProvider->clear();
-
-        return $this->result;
+        return null;
     }
 
     /**
