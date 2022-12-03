@@ -517,6 +517,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function getDeliveryTimeMessage($deliveryTime = 0)
     {
-        return str_replace('{{d}}', "".$deliveryTime, $this->config->getShippingForecastMessage());
+        $find = array('{{d}}');
+        $replace = array("".$deliveryTime);
+        $inputValue = array($this->config->getShippingForecastMessage());
+        $result = str_replace($find, $replace, $inputValue);
+        return $result;
     }
 }

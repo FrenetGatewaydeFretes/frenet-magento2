@@ -158,8 +158,12 @@ class Quote implements QuoteProductInterface
      */
     private function prepareService(ServiceInterface $service): array
     {
-        $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
-        $forecast = str_replace('{{d}}', $deliveryTime, $this->config->getShippingForecastMessage());
+            $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
+            $find = array('{{d}}');
+            $replace = array($deliveryTime);
+            $inputValue = array($this->config->getShippingForecastMessage());
+
+            $forecast = str_replace($find, $replace, $inputValue);
 
         return [
             'service_code' => $service->getServiceCode(),
