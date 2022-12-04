@@ -86,9 +86,11 @@ class Calculator implements CalculatorInterface
      */
     private function processService(Service $service): Service
     {
+        $serviceDescription = $service->getServiceDescription();
+        if (is_array($serviceDescription)) $serviceDescription = implode(" ", $serviceDescription);
         $find = array('|');
         $replace = array("\n");
-        $inputValue = array("".$service->getServiceDescription());
+        $inputValue = array($serviceDescription);
         $result = str_replace($find, $replace, $inputValue);
 
         $service->setData('service_description', $result );

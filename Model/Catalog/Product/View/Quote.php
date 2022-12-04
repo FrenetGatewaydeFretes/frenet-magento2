@@ -159,11 +159,14 @@ class Quote implements QuoteProductInterface
     private function prepareService(ServiceInterface $service): array
     {
             $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
-            $find = array('{{d}}');
-            $replace = array($deliveryTime);
-            $inputValue = array($this->config->getShippingForecastMessage());
 
-            $forecast = str_replace($find, $replace, $inputValue);
+            $pattern = '/\{\{d\}\}/i';
+            $replacement = "".$deliveryTime;
+            $subject = $this->config->getShippingForecastMessage();
+            $forecast = preg_replace($pattern, $replacement, $subject);
+
+            $serviceDescription = $service->getServiceDescription();
+            if (is_array($serviceDescription)) $serviceDescription = implode(" ", $serviceDescription);
 
         return [
             'service_code' => $service->getServiceCode(),
@@ -171,7 +174,7 @@ class Quote implements QuoteProductInterface
             'message' => $service->getMessage(),
             'delivery_time' => $deliveryTime,
             'delivery_description' => $forecast,
-            'service_description' => $service->getServiceDescription(),
+            'service_description' => $serviceDescription,
             'shipping_price' => $service->getShippingPrice(),
         ];
     }

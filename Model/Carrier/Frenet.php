@@ -403,16 +403,19 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             }
 
             $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
+            $serviceDescription = $service->getServiceDescription();
+            if (is_array($serviceDescription)) $serviceDescription = implode(" ", $service->getServiceDescription());
+            $serviceMessage = "".$service->getMessage();
 
             $title = $this->appendInformation(
-                $service->getServiceDescription(),
+                $serviceDescription,
                 $deliveryTime,
-                $service->getMessage()
+                $serviceMessage
             );
 
             $description = $this->prepareMethodDescription(
                 $service->getCarrier(),
-                $service->getServiceDescription(),
+                $serviceDescription,
                 $deliveryTime
             );
 
@@ -517,10 +520,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function getDeliveryTimeMessage($deliveryTime = 0)
     {
-        $find = array('{{d}}');
-        $replace = array("".$deliveryTime);
-        $inputValue = array($this->config->getShippingForecastMessage());
-        $result = str_replace($find, $replace, $inputValue);
+        // dias {{d}} ao inves de {{d}} aaadd
+        $pattern = '/\{\{d\}\}/i';
+        $replacement = "".$deliveryTime;
+        $subject = $this->config->getShippingForecastMessage();
+        $result = preg_replace($pattern, $replacement, $subject);
         return $result;
     }
 }
