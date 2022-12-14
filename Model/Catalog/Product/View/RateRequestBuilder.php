@@ -80,32 +80,26 @@ class RateRequestBuilder
     {
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
-        $request = $this->prepareProductRequest($product, $qty, $options);
-		
+        $request = $this->prepareProductRequest($product, $qty, $options);		
         $rs = $quote->addProduct($product, $request);
-
-		if (is_string($rs)) {
-			throw new \Magento\Framework\Exception\LocalizedException(
-				__($rs)
-			);
-		}
-
         $this->fixQuoteItems($quote);
-
-        /** @var RateRequest $rateRequest */
-        $rateRequest = $this->rateRequestFactory->create();
 		$allitems = $quote->getAllItems();
 
-		if (count($allitems) == 0) {
-			$quoteItem = $quote->getItemByProduct($product);
-			if (is_bool($quoteItem)) {
+		if (count($allitems) == 0) {			
+			$request = $this->prepareProductOptionRequest($product, $qty, $options);		
+        	$rs = $quote->addProduct($product, $request);
+			if (is_string($rs)) {
 				throw new \Magento\Framework\Exception\LocalizedException(
-					__('inclusão do produto falhou')
+					__($rs)
 				);
 			}
-			$allitems = [ $quoteItem ];
+	
+			$this->fixQuoteItems($quote);
+			$allitems = $quote->getAllItems();
 		}
 
+		/** @var RateRequest $rateRequest */
+		$rateRequest = $this->rateRequestFactory->create();
         $rateRequest->setAllItems($allitems);
         $rateRequest->setDestPostcode($postcode);
         $rateRequest->setDestCountryId('BR');
@@ -148,20 +142,17 @@ class RateRequestBuilder
         return $weight * $qty;
     }
 
-    /**
+	/**
      * @param ProductInterface $product
      * @param int              $qty
      * @param array            $options
      *
      * @return DataObject
      */
-    private function prepareProductRequest(ProductInterface $product, int $qty = 1, array $options = []): DataObject
+    private function prepareProductOptionRequest(ProductInterface $product, int $qty = 1, array $options = []): DataObject
     {
         /** @var DataObject $request */
         $request = $this->dataObjectFactory->create();
-        
-        $this->getBuilder($product->getTypeId())->build($product, $request, $options);
-				
 		if (isset($options['options']) && !empty($options['options'])) {   
 			// sync options: https://magento.stackexchange.com/questions/286402/error-exception-message-the-products-required-options-werent-entered-make
 			$optionsRequest = $options["options"];
@@ -175,9 +166,24 @@ class RateRequestBuilder
 
 			$request->setData(['qty' => $qty, 'options' =>  $optionsValues]);
 		}
-		else {
-			$request->setData(['qty' => $qty]);
-		}
+
+        return $request;
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @param int              $qty
+     * @param array            $options
+     *
+     * @return DataObject
+     */
+    private function prepareProductRequest(ProductInterface $product, int $qty = 1, array $options = []): DataObject
+    {
+        /** @var DataObject $request */
+        $request = $this->dataObjectFactory->create();
+        $request->setData(['qty' => $qty]);
+
+        $this->getBuilder($product->getTypeId())->build($product, $request, $options);
 
         return $request;
     }
