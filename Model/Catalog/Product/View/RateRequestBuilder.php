@@ -80,22 +80,40 @@ class RateRequestBuilder
     {
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
-
         $request = $this->prepareProductRequest($product, $qty, $options);
-        $quote->addProduct($product, $request);
+		
+        $rs = $quote->addProduct($product, $request);
+
+		if (is_string($rs)) {
+			throw new \Magento\Framework\Exception\LocalizedException(
+				__($rs)
+			);
+		}
+
         $this->fixQuoteItems($quote);
 
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestFactory->create();
+		$allitems = $quote->getAllItems();
 
-        $rateRequest->setAllItems($quote->getAllItems());
+		if (count($allitems) == 0) {
+			$quoteItem = $quote->getItemByProduct($product);
+			if (is_bool($quoteItem)) {
+				throw new \Magento\Framework\Exception\LocalizedException(
+					__('inclusão do produto falhou')
+				);
+			}
+			$allitems = [ $quoteItem ];
+		}
+
+        $rateRequest->setAllItems($allitems);
         $rateRequest->setDestPostcode($postcode);
         $rateRequest->setDestCountryId('BR');
 
         $totalWeight = 0;
 
         /** @var QuoteItem $item */
-        foreach ($quote->getAllItems() as $item) {
+        foreach ($allitems as $item) {
             $totalWeight += $item->getRowWeight();
         }
 
@@ -141,9 +159,25 @@ class RateRequestBuilder
     {
         /** @var DataObject $request */
         $request = $this->dataObjectFactory->create();
-        $request->setData(['qty' => $qty]);
-
+        
         $this->getBuilder($product->getTypeId())->build($product, $request, $options);
+				
+		if (isset($options['options']) && !empty($options['options'])) {   
+			// sync options: https://magento.stackexchange.com/questions/286402/error-exception-message-the-products-required-options-werent-entered-make
+			$optionsRequest = $options["options"];
+			$objtManager = \Magento\Framework\App\ObjectManager::getInstance();
+			$customOptions = $objtManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($product);
+			
+			$optionsValues = [];
+			foreach ($customOptions->getItems() as $option) {
+				$optionsValues[$option->getId()] = $optionsRequest[$option->getId()];
+			}
+
+			$request->setData(['qty' => $qty, 'options' =>  $optionsValues]);
+		}
+		else {
+			$request->setData(['qty' => $qty]);
+		}
 
         return $request;
     }
