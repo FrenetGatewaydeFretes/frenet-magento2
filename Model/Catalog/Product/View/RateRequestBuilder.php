@@ -161,7 +161,9 @@ class RateRequestBuilder
 			
 			$optionsValues = [];
 			foreach ($customOptions->getItems() as $option) {
-				$optionsValues[$option->getId()] = $optionsRequest[$option->getId()];
+				if (array_key_exists($option->getId(), $optionsRequest)) {
+					$optionsValues[$option->getId()] = $optionsRequest[$option->getId()];
+				}
 			}
 
 			$request->setData(['qty' => $qty, 'options' =>  $optionsValues]);
