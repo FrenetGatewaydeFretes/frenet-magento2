@@ -404,7 +404,9 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
 
             $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
             $serviceDescription = $service->getServiceDescription();
-            if (is_array($serviceDescription)) $serviceDescription = implode(" ", $service->getServiceDescription());
+            if (is_array($serviceDescription)) {
+                $serviceDescription = implode(" ", $service->getServiceDescription());
+            }
             $serviceMessage = "".$service->getMessage();
 
             $title = $this->appendInformation(

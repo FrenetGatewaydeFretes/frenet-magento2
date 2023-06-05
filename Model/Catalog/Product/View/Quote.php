@@ -166,7 +166,9 @@ class Quote implements QuoteProductInterface
             $forecast = preg_replace($pattern, $replacement, $subject);
 
             $serviceDescription = $service->getServiceDescription();
-            if (is_array($serviceDescription)) $serviceDescription = implode(" ", $serviceDescription);
+        if (is_array($serviceDescription)) {
+            $serviceDescription = implode(" ", $serviceDescription);
+        }
 
         return [
             'service_code' => $service->getServiceCode(),

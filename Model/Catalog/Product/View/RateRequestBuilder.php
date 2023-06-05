@@ -80,26 +80,26 @@ class RateRequestBuilder
     {
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
-        $request = $this->prepareProductRequest($product, $qty, $options);		
+        $request = $this->prepareProductRequest($product, $qty, $options);
         $rs = $quote->addProduct($product, $request);
         $this->fixQuoteItems($quote);
-		$allitems = $quote->getAllItems();
+        $allitems = $quote->getAllItems();
 
-		if (count($allitems) == 0) {			
-			$request = $this->prepareProductOptionRequest($product, $qty, $options);		
-        	$rs = $quote->addProduct($product, $request);
-			if (is_string($rs)) {
-				throw new \Magento\Framework\Exception\LocalizedException(
-					__($rs)
-				);
-			}
-	
-			$this->fixQuoteItems($quote);
-			$allitems = $quote->getAllItems();
-		}
+        if (count($allitems) == 0) {
+            $request = $this->prepareProductOptionRequest($product, $qty, $options);
+            $rs = $quote->addProduct($product, $request);
+            if (is_string($rs)) {
+                throw new \Magento\Framework\Exception\LocalizedException(
+                    __($rs)
+                );
+            }
+    
+            $this->fixQuoteItems($quote);
+            $allitems = $quote->getAllItems();
+        }
 
-		/** @var RateRequest $rateRequest */
-		$rateRequest = $this->rateRequestFactory->create();
+        /** @var RateRequest $rateRequest */
+        $rateRequest = $this->rateRequestFactory->create();
         $rateRequest->setAllItems($allitems);
         $rateRequest->setDestPostcode($postcode);
         $rateRequest->setDestCountryId('BR');
@@ -142,7 +142,7 @@ class RateRequestBuilder
         return $weight * $qty;
     }
 
-	/**
+    /**
      * @param ProductInterface $product
      * @param int              $qty
      * @param array            $options
@@ -153,21 +153,21 @@ class RateRequestBuilder
     {
         /** @var DataObject $request */
         $request = $this->dataObjectFactory->create();
-		if (isset($options['options']) && !empty($options['options'])) {   
-			// sync options: https://magento.stackexchange.com/questions/286402/error-exception-message-the-products-required-options-werent-entered-make
-			$optionsRequest = $options["options"];
-			$objtManager = \Magento\Framework\App\ObjectManager::getInstance();
-			$customOptions = $objtManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($product);
-			
-			$optionsValues = [];
-			foreach ($customOptions->getItems() as $option) {
-				if (array_key_exists($option->getId(), $optionsRequest)) {
-					$optionsValues[$option->getId()] = $optionsRequest[$option->getId()];
-				}
-			}
+        if (isset($options['options']) && !empty($options['options'])) {
+            // sync options: https://magento.stackexchange.com/questions/286402/error-exception-message-the-products-required-options-werent-entered-make
+            $optionsRequest = $options["options"];
+            $objtManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $customOptions = $objtManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($product);
+            
+            $optionsValues = [];
+            foreach ($customOptions->getItems() as $option) {
+                if (array_key_exists($option->getId(), $optionsRequest)) {
+                    $optionsValues[$option->getId()] = $optionsRequest[$option->getId()];
+                }
+            }
 
-			$request->setData(['qty' => $qty, 'options' =>  $optionsValues]);
-		}
+            $request->setData(['qty' => $qty, 'options' =>  $optionsValues]);
+        }
 
         return $request;
     }
