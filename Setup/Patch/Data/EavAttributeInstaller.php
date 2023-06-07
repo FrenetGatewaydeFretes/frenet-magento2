@@ -16,11 +16,13 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Setup\Patch\Data;
 
 use Frenet\Shipping\Model\Catalog\ProductType;
+use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Console\Cli;
 
 /**
  * Class EavAttributeInstaller
  */
-abstract class EavAttributeInstaller
+class EavAttributeInstaller  implements DataPatchInterface
 {
     /**
      * @var \Psr\Log\LoggerInterface
@@ -44,6 +46,39 @@ abstract class EavAttributeInstaller
     ) {
         $this->setupFactory = $setupFactory;
         $this->logger = $logger;
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function apply()
+    {
+        return Cli::RETURN_SUCCESS;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getDependencies()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getVersion()
+    {
+        return '2.4.5';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAliases()
+    {
+        return [ "frenetshipping-2.4.5.4" ];
     }
 
     /**
@@ -71,7 +106,10 @@ abstract class EavAttributeInstaller
     /**
      * @return string
      */
-    abstract protected function getEntityType();
+    protected function getEntityType()
+    {
+        return \Magento\Catalog\Model\Product::ENTITY;
+    }
 
     /**
      * @param array $config

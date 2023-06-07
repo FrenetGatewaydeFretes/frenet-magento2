@@ -16,11 +16,13 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Setup\Patch\Data;
 
 use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
+use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Console\Cli;
 
 /**
  * Class AttributeContainer
  */
-class AttributeContainer
+class AttributeContainer implements DataPatchInterface
 {
     /**
      * @var array
@@ -72,6 +74,38 @@ class AttributeContainer
     private $translatable = [
         'label', 'description', 'note'
     ];
+
+    /**
+     * @inheritdoc
+     */
+    public function apply()
+    {
+        return Cli::RETURN_SUCCESS;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getDependencies()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getVersion()
+    {
+        return '2.4.5';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAliases()
+    {
+        return [ "frenetshipping-2.4.5.4" ];
+    }
 
     /**
      * @param string $attributeCode

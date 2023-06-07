@@ -11,12 +11,17 @@
         }
     },
     "description":"Integrate your Magento 2 with Frenet Services in a simple way.",
-    "repositories": [
-        {
+    "repositories": {
+        "mage": {
             "type": "composer",
-            "url": "https://repo.magento.com/"
+            "url": "https://repo.magento.com",
+            "exclude": [ "frenet/frenet-magento2", "frenet/frenet-php" ]
+        },
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.org"
         }
-    ],
+    },
     "require": {
         "php": "^7.0|>=8.0",
         "frenet/frenet-php": "^1.3.1",
@@ -25,18 +30,16 @@
         "magento/module-catalog": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
         "magento/module-quote": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
         "magento/module-shipping": "^100.0.0",
-        "magento/module-directory": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
+        "magento/module-directory": "^100.0.0",
         "magento/module-bundle": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
-        "magento/module-grouped-product": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
-        "magento/module-configurable-product": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
-        "magento/module-downloadable": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
-        "magento/module-store": "^101.0.0|^102.0.0|^103.0.0|^104.0.0"
+        "magento/module-grouped-product": "^100.0.0",
+        "magento/module-configurable-product": "^100.0.0",
+        "magento/module-downloadable": "^100.0.0",
+        "magento/module-store": "^101.0.0"
     },
     "require-dev": {
         "magento/magento-coding-standard": "~4.0.0",
-        "magento/magento2-functional-testing-framework": "^101.0.0|^102.0.0|^103.0.0|^104.0.0",
-        "phpmd/phpmd": "@stable",
-        "phpunit/phpunit": "~6.5.0"
+        "phpmd/phpmd": "@stable"
     },
     "license": "proprietary",
     "suggest": {},
