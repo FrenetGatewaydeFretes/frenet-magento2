@@ -91,7 +91,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
      */
     public function getAliases()
     {
-        return [ "frenetshipping-2.4.5.4" ];
+        return [ "frenetshipping-2.4.5.6" ];
     }
 
     /**
