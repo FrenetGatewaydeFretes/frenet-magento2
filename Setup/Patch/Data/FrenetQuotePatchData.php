@@ -83,7 +83,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
      */
     public static function getVersion()
     {
-        return '2.4.5';
+        return '2.4.6';
     }
 
     /**
@@ -91,7 +91,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
      */
     public function getAliases()
     {
-        return [ "frenetshipping-2.4.5.6" ];
+        return [ "frenetshipping-2.4.6.1" ];
     }
 
     /**
