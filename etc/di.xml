@@ -27,7 +27,6 @@
 
     <!-- API Classes -->
     <preference for="Frenet\Shipping\Api\QuoteProductInterface" type="Frenet\Shipping\Model\Catalog\Product\View\Quote"/>
-    <preference for="Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface" type="Frenet\Shipping\Model\Catalog\Product\View\ProductQuoteOptions"/>
 
     <type name="Frenet\Shipping\Model\Calculator">
         <arguments>
