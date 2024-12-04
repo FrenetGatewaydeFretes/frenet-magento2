@@ -14,7 +14,6 @@
 
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
-use Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface;
 use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;

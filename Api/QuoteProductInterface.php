@@ -14,8 +14,6 @@
 
 namespace Frenet\Shipping\Api;
 
-use Frenet\Shipping\Api\Data\ProductQuoteOptionsInterface;
-
 interface QuoteProductInterface
 {
     /**
