@@ -1,7 +1,7 @@
 {
     "name": "frenet/frenet-magento2",
     "type": "magento2-module",
-    "version": "2.4.6",
+    "version": "2.4.7-p3",
     "autoload": {
         "files": [
             "registration.php"
