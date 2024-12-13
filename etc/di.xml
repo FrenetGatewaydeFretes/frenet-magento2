@@ -81,4 +81,11 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory">
+        <arguments>
+            <argument name="objectClass" xsi:type="string">Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface</argument>
+        </arguments>
+    </type>
+
 </config>
