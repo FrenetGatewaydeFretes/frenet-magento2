@@ -67,7 +67,7 @@ class TotalsCollector
      *
      * @return float
      */
-    public function calculateQuoteDiscounts(?Quote $quote = null) : float
+    public function calculateQuoteDiscounts(Quote $quote = null) : float
     {
         return $this->iterateCollectors($this->getDiscounts(), $quote);
     }
@@ -77,7 +77,7 @@ class TotalsCollector
      *
      * @return float
      */
-    public function calculateQuoteAdditions(?Quote $quote = null) : float
+    public function calculateQuoteAdditions(Quote $quote = null) : float
     {
         return $this->iterateCollectors($this->getAdditions(), $quote);
     }
@@ -88,7 +88,7 @@ class TotalsCollector
      *
      * @return float
      */
-    private function iterateCollectors(array $collectors = [], ?Quote $quote = null) : float
+    private function iterateCollectors(array $collectors = [], Quote $quote = null) : float
     {
         $total = 0.0000;
         $quote = $this->getQuote($quote);
@@ -105,7 +105,7 @@ class TotalsCollector
      *
      * @return Quote
      */
-    private function getQuote(?Quote $quote = null)
+    private function getQuote(Quote $quote = null)
     {
         if (!$quote) {
             return $this->checkoutSession->getQuote();
