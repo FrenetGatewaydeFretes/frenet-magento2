@@ -54,6 +54,13 @@
                     <comment><![CDATA[When the cart's total weight is greater than the limit (30kg) multiple calls will be done for Correios.<br/><br/><b>Note</b>: with this feature enabled you'll need to ship the products in diferent packages.<br/><br/><b style='color:red;'>Warning</b>: The shipping rules and restrictions based in cart total or weight may not work properly when this option is enabled.]]></comment>
                 </field>
 
+                <!-- MAX UNIT QUANTITY (PACKAGE DISTRIBUTION SAFETY LIMIT) -->
+                <field id="max_unit_quantity" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Item Quantity per Shipping Line</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <comment><![CDATA[Safety limit for the quantity of a single cart item considered while building shipping packages. Protects the package calculation from excessively large quantities. Leave empty to use the default (5000).]]></comment>
+                </field>
+
                 <!-- ATTRIBUTES MAPPING -->
                 <include path="Frenet_Shipping::system/attributes_mapping.xml"/>
 

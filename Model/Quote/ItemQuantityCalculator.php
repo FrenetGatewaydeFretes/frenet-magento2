@@ -16,6 +16,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Shipping\Model\Catalog\ProductType;
+use Frenet\Shipping\Model\Config;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
@@ -23,6 +24,16 @@ use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
  */
 class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
 {
+    /**
+     * @var Config
+     */
+    private $config;
+
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+    }
+
     /**
      * @param QuoteItem $item
      *
@@ -56,7 +67,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
                 $qty = $this->calculateSimpleProduct($item);
         }
 
-        return (float) max(1, $qty);
+        return (float) min($this->config->getMaxUnitQuantity(), max(1, $qty));
     }
 
     /**
