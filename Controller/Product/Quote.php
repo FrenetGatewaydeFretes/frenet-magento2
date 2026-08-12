@@ -27,6 +27,18 @@ use Magento\Framework\Controller\ResultFactory;
 class Quote extends Action implements HttpPostActionInterface
 {
     /**
+     * Maximum quantity accepted for a single shipping quote request.
+     *
+     * This endpoint builds an in-memory quote item directly from the
+     * request, bypassing the cart's own qty validation. A crafted qty
+     * value would otherwise be free to inflate the number of shipping
+     * packages (and outbound API calls to Frenet, one per package - see
+     * PackagesCalculator::processPackages()) that a single request can
+     * trigger, regardless of the product's configured weight.
+     */
+    private const MAX_QTY = 1000;
+
+    /**
      * @var \Frenet\Shipping\Api\QuoteProductInterface
      */
     private $quoteProduct;
@@ -49,9 +61,19 @@ class Quote extends Action implements HttpPostActionInterface
         $qty = (float) $this->getRequest()->getParam('qty');
         $options = (array) $this->getRequest()->getParams();
 
+        /** @var \Magento\Framework\Controller\Result\Json $page */
+        $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
+
+        if ($qty <= 0 || $qty > self::MAX_QTY) {
+            $page->setData([
+                'error'   => true,
+                'message' => __('Invalid quantity informed.')
+            ]);
+
+            return $page;
+        }
+
         try {
-            /** @var \Magento\Framework\Controller\Result\Json $result */
-            $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
             $rates = $this->quoteProduct->quoteByProductId($productId, $postcode, $qty, $options);
 
             $page->setData([
