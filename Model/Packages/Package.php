@@ -68,14 +68,15 @@ class Package
     }
 
     /**
-     * @param QuoteItem $item
-     * @param int       $qty
+     * @param QuoteItem  $item
+     * @param int        $qty
+     * @param float|null $unitWeight Pre-computed unit weight (see planQuantitiesFor()); avoids re-extracting it.
      *
      * @return bool
      */
-    public function addItem(QuoteItem $item, $qty = 1)
+    public function addItem(QuoteItem $item, $qty = 1, ?float $unitWeight = null)
     {
-        if (!$this->canAddItem($item, $qty)) {
+        if (!$this->canAddItem($item, $qty, $unitWeight)) {
             return false;
         }
 
@@ -110,20 +111,22 @@ class Package
     }
 
     /**
-     * @param QuoteItem $item
-     * @param int       $qty
+     * @param QuoteItem  $item
+     * @param int        $qty
+     * @param float|null $unitWeight Pre-computed unit weight (see planQuantitiesFor()); avoids re-extracting it.
      *
      * @return bool
      */
-    public function canAddItem(QuoteItem $item, $qty = 1)
+    public function canAddItem(QuoteItem $item, $qty = 1, ?float $unitWeight = null)
     {
         if ($qty <= 0) {
             return true;
         }
 
-        $this->dimensionsExtractor->setProductByCartItem($item);
-
-        $weight = $this->dimensionsExtractor->getWeight();
+        if ($unitWeight === null) {
+            $this->dimensionsExtractor->setProductByCartItem($item);
+            $unitWeight = (float) $this->dimensionsExtractor->getWeight();
+        }
 
         /**
          * A primeira unidade do lote é comparada usando o peso cru (igual
@@ -134,8 +137,8 @@ class Package
          * $qty > 1 seria comparado de forma inconsistente com a soma que
          * getTotalWeight() reporta para o mesmo lote depois de adicionado.
          */
-        $convertedWeight = (float) $this->weightConverter->convertToKg($weight);
-        $itemWeight = $weight + $convertedWeight * ($qty - 1);
+        $convertedWeight = (float) $this->weightConverter->convertToKg($unitWeight);
+        $itemWeight = $unitWeight + $convertedWeight * ($qty - 1);
 
         if (($itemWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
             return false;
@@ -191,10 +194,13 @@ class Package
      * mistura cru/convertido, em vez de assumir peso uniforme dos dois
      * lados da conta.
      *
+     * Cada entrada também carrega o unitWeight já extraído aqui, para que
+     * quem consome o plano não precise reextraí-lo por lote.
+     *
      * @param QuoteItem $item
      * @param float     $requestedQty
      *
-     * @return array{newPackage: bool, qty: float}[]
+     * @return array{newPackage: bool, qty: float, unitWeight: float}[]
      */
     public function planQuantitiesFor(QuoteItem $item, float $requestedQty): array
     {
@@ -202,7 +208,7 @@ class Package
         $unitWeight = (float) $this->dimensionsExtractor->getWeight();
 
         if ($unitWeight <= 0) {
-            return [['newPackage' => false, 'qty' => $requestedQty]];
+            return [['newPackage' => false, 'qty' => $requestedQty, 'unitWeight' => $unitWeight]];
         }
 
         $convertedUnitWeight = (float) $this->weightConverter->convertToKg($unitWeight);
@@ -235,7 +241,7 @@ class Package
         $plan = [];
 
         if ($firstBatch > 0) {
-            $plan[] = ['newPackage' => false, 'qty' => (float) $firstBatch];
+            $plan[] = ['newPackage' => false, 'qty' => (float) $firstBatch, 'unitWeight' => $unitWeight];
         }
 
         $fullPackagesCount = intdiv($remaining, $unitsPerFullPackage);
@@ -244,12 +250,16 @@ class Package
         if ($fullPackagesCount > 0) {
             $plan = array_merge(
                 $plan,
-                array_fill(0, $fullPackagesCount, ['newPackage' => true, 'qty' => (float) $unitsPerFullPackage])
+                array_fill(
+                    0,
+                    $fullPackagesCount,
+                    ['newPackage' => true, 'qty' => (float) $unitsPerFullPackage, 'unitWeight' => $unitWeight]
+                )
             );
         }
 
         if ($leftover > 0) {
-            $plan[] = ['newPackage' => true, 'qty' => (float) $leftover];
+            $plan[] = ['newPackage' => true, 'qty' => (float) $leftover, 'unitWeight' => $unitWeight];
         }
 
         return $plan;

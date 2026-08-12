@@ -152,7 +152,7 @@ class PackageManager
             if ($batch['newPackage']) {
                 $this->useNewPackage();
             }
-            $this->getPackage()->addItem($item, $batch['qty']);
+            $this->getPackage()->addItem($item, $batch['qty'], $batch['unitWeight']);
         }
     }
 
