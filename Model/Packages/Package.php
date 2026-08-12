@@ -284,7 +284,9 @@ class Package
             return 0;
         }
 
-        return intdiv($capacityScaled - $rawUnitWeightScaled, $convertedUnitWeightScaled) + 1;
+        // Protege contra um WeightConverterInterface customizado (ponto de
+        // extensão via DI) que devolva 0 para um peso positivo.
+        return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedUnitWeightScaled, 1)) + 1;
     }
 
     /**
