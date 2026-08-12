@@ -16,6 +16,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
+use Frenet\Shipping\Model\WeightConverterInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
@@ -49,14 +50,21 @@ class Package
      */
     private $packageItemFactory;
 
+    /**
+     * @var WeightConverterInterface
+     */
+    private $weightConverter;
+
     public function __construct(
         DimensionsExtractorInterface $dimensionsExtractor,
         PackageItemFactory $packageItemFactory,
-        PackageLimit $packageLimit
+        PackageLimit $packageLimit,
+        WeightConverterInterface $weightConverter
     ) {
         $this->dimensionsExtractor = $dimensionsExtractor;
         $this->packageItemFactory = $packageItemFactory;
         $this->packageLimit = $packageLimit;
+        $this->weightConverter = $weightConverter;
     }
 
     /**
@@ -109,10 +117,25 @@ class Package
      */
     public function canAddItem(QuoteItem $item, $qty = 1)
     {
+        if ($qty <= 0) {
+            return true;
+        }
+
         $this->dimensionsExtractor->setProductByCartItem($item);
 
         $weight = $this->dimensionsExtractor->getWeight();
-        $itemWeight = $weight * $qty;
+
+        /**
+         * A primeira unidade do lote é comparada usando o peso cru (igual
+         * ao comportamento original com $qty=1); as unidades seguintes do
+         * mesmo lote somam o peso convertido, que é a mesma base usada por
+         * getTotalWeight() (soma de PackageItem::getTotalWeight(), que já
+         * passa por WeightConverter::convertToKg()). Sem isso, um lote com
+         * $qty > 1 seria comparado de forma inconsistente com a soma que
+         * getTotalWeight() reporta para o mesmo lote depois de adicionado.
+         */
+        $convertedWeight = (float) $this->weightConverter->convertToKg($weight);
+        $itemWeight = $weight + $convertedWeight * ($qty - 1);
 
         if (($itemWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
             return false;
@@ -156,6 +179,18 @@ class Package
      * item anterior); os lotes seguintes (newPackage => true) assumem
      * sempre um pacote novo e vazio, com capacidade cheia.
      *
+     * canAddItem() compara o peso *cru* do item sendo adicionado com o
+     * peso *convertido para kg* já acumulado no pacote (getTotalWeight()
+     * soma PackageItem::getTotalWeight(), que passa por
+     * WeightConverter::convertToKg()) -- uma inconsistência pré-existente
+     * que só produz efeito quando a loja não está configurada em kg
+     * (general/locale/weight_unit != "kgs", que é inclusive o valor
+     * padrão de fábrica do Magento_Directory). Para que o resultado do
+     * empacotamento continue idêntico ao algoritmo unidade-por-unidade
+     * mesmo nesse cenário, unitsFitting() replica exatamente essa mesma
+     * mistura cru/convertido, em vez de assumir peso uniforme dos dois
+     * lados da conta.
+     *
      * @param QuoteItem $item
      * @param float     $requestedQty
      *
@@ -170,11 +205,14 @@ class Package
             return [['newPackage' => false, 'qty' => $requestedQty]];
         }
 
+        $convertedUnitWeight = (float) $this->weightConverter->convertToKg($unitWeight);
+
         $unitWeightScaled = (int) round($unitWeight * self::WEIGHT_SCALE);
+        $convertedUnitWeightScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
         $fullCapacityScaled = (int) round($this->packageLimit->getMaxWeight() * self::WEIGHT_SCALE);
         $remainingScaled = max(0, (int) round($this->getRemainingWeight() * self::WEIGHT_SCALE));
 
-        $unitsPerFullPackage = intdiv($fullCapacityScaled, $unitWeightScaled);
+        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedUnitWeightScaled);
 
         if ($unitsPerFullPackage < 1) {
             /**
@@ -188,7 +226,10 @@ class Package
         }
 
         $requestedQtyInt = (int) $requestedQty;
-        $firstBatch = min($requestedQtyInt, intdiv($remainingScaled, $unitWeightScaled));
+        $firstBatch = min(
+            $requestedQtyInt,
+            $this->unitsFitting($remainingScaled, $unitWeightScaled, $convertedUnitWeightScaled)
+        );
         $remaining = $requestedQtyInt - $firstBatch;
 
         $plan = [];
@@ -212,6 +253,28 @@ class Package
         }
 
         return $plan;
+    }
+
+    /**
+     * Quantas unidades de peso cru $rawUnitWeightScaled (com equivalente
+     * convertido $convertedUnitWeightScaled) cabem numa capacidade
+     * $capacityScaled, replicando a semântica de canAddItem(): a primeira
+     * unidade é comparada usando peso cru; cada unidade adicional soma o
+     * peso convertido (mesma base usada por getTotalWeight()).
+     *
+     * @param int $capacityScaled
+     * @param int $rawUnitWeightScaled
+     * @param int $convertedUnitWeightScaled
+     *
+     * @return int
+     */
+    private function unitsFitting(int $capacityScaled, int $rawUnitWeightScaled, int $convertedUnitWeightScaled): int
+    {
+        if ($rawUnitWeightScaled > $capacityScaled) {
+            return 0;
+        }
+
+        return intdiv($capacityScaled - $rawUnitWeightScaled, $convertedUnitWeightScaled) + 1;
     }
 
     /**
