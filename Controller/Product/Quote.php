@@ -67,12 +67,7 @@ class Quote extends Action implements HttpPostActionInterface
         $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
 
         if ($qty <= 0 || $qty > self::MAX_QTY) {
-            $page->setData([
-                'error'   => true,
-                'message' => __('Invalid quantity informed.')
-            ]);
-
-            return $page;
+            return $this->jsonError($page, (string) __('Invalid quantity informed.'));
         }
 
         try {
@@ -83,12 +78,23 @@ class Quote extends Action implements HttpPostActionInterface
                 'rates' => $rates
             ]);
         } catch (\Exception $exception) {
-            $page->setData([
-                'error'   => true,
-                'message' => $exception->getMessage()
-            ]);
+            $this->jsonError($page, $exception->getMessage());
         }
 
         return $page;
+    }
+
+    /**
+     * @param \Magento\Framework\Controller\Result\Json $page
+     * @param string                                    $message
+     *
+     * @return \Magento\Framework\Controller\Result\Json
+     */
+    private function jsonError(\Magento\Framework\Controller\Result\Json $page, string $message): \Magento\Framework\Controller\Result\Json
+    {
+        return $page->setData([
+            'error'   => true,
+            'message' => $message
+        ]);
     }
 }
