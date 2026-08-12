@@ -12,6 +12,8 @@
  * Copyright (c) 2020.
  */
 
+declare(strict_types=1);
+
 namespace Frenet\Shipping\Controller\Product;
 
 use Magento\Framework\App\Action\Action;
@@ -58,7 +60,7 @@ class Quote extends Action implements HttpPostActionInterface
     {
         $productId = (int) $this->getRequest()->getParam('product');
         $postcode = (string) $this->getRequest()->getParam('postcode');
-        $qty = (float) $this->getRequest()->getParam('qty');
+        $qty = (int) $this->getRequest()->getParam('qty');
         $options = (array) $this->getRequest()->getParams();
 
         /** @var \Magento\Framework\Controller\Result\Json $page */
