@@ -129,13 +129,10 @@ class Package
         }
 
         /**
-         * A primeira unidade do lote é comparada usando o peso cru (igual
-         * ao comportamento original com $qty=1); as unidades seguintes do
-         * mesmo lote somam o peso convertido, que é a mesma base usada por
-         * getTotalWeight() (soma de PackageItem::getTotalWeight(), que já
-         * passa por WeightConverter::convertToKg()). Sem isso, um lote com
-         * $qty > 1 seria comparado de forma inconsistente com a soma que
-         * getTotalWeight() reporta para o mesmo lote depois de adicionado.
+         * The batch's first unit is compared using the raw weight (matching
+         * the original $qty=1 behavior); each additional unit adds the
+         * converted weight, the same basis getTotalWeight() accumulates
+         * (via PackageItem::getTotalWeight() -> WeightConverter::convertToKg()).
          */
         $convertedWeight = (float) $this->weightConverter->convertToKg($unitWeight);
         $itemWeight = $unitWeight + $convertedWeight * ($qty - 1);
@@ -171,31 +168,26 @@ class Package
     }
 
     /**
-     * Plano de como distribuir $requestedQty unidades de $item entre pacotes,
-     * calculado inteiramente por aritmética (divisão/módulo inteiros, sem
-     * while/for dependente da quantidade). Cada entrada indica quantas
-     * unidades entram num pacote e se é necessário abrir um pacote novo
-     * antes de adicioná-las.
+     * Plans how to distribute $requestedQty units of $item across packages,
+     * computed entirely through integer division/modulo (no while/for tied
+     * to $requestedQty). Each entry carries how many units go in, whether a
+     * new package needs to be opened first, and the unit weight already
+     * extracted here, so callers don't need to re-extract it per batch.
      *
-     * O primeiro lote (newPackage => false) só entra no plano quando cabe
-     * algo no pacote atual (que pode já estar parcialmente ocupado por um
-     * item anterior); os lotes seguintes (newPackage => true) assumem
-     * sempre um pacote novo e vazio, com capacidade cheia.
+     * The first batch (newPackage => false) only appears when something
+     * still fits in the current package (which may already be partially
+     * filled by a previous item); subsequent batches (newPackage => true)
+     * always assume a fresh, empty package at full capacity.
      *
-     * canAddItem() compara o peso *cru* do item sendo adicionado com o
-     * peso *convertido para kg* já acumulado no pacote (getTotalWeight()
-     * soma PackageItem::getTotalWeight(), que passa por
-     * WeightConverter::convertToKg()) -- uma inconsistência pré-existente
-     * que só produz efeito quando a loja não está configurada em kg
-     * (general/locale/weight_unit != "kgs", que é inclusive o valor
-     * padrão de fábrica do Magento_Directory). Para que o resultado do
-     * empacotamento continue idêntico ao algoritmo unidade-por-unidade
-     * mesmo nesse cenário, unitsFitting() replica exatamente essa mesma
-     * mistura cru/convertido, em vez de assumir peso uniforme dos dois
-     * lados da conta.
-     *
-     * Cada entrada também carrega o unitWeight já extraído aqui, para que
-     * quem consome o plano não precise reextraí-lo por lote.
+     * canAddItem() compares the item's *raw* weight against the *converted
+     * to kg* weight already accumulated in the package (getTotalWeight()
+     * sums PackageItem::getTotalWeight(), which goes through
+     * WeightConverter::convertToKg()) -- a pre-existing inconsistency that
+     * only surfaces when the store isn't configured in kg
+     * (general/locale/weight_unit != "kgs", itself Magento_Directory's
+     * factory default). unitsFitting() replicates that same raw/converted
+     * mix so the packing result stays identical to the old unit-by-unit
+     * algorithm even in that scenario.
      *
      * @param QuoteItem $item
      * @param float     $requestedQty
@@ -221,13 +213,9 @@ class Package
         $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedUnitWeightScaled);
 
         if ($unitsPerFullPackage < 1) {
-            /**
-             * Peso unitário sozinho excede o limite mesmo de um pacote
-             * vazio. Comportamento herdado: o algoritmo unidade-por-unidade
-             * anterior também descartava esse item silenciosamente (via
-             * canAddItem() retornando false). Não introduzido por este
-             * método.
-             */
+            // Unit weight alone exceeds the limit of even an empty package.
+            // Inherited behavior: the previous unit-by-unit algorithm also
+            // silently dropped this item (via canAddItem() returning false).
             return [];
         }
 
@@ -266,11 +254,11 @@ class Package
     }
 
     /**
-     * Quantas unidades de peso cru $rawUnitWeightScaled (com equivalente
-     * convertido $convertedUnitWeightScaled) cabem numa capacidade
-     * $capacityScaled, replicando a semântica de canAddItem(): a primeira
-     * unidade é comparada usando peso cru; cada unidade adicional soma o
-     * peso convertido (mesma base usada por getTotalWeight()).
+     * How many units of raw weight $rawUnitWeightScaled (with converted
+     * equivalent $convertedUnitWeightScaled) fit in a $capacityScaled
+     * capacity, replicating canAddItem()'s semantics: the first unit is
+     * compared using raw weight; each additional unit adds the converted
+     * weight (the same basis getTotalWeight() uses).
      *
      * @param int $capacityScaled
      * @param int $rawUnitWeightScaled
@@ -284,8 +272,10 @@ class Package
             return 0;
         }
 
-        // Protege contra um WeightConverterInterface customizado (ponto de
-        // extensão via DI) que devolva 0 para um peso positivo.
+        // Guards against a custom WeightConverterInterface (a DI extension
+        // point) returning 0 for a positive weight; the stock converter
+        // never does, but a division by zero here shouldn't be possible
+        // regardless of what's wired in via di.xml.
         return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedUnitWeightScaled, 1)) + 1;
     }
 
