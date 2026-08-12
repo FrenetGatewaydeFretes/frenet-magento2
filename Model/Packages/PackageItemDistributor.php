@@ -55,27 +55,40 @@ class PackageItemDistributor
      */
     public function distribute(): array
     {
-        return $this->getUnitItems();
+        return $this->getGroupedItems();
     }
 
     /**
-     * @return array
+     * Retorna um par item+qty por linha válida da quote, sem explodir a
+     * quantidade em cópias unitárias (ver Package::planQuantitiesFor(),
+     * que faz esse trabalho por aritmética quando o pacote é montado).
+     *
+     * A quantidade é truncada (floor) para preservar o comportamento já
+     * existente do algoritmo anterior, que descartava implicitamente a
+     * parte fracionária de itens com "Qty Uses Decimals" habilitado.
+     *
+     * @return array{item: QuoteItem, qty: float}[]
      */
-    private function getUnitItems(): array
+    private function getGroupedItems(): array
     {
         $rateRequest = $this->rateRequestProvider->getRateRequest();
-        $unitItems = [];
+        $groupedItems = [];
 
         /** @var QuoteItem $item */
         foreach ($rateRequest->getAllItems() as $item) {
             if (!$this->quoteItemValidator->validate($item)) {
                 continue;
             }
-            $qty = $this->itemQuantityCalculator->calculate($item);
-            for ($idx = 1; $idx <= $qty; $idx++) {
-                $unitItems[] = $item;
+
+            $qty = floor($this->itemQuantityCalculator->calculate($item));
+
+            if ($qty < 1) {
+                continue;
             }
+
+            $groupedItems[] = ['item' => $item, 'qty' => $qty];
         }
-        return $unitItems;
+
+        return $groupedItems;
     }
 }

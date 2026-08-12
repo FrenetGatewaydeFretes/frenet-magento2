@@ -88,11 +88,8 @@ class PackageManager
      */
     public function process(): self
     {
-        $items = $this->packageItemDistributor->distribute();
-
-        /** @var QuoteItem $item */
-        foreach ($items as $item) {
-            $this->addItemToPackage($item);
+        foreach ($this->packageItemDistributor->distribute() as $entry) {
+            $this->addItemToPackage($entry['item'], $entry['qty']);
         }
 
         return $this;
@@ -143,16 +140,20 @@ class PackageManager
 
     /**
      * @param QuoteItem $item
+     * @param float     $qty
      *
-     * @return bool
+     * @return void
      */
-    private function addItemToPackage(QuoteItem $item)
+    private function addItemToPackage(QuoteItem $item, float $qty): void
     {
-        if (!$this->getPackage()->canAddItem($item, 1)) {
-            $this->useNewPackage();
-        }
+        $plan = $this->getPackage()->planQuantitiesFor($item, $qty);
 
-        return $this->getPackage()->addItem($item, 1);
+        foreach ($plan as $batch) {
+            if ($batch['newPackage']) {
+                $this->useNewPackage();
+            }
+            $this->getPackage()->addItem($item, $batch['qty']);
+        }
     }
 
     /**
