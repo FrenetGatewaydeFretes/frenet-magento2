@@ -40,6 +40,11 @@ class PackageItemDistributor
      */
     private $rateRequestProvider;
 
+    /**
+     * @param QuoteItemValidatorInterface $quoteItemValidator
+     * @param ItemQuantityCalculator      $itemQuantityCalculator
+     * @param RateRequestProvider         $rateRequestProvider
+     */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         ItemQuantityCalculator $itemQuantityCalculator,
@@ -51,6 +56,8 @@ class PackageItemDistributor
     }
 
     /**
+     * Returns the quote items grouped with their quantity, ready to be packed.
+     *
      * @return array
      */
     public function distribute(): array
@@ -59,13 +66,12 @@ class PackageItemDistributor
     }
 
     /**
-     * Retorna um par item+qty por linha válida da quote, sem explodir a
-     * quantidade em cópias unitárias (ver Package::planQuantitiesFor(),
-     * que faz esse trabalho por aritmética quando o pacote é montado).
+     * Returns one item+qty pair per valid quote line, without exploding the quantity into unit copies.
      *
-     * A quantidade é truncada (floor) para preservar o comportamento já
-     * existente do algoritmo anterior, que descartava implicitamente a
-     * parte fracionária de itens com "Qty Uses Decimals" habilitado.
+     * Package::planQuantitiesFor() does that split arithmetically when the
+     * package is built. The quantity is truncated (floor) to preserve the
+     * previous algorithm's behavior, which implicitly discarded the
+     * fractional part of items with "Qty Uses Decimals" enabled.
      *
      * @return array{item: QuoteItem, qty: float}[]
      */

@@ -45,6 +45,10 @@ class Quote extends Action implements HttpPostActionInterface
      */
     private $quoteProduct;
 
+    /**
+     * @param Context                                    $context
+     * @param \Frenet\Shipping\Api\QuoteProductInterface $quoteProduct
+     */
     public function __construct(
         Context $context,
         \Frenet\Shipping\Api\QuoteProductInterface $quoteProduct
@@ -54,6 +58,8 @@ class Quote extends Action implements HttpPostActionInterface
     }
 
     /**
+     * Handles the AJAX shipping quote request for a single product.
+     *
      * @return \Magento\Framework\Controller\ResultInterface
      */
     public function execute()
@@ -85,6 +91,8 @@ class Quote extends Action implements HttpPostActionInterface
     }
 
     /**
+     * Builds a JSON error response.
+     *
      * @param \Magento\Framework\Controller\Result\Json $page
      * @param string                                    $message
      *

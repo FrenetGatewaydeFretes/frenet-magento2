@@ -29,12 +29,17 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
      */
     private $config;
 
+    /**
+     * @param Config $config
+     */
     public function __construct(Config $config)
     {
         $this->config = $config;
     }
 
     /**
+     * Calculates the effective quantity of a quote item, capped at the configured maximum.
+     *
      * @param QuoteItem $item
      *
      * @return float
@@ -71,6 +76,8 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     }
 
     /**
+     * Returns the quantity for a simple product.
+     *
      * @param QuoteItem $item
      *
      * @return float
@@ -81,6 +88,8 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     }
 
     /**
+     * Returns the quantity for a bundle product, scaled by the parent item's quantity.
+     *
      * @param QuoteItem $item
      *
      * @return float
@@ -92,6 +101,8 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     }
 
     /**
+     * Returns the quantity for a grouped product.
+     *
      * @param QuoteItem $item
      *
      * @return float
@@ -102,7 +113,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     }
 
     /**
-     * The right quantity for configurable products are on the parent item.
+     * Returns the quantity for a configurable product, which lives on the parent item.
      *
      * @param QuoteItem $item
      *

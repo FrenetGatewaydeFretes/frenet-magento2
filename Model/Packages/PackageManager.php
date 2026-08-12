@@ -61,8 +61,6 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
-     * PackageManager constructor.
-     *
      * @param QuoteItemValidatorInterface     $quoteItemValidator
      * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
      * @param PackageFactory                  $packageFactory
@@ -84,6 +82,8 @@ class PackageManager
     }
 
     /**
+     * Distributes the quote items into packages.
+     *
      * @return $this
      */
     public function process(): self
@@ -96,6 +96,8 @@ class PackageManager
     }
 
     /**
+     * Returns the packages built so far.
+     *
      * @return Package[]
      */
     public function getPackages(): array
@@ -104,6 +106,8 @@ class PackageManager
     }
 
     /**
+     * Returns the number of packages built so far.
+     *
      * @return int
      */
     public function countPackages()
@@ -112,6 +116,8 @@ class PackageManager
     }
 
     /**
+     * Clears the current package reference.
+     *
      * @return $this
      */
     public function unsetCurrentPackage()
@@ -121,6 +127,8 @@ class PackageManager
     }
 
     /**
+     * Clears all built packages.
+     *
      * @return $this
      */
     public function resetPackages() : self
@@ -131,6 +139,8 @@ class PackageManager
     }
 
     /**
+     * Creates a new, empty package.
+     *
      * @return Package
      */
     public function createPackage()
@@ -139,6 +149,8 @@ class PackageManager
     }
 
     /**
+     * Applies a quote item's packing plan, opening new packages as needed.
+     *
      * @param QuoteItem $item
      * @param float     $qty
      *
@@ -157,6 +169,8 @@ class PackageManager
     }
 
     /**
+     * Returns the current package, creating one if none exists yet.
+     *
      * @return Package
      */
     private function getPackage()
@@ -169,6 +183,8 @@ class PackageManager
     }
 
     /**
+     * Starts a new current package and registers it.
+     *
      * @return $this
      */
     private function useNewPackage()

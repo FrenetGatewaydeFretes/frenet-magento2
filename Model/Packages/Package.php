@@ -55,6 +55,12 @@ class Package
      */
     private $weightConverter;
 
+    /**
+     * @param DimensionsExtractorInterface $dimensionsExtractor
+     * @param PackageItemFactory           $packageItemFactory
+     * @param PackageLimit                 $packageLimit
+     * @param WeightConverterInterface     $weightConverter
+     */
     public function __construct(
         DimensionsExtractorInterface $dimensionsExtractor,
         PackageItemFactory $packageItemFactory,
@@ -68,6 +74,8 @@ class Package
     }
 
     /**
+     * Adds a quantity of an item to the package.
+     *
      * @param QuoteItem  $item
      * @param int        $qty
      * @param float|null $unitWeight Pre-computed unit weight (see planQuantitiesFor()); avoids re-extracting it.
@@ -93,6 +101,8 @@ class Package
     }
 
     /**
+     * Returns the items currently in the package.
+     *
      * @return PackageItem[]
      */
     public function getItems()
@@ -101,6 +111,8 @@ class Package
     }
 
     /**
+     * Returns a package item by its cart item ID.
+     *
      * @param $itemId
      *
      * @return PackageItem|null
@@ -111,6 +123,8 @@ class Package
     }
 
     /**
+     * Checks whether a quantity of an item still fits within the package weight limit.
+     *
      * @param QuoteItem  $item
      * @param int        $qty
      * @param float|null $unitWeight Pre-computed unit weight (see planQuantitiesFor()); avoids re-extracting it.
@@ -145,6 +159,8 @@ class Package
     }
 
     /**
+     * Returns the total weight of all items in the package.
+     *
      * @return float
      */
     public function getTotalWeight()
@@ -160,6 +176,8 @@ class Package
     }
 
     /**
+     * Returns the weight capacity still available in the package.
+     *
      * @return float
      */
     public function getRemainingWeight(): float
@@ -168,8 +186,9 @@ class Package
     }
 
     /**
-     * Plans how to distribute $requestedQty units of $item across packages,
-     * computed entirely through integer division/modulo (no while/for tied
+     * Plans how to distribute a quantity of an item across packages.
+     *
+     * Computed entirely through integer division/modulo (no while/for tied
      * to $requestedQty). Each entry carries how many units go in, whether a
      * new package needs to be opened first, and the unit weight already
      * extracted here, so callers don't need to re-extract it per batch.
@@ -254,11 +273,11 @@ class Package
     }
 
     /**
-     * How many units of raw weight $rawUnitWeightScaled (with converted
-     * equivalent $convertedUnitWeightScaled) fit in a $capacityScaled
-     * capacity, replicating canAddItem()'s semantics: the first unit is
-     * compared using raw weight; each additional unit adds the converted
-     * weight (the same basis getTotalWeight() uses).
+     * Computes how many units fit in a given weight capacity.
+     *
+     * Replicates canAddItem()'s semantics: the first unit is compared using
+     * raw weight; each additional unit adds the converted weight (the same
+     * basis getTotalWeight() uses).
      *
      * @param int $capacityScaled
      * @param int $rawUnitWeightScaled
@@ -280,6 +299,8 @@ class Package
     }
 
     /**
+     * Returns the total price of all items in the package.
+     *
      * @return float
      */
     public function getTotalPrice()
@@ -295,6 +316,8 @@ class Package
     }
 
     /**
+     * Checks whether the given item is already in the package.
+     *
      * @param QuoteItem $item
      *
      * @return bool
@@ -305,6 +328,8 @@ class Package
     }
 
     /**
+     * Returns the quantity already added for the given item.
+     *
      * @param QuoteItem $item
      *
      * @return float
