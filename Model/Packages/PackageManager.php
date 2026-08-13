@@ -36,7 +36,7 @@ class PackageManager
     private $packages = [];
 
     /**
-     * @var \Frenet\Shipping\Model\Packages\PackageFactory
+     * @var PackageFactory
      */
     private $packageFactory;
 

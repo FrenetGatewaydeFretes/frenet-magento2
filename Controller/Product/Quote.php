@@ -16,10 +16,13 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Controller\Product;
 
+use Frenet\Shipping\Api\QuoteProductInterface;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Controller\ResultInterface;
 
 /**
  * Class Quote
@@ -30,28 +33,21 @@ class Quote extends Action implements HttpPostActionInterface
 {
     /**
      * Maximum quantity accepted for a single shipping quote request.
-     *
-     * This endpoint builds an in-memory quote item directly from the
-     * request, bypassing the cart's own qty validation. A crafted qty
-     * value would otherwise be free to inflate the number of shipping
-     * packages (and outbound API calls to Frenet, one per package - see
-     * PackagesCalculator::processPackages()) that a single request can
-     * trigger, regardless of the product's configured weight.
      */
     private const MAX_QTY = 1000;
 
     /**
-     * @var \Frenet\Shipping\Api\QuoteProductInterface
+     * @var QuoteProductInterface
      */
     private $quoteProduct;
 
     /**
-     * @param Context                                    $context
-     * @param \Frenet\Shipping\Api\QuoteProductInterface $quoteProduct
+     * @param Context               $context
+     * @param QuoteProductInterface $quoteProduct
      */
     public function __construct(
         Context $context,
-        \Frenet\Shipping\Api\QuoteProductInterface $quoteProduct
+        QuoteProductInterface $quoteProduct
     ) {
         parent::__construct($context);
         $this->quoteProduct = $quoteProduct;
@@ -60,7 +56,7 @@ class Quote extends Action implements HttpPostActionInterface
     /**
      * Handles the AJAX shipping quote request for a single product.
      *
-     * @return \Magento\Framework\Controller\ResultInterface
+     * @return ResultInterface
      */
     public function execute()
     {
@@ -69,7 +65,7 @@ class Quote extends Action implements HttpPostActionInterface
         $qty = (int) $this->getRequest()->getParam('qty');
         $options = (array) $this->getRequest()->getParams();
 
-        /** @var \Magento\Framework\Controller\Result\Json $page */
+        /** @var Json $page */
         $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
 
         if ($qty <= 0 || $qty > self::MAX_QTY) {
@@ -93,12 +89,12 @@ class Quote extends Action implements HttpPostActionInterface
     /**
      * Builds a JSON error response.
      *
-     * @param \Magento\Framework\Controller\Result\Json $page
-     * @param string                                    $message
+     * @param Json   $page
+     * @param string $message
      *
-     * @return \Magento\Framework\Controller\Result\Json
+     * @return Json
      */
-    private function jsonError(\Magento\Framework\Controller\Result\Json $page, string $message): \Magento\Framework\Controller\Result\Json
+    private function jsonError(Json $page, string $message): Json
     {
         return $page->setData([
             'error'   => true,
