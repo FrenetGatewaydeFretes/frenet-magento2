@@ -50,6 +50,9 @@
                 <!-- ADDITIONAL LEAD TIME -->
                 <additional_lead_time>0</additional_lead_time>
 
+                <!-- PACKAGE MAX WEIGHT (KG) -->
+                <package_max_weight>30</package_max_weight>
+
                 <!-- MAX UNIT QUANTITY (PACKAGE DISTRIBUTION SAFETY LIMIT) -->
                 <max_unit_quantity>5000</max_unit_quantity>
 

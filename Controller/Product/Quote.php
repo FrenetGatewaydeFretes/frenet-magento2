@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Controller\Product;
 
 use Frenet\Shipping\Api\QuoteProductInterface;
+use Frenet\Shipping\Model\Config;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
@@ -32,25 +33,28 @@ use Magento\Framework\Controller\ResultInterface;
 class Quote extends Action implements HttpPostActionInterface
 {
     /**
-     * Maximum quantity accepted for a single shipping quote request.
-     */
-    private const MAX_QTY = 1000;
-
-    /**
      * @var QuoteProductInterface
      */
     private $quoteProduct;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * @param Context               $context
      * @param QuoteProductInterface $quoteProduct
+     * @param Config                $config
      */
     public function __construct(
         Context $context,
-        QuoteProductInterface $quoteProduct
+        QuoteProductInterface $quoteProduct,
+        Config $config
     ) {
         parent::__construct($context);
         $this->quoteProduct = $quoteProduct;
+        $this->config = $config;
     }
 
     /**
@@ -68,7 +72,7 @@ class Quote extends Action implements HttpPostActionInterface
         /** @var Json $page */
         $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
 
-        if ($qty <= 0 || $qty > self::MAX_QTY) {
+        if ($qty <= 0 || $qty > $this->config->getMaxUnitQuantity()) {
             return $this->jsonError($page, (string) __('Invalid quantity informed.'));
         }
 

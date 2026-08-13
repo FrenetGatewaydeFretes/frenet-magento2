@@ -216,6 +216,18 @@ class Config
     }
 
     /**
+     * Returns the maximum weight allowed per shipping package, in kilograms.
+     *
+     * @param string|int|StoreInterface $store
+     *
+     * @return float
+     */
+    public function getPackageMaxWeight($store = null): float
+    {
+        return (float) $this->getCarrierConfig('package_max_weight', $store);
+    }
+
+    /**
      * Maximum quantity of a single cart item considered when building shipping packages.
      *
      * @param string|int|StoreInterface $store

@@ -12,7 +12,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 
 - **Cotação de frete em tempo real** no carrinho e no checkout, via API da Frenet, com todas as transportadoras habilitadas na sua conta (Correios, Jadlog, transportadoras parceiras, etc).
 - **Cotação de frete na página de produto**, antes de adicionar ao carrinho — configurável por tipo de produto (simples, configurável, bundle, agrupado).
-- **Divisão automática em múltiplos pacotes** (*multi-quote*) quando o peso total do carrinho excede o limite de um único pacote (30kg), com cálculo de empacotamento O(1) independente da quantidade de itens.
+- **Divisão automática em múltiplos pacotes** (*multi-quote*) quando o peso total do carrinho excede o peso máximo configurado por pacote (padrão 30kg), com cálculo de empacotamento O(1) independente da quantidade de itens.
 - **Mapeamento de atributos de produto** para peso, altura, largura e comprimento — use os atributos padrão ou aponte para atributos customizados do seu catálogo.
 - **Rastreio de encomendas** integrado (`Model/Tracking.php`), exibindo o status de entrega da Frenet direto no Magento.
 - **Mensagem de previsão de entrega** configurável, com placeholder de prazo em dias (`{{d}}`).
@@ -65,7 +65,8 @@ No admin do Magento, acesse **Stores > Configuration > Sales > Delivery Methods 
 
 Recursos opcionais, no mesmo painel:
 
-- **Enable Multi Quote**: divide o carrinho em múltiplos pacotes quando o peso total ultrapassa 30kg (uma chamada de API por pacote gerado).
+- **Enable Multi Quote**: divide o carrinho em múltiplos pacotes quando o peso total ultrapassa o **Package Max Weight** (uma chamada de API por pacote gerado).
+- **Package Max Weight (kg)**: peso máximo por pacote em quilogramas (padrão 30). Só precisa ser alterado se houver instrução específica.
 - **Maximum Item Quantity per Shipping Line**: teto de segurança (padrão 5000) para a quantidade de um mesmo item considerada no cálculo de pacotes.
 - **Product Quote**: habilita a cotação de frete diretamente na página de produto, antes do cliente adicionar ao carrinho.
 - **Show Shipping Forecast** / **Shipping Forecast Message**: exibe uma mensagem de prazo estimado de entrega.
