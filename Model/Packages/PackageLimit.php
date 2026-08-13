@@ -15,16 +15,13 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\Shipping\Model\Config;
+
 /**
  * Class PackageLimit
  */
 class PackageLimit
 {
-    /**
-     * @var float
-     */
-    const PACKAGE_MAX_WEIGHT = 30.0000;
-
     /**
      * @var float
      */
@@ -36,17 +33,35 @@ class PackageLimit
     private $maxWeight = null;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * @param Config $config
+     */
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * Returns the maximum weight allowed for a package.
+     *
      * @return float
      */
     public function getMaxWeight()
     {
         if (null === $this->maxWeight) {
-            return self::PACKAGE_MAX_WEIGHT;
+            return $this->config->getPackageMaxWeight();
         }
+
         return (float) $this->maxWeight;
     }
 
     /**
+     * Overrides the package max weight for the current calculation.
+     *
      * @param float $weight
      *
      * @return $this
@@ -58,6 +73,8 @@ class PackageLimit
     }
 
     /**
+     * Removes the package weight limit for the current calculation.
+     *
      * @return $this
      */
     public function removeLimit()
@@ -66,6 +83,8 @@ class PackageLimit
     }
 
     /**
+     * Checks whether the package weight limit is currently disabled.
+     *
      * @return bool
      */
     public function isUnlimited()
@@ -74,6 +93,8 @@ class PackageLimit
     }
 
     /**
+     * Restores the configured package max weight.
+     *
      * @return $this
      */
     public function resetMaxWeight()
@@ -83,6 +104,8 @@ class PackageLimit
     }
 
     /**
+     * Checks whether the given weight exceeds the package max weight.
+     *
      * @param float $weight
      *
      * @return bool

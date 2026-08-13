@@ -40,6 +40,11 @@ class PackageItemDistributor
      */
     private $rateRequestProvider;
 
+    /**
+     * @param QuoteItemValidatorInterface $quoteItemValidator
+     * @param ItemQuantityCalculator      $itemQuantityCalculator
+     * @param RateRequestProvider         $rateRequestProvider
+     */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         ItemQuantityCalculator $itemQuantityCalculator,
@@ -51,31 +56,40 @@ class PackageItemDistributor
     }
 
     /**
+     * Returns the quote items grouped with their quantity, ready to be packed.
+     *
      * @return array
      */
     public function distribute(): array
     {
-        return $this->getUnitItems();
+        return $this->getGroupedItems();
     }
 
     /**
-     * @return array
+     * Returns one item+qty pair per valid quote line, without exploding the quantity into unit copies.
+     *
+     * @return array{item: QuoteItem, qty: float}[]
      */
-    private function getUnitItems(): array
+    private function getGroupedItems(): array
     {
         $rateRequest = $this->rateRequestProvider->getRateRequest();
-        $unitItems = [];
+        $groupedItems = [];
 
         /** @var QuoteItem $item */
         foreach ($rateRequest->getAllItems() as $item) {
             if (!$this->quoteItemValidator->validate($item)) {
                 continue;
             }
-            $qty = $this->itemQuantityCalculator->calculate($item);
-            for ($idx = 1; $idx <= $qty; $idx++) {
-                $unitItems[] = $item;
+
+            $qty = floor($this->itemQuantityCalculator->calculate($item));
+
+            if ($qty < 1) {
+                continue;
             }
+
+            $groupedItems[] = ['item' => $item, 'qty' => $qty];
         }
-        return $unitItems;
+
+        return $groupedItems;
     }
 }

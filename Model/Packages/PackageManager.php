@@ -36,7 +36,7 @@ class PackageManager
     private $packages = [];
 
     /**
-     * @var \Frenet\Shipping\Model\Packages\PackageFactory
+     * @var PackageFactory
      */
     private $packageFactory;
 
@@ -61,8 +61,6 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
-     * PackageManager constructor.
-     *
      * @param QuoteItemValidatorInterface     $quoteItemValidator
      * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
      * @param PackageFactory                  $packageFactory
@@ -84,21 +82,22 @@ class PackageManager
     }
 
     /**
+     * Distributes the quote items into packages.
+     *
      * @return $this
      */
     public function process(): self
     {
-        $items = $this->packageItemDistributor->distribute();
-
-        /** @var QuoteItem $item */
-        foreach ($items as $item) {
-            $this->addItemToPackage($item);
+        foreach ($this->packageItemDistributor->distribute() as $entry) {
+            $this->addItemToPackage($entry['item'], $entry['qty']);
         }
 
         return $this;
     }
 
     /**
+     * Returns the packages built so far.
+     *
      * @return Package[]
      */
     public function getPackages(): array
@@ -107,6 +106,8 @@ class PackageManager
     }
 
     /**
+     * Returns the number of packages built so far.
+     *
      * @return int
      */
     public function countPackages()
@@ -115,6 +116,8 @@ class PackageManager
     }
 
     /**
+     * Clears the current package reference.
+     *
      * @return $this
      */
     public function unsetCurrentPackage()
@@ -124,6 +127,8 @@ class PackageManager
     }
 
     /**
+     * Clears all built packages.
+     *
      * @return $this
      */
     public function resetPackages() : self
@@ -134,6 +139,8 @@ class PackageManager
     }
 
     /**
+     * Creates a new, empty package.
+     *
      * @return Package
      */
     public function createPackage()
@@ -142,20 +149,28 @@ class PackageManager
     }
 
     /**
-     * @param QuoteItem $item
+     * Applies a quote item's packing plan, opening new packages as needed.
      *
-     * @return bool
+     * @param QuoteItem $item
+     * @param float     $qty
+     *
+     * @return void
      */
-    private function addItemToPackage(QuoteItem $item)
+    private function addItemToPackage(QuoteItem $item, float $qty): void
     {
-        if (!$this->getPackage()->canAddItem($item, 1)) {
-            $this->useNewPackage();
-        }
+        $plan = $this->getPackage()->planQuantitiesFor($item, $qty);
 
-        return $this->getPackage()->addItem($item, 1);
+        foreach ($plan as $batch) {
+            if ($batch['newPackage']) {
+                $this->useNewPackage();
+            }
+            $this->getPackage()->addItem($item, $batch['qty'], $batch['unitWeight']);
+        }
     }
 
     /**
+     * Returns the current package, creating one if none exists yet.
+     *
      * @return Package
      */
     private function getPackage()
@@ -168,6 +183,8 @@ class PackageManager
     }
 
     /**
+     * Starts a new current package and registers it.
+     *
      * @return $this
      */
     private function useNewPackage()

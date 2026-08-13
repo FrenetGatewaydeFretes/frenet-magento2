@@ -15,7 +15,10 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
-use \Magento\Store\Model\ScopeInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class Config
@@ -23,25 +26,31 @@ use \Magento\Store\Model\ScopeInterface;
 class Config
 {
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
     private $scopeConfig;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     private $storeManager;
 
+    /**
+     * @param ScopeConfigInterface  $scopeConfig
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        ScopeConfigInterface $scopeConfig,
+        StoreManagerInterface $storeManager
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Checks whether the Frenet shipping method is active.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return bool
      */
@@ -51,7 +60,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the Frenet API token.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -61,7 +72,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the product attribute code mapped to weight.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -71,7 +84,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the product attribute code mapped to height.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -81,7 +96,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the product attribute code mapped to length.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -91,7 +108,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the product attribute code mapped to width.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -101,7 +120,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the default weight used when a product has none.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return float
      */
@@ -111,7 +132,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the default height used when a product has none.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return float
      */
@@ -121,7 +144,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the default length used when a product has none.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return float
      */
@@ -131,7 +156,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the default width used when a product has none.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return float
      */
@@ -141,7 +168,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the additional lead time, in days, added to the delivery estimate.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return int
      */
@@ -151,7 +180,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Checks whether the shipping forecast message should be shown.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return bool
      */
@@ -161,7 +192,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the shipping forecast message template.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -171,7 +204,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Checks whether multi-quote (package splitting) is enabled.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return bool
      */
@@ -181,7 +216,33 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the maximum weight allowed per shipping package, in kilograms.
+     *
+     * @param string|int|StoreInterface $store
+     *
+     * @return float
+     */
+    public function getPackageMaxWeight($store = null): float
+    {
+        return (float) $this->getCarrierConfig('package_max_weight', $store);
+    }
+
+    /**
+     * Maximum quantity of a single cart item considered when building shipping packages.
+     *
+     * @param string|int|StoreInterface $store
+     *
+     * @return int
+     */
+    public function getMaxUnitQuantity($store = null): int
+    {
+        return (int) $this->getCarrierConfig('max_unit_quantity', $store);
+    }
+
+    /**
+     * Checks whether debug mode is enabled.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return bool
      */
@@ -191,7 +252,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the debug log filename.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -201,7 +264,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Checks whether the product-page shipping quote widget is enabled.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return bool
      */
@@ -211,8 +276,10 @@ class Config
     }
 
     /**
-     * @param string                                            $productTypeId
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Checks whether the given product type may use the product-page shipping quote widget.
+     *
+     * @param string                    $productTypeId
+     * @param string|int|StoreInterface $store
      *
      * @return bool
      */
@@ -223,7 +290,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the product types allowed to use the product-page shipping quote widget.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return array
      */
@@ -236,7 +305,9 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns the shipping origin postcode.
+     *
+     * @param string|int|StoreInterface $store
      *
      * @return string
      */
@@ -246,8 +317,10 @@ class Config
     }
 
     /**
-     * @param string                                            $field
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Returns a carrier-scoped configuration value.
+     *
+     * @param string                    $field
+     * @param string|int|StoreInterface $store
      *
      * @return mixed
      */
@@ -257,11 +330,13 @@ class Config
     }
 
     /**
-     * @param string                                            $section
-     * @param string                                            $group
-     * @param string                                            $field
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
-     * @param string                                            $scopeType
+     * Returns a configuration value for the given section, group and field.
+     *
+     * @param string                    $section
+     * @param string                    $group
+     * @param string                    $field
+     * @param string|int|StoreInterface $store
+     * @param string                    $scopeType
      *
      * @return mixed
      */
@@ -272,9 +347,11 @@ class Config
     }
 
     /**
-     * @param string|int|\Magento\Store\Api\Data\StoreInterface $store
+     * Resolves the store to use, falling back to the default store view.
      *
-     * @return \Magento\Store\Api\Data\StoreInterface|null
+     * @param string|int|StoreInterface $store
+     *
+     * @return StoreInterface|null
      */
     private function getStore($store = null)
     {
