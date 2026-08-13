@@ -68,11 +68,6 @@ class PackageItemDistributor
     /**
      * Returns one item+qty pair per valid quote line, without exploding the quantity into unit copies.
      *
-     * Package::planQuantitiesFor() does that split arithmetically when the
-     * package is built. The quantity is truncated (floor) to preserve the
-     * previous algorithm's behavior, which implicitly discarded the
-     * fractional part of items with "Qty Uses Decimals" enabled.
-     *
      * @return array{item: QuoteItem, qty: float}[]
      */
     private function getGroupedItems(): array

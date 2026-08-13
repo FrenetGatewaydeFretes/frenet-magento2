@@ -218,11 +218,6 @@ class Config
     /**
      * Maximum quantity of a single cart item considered when building shipping packages.
      *
-     * Bounds how many shipping packages (and therefore outbound API calls to
-     * Frenet, one per package - see PackagesCalculator::processPackages())
-     * a single cart line can generate, regardless of the product's
-     * configured weight.
-     *
      * @param string|int|StoreInterface $store
      *
      * @return int
