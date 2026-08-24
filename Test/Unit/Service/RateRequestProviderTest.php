@@ -27,7 +27,7 @@ class RateRequestProviderTest extends TestCase
      */
     private $rateRequestProvider;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->rateRequestProvider = $this->getObject(RateRequestProvider::class);
     }

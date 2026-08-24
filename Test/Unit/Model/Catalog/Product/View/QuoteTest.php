@@ -91,7 +91,7 @@ class QuoteTest extends TestCase
      */
     private $service;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->product = $this->prepareProduct();
 
@@ -192,7 +192,7 @@ class QuoteTest extends TestCase
 //    }
 
     /**
-     * @ test
+     * @test
      */
     public function quoteByProductId()
     {
@@ -203,7 +203,7 @@ class QuoteTest extends TestCase
     }
 
     /**
-     * @ test
+     * @test
      */
     public function quoteByProductSku()
     {
@@ -221,7 +221,7 @@ class QuoteTest extends TestCase
         /** @var Product | MockObject $product */
         $product = $this->getMockBuilder(Product::class)
             ->disableOriginalConstructor()
-            ->setMethods([
+            ->onlyMethods([
                 'getId',
                 'getSku',
                 'getPrice',

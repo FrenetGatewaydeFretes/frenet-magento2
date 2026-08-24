@@ -27,7 +27,7 @@ class FrenetTest extends TestCase
      */
     private $request;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
         $this->request = $objectManager->getObject(\Magento\Quote\Model\Quote\Address\RateRequest::class);
