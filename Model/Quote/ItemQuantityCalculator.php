@@ -16,7 +16,7 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Shipping\Model\Catalog\ProductType;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
@@ -25,14 +25,14 @@ use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
 {
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     /**
-     * @param Config $config
+     * @param ConfigInterface $config
      */
-    public function __construct(Config $config)
+    public function __construct(ConfigInterface $config)
     {
         $this->config = $config;
     }

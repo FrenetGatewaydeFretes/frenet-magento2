@@ -16,10 +16,10 @@ namespace Frenet\Shipping\Model\Packages;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiServiceInterface;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Model\TotalsCollector;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -43,7 +43,7 @@ class PackageProcessor
     private $quoteItemValidator;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
@@ -53,7 +53,7 @@ class PackageProcessor
     private $quoteCouponProcessor;
 
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $rateRequestProvider;
 
@@ -64,9 +64,9 @@ class PackageProcessor
 
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
-        Config $config,
+        ConfigInterface $config,
         ApiServiceInterface $apiService,
-        RateRequestProvider $rateRequestProvider,
+        RateRequestProviderInterface $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor,
         TotalsCollector $totalsCollector
     ) {

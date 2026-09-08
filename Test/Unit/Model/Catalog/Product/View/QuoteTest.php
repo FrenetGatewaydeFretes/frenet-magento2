@@ -20,9 +20,9 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 use Frenet\Shipping\Model\Calculator;
 use Frenet\Shipping\Model\Catalog\Product\View\Quote;
 use Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
-use Frenet\Shipping\Model\Config;
-use Frenet\Shipping\Model\DeliveryTimeCalculator;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Model\ConfigInterface;
+use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -41,21 +41,21 @@ class QuoteTest extends TestCase
     private const POSTCODE = '01310-100';
 
     private ProductRepositoryInterface&MockObject $productRepository;
-    private RateRequestProvider&MockObject $rateRequestProvider;
+    private RateRequestProviderInterface&MockObject $rateRequestProvider;
     private Calculator&MockObject $calculator;
     private RateRequestBuilder&MockObject $rateRequestBuilder;
-    private DeliveryTimeCalculator&MockObject $deliveryTimeCalculator;
-    private Config&MockObject $config;
+    private DeliveryTimeCalculatorInterface&MockObject $deliveryTimeCalculator;
+    private ConfigInterface&MockObject $config;
     private Quote $subject;
 
     protected function setUp(): void
     {
         $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
-        $this->rateRequestProvider = $this->createMock(RateRequestProvider::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
         $this->calculator = $this->createMock(Calculator::class);
         $this->rateRequestBuilder = $this->createMock(RateRequestBuilder::class);
-        $this->deliveryTimeCalculator = $this->createMock(DeliveryTimeCalculator::class);
-        $this->config = $this->createMock(Config::class);
+        $this->deliveryTimeCalculator = $this->createMock(DeliveryTimeCalculatorInterface::class);
+        $this->config = $this->createMock(ConfigInterface::class);
 
         $this->subject = new Quote(
             $this->productRepository,

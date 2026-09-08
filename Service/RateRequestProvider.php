@@ -21,16 +21,12 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 /**
  * Holds the rate request for the current quote so collaborators down the calculation chain can read it without re-plumbing it.
  */
-class RateRequestProvider
+class RateRequestProvider implements RateRequestProviderInterface
 {
     private ?RateRequest $rateRequest = null;
 
     /**
-     * Stores the rate request for the current quote.
-     *
-     * @param RateRequest $rateRequest
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function setRateRequest(RateRequest $rateRequest): self
     {
@@ -39,10 +35,7 @@ class RateRequestProvider
     }
 
     /**
-     * Returns the rate request set for the current quote.
-     *
-     * @return RateRequest
-     * @throws LocalizedException
+     * @inheritDoc
      */
     public function getRateRequest(): RateRequest
     {
@@ -54,9 +47,7 @@ class RateRequestProvider
     }
 
     /**
-     * Drops the stored rate request once the quote is done.
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function clear(): self
     {

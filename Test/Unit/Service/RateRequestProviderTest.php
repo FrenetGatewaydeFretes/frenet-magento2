@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Test\Unit\Service;
 
 use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\TestCase;
@@ -31,6 +32,11 @@ class RateRequestProviderTest extends TestCase
     protected function setUp(): void
     {
         $this->subject = new RateRequestProvider();
+    }
+
+    public function testShouldImplementTheRateRequestProviderContract(): void
+    {
+        $this->assertInstanceOf(RateRequestProviderInterface::class, $this->subject);
     }
 
     public function testShouldReturnSelfWhenSettingTheRateRequest(): void

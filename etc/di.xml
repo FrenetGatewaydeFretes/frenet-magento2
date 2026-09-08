@@ -14,6 +14,9 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
     <preference for="Frenet\Shipping\Model\ApiServiceInterface" type="Frenet\Shipping\Model\ApiService"/>
+    <preference for="Frenet\Shipping\Model\ConfigInterface" type="Frenet\Shipping\Model\Config"/>
+    <preference for="Frenet\Shipping\Model\DeliveryTimeCalculatorInterface" type="Frenet\Shipping\Model\DeliveryTimeCalculator"/>
+    <preference for="Frenet\Shipping\Service\RateRequestProviderInterface" type="Frenet\Shipping\Service\RateRequestProvider"/>
     <preference for="Frenet\Shipping\Model\CalculatorInterface" type="Frenet\Shipping\Model\Calculator"/>
     <preference for="Frenet\Shipping\Model\WeightConverterInterface" type="Frenet\Shipping\Model\WeightConverter"/>
     <preference for="Frenet\Shipping\Model\ServiceFinderInterface" type="Frenet\Shipping\Model\ServiceFinder"/>

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Test\Unit\Model\Carrier;
 
 use Frenet\Shipping\Model\Carrier\Frenet;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -28,13 +28,13 @@ use ReflectionClass;
 #[AllowMockObjectsWithoutExpectations]
 class FrenetTest extends TestCase
 {
-    private Config&MockObject $config;
+    private ConfigInterface&MockObject $config;
     private StoreManagerInterface&MockObject $storeManager;
     private Frenet $subject;
 
     protected function setUp(): void
     {
-        $this->config = $this->createMock(Config::class);
+        $this->config = $this->createMock(ConfigInterface::class);
         $this->storeManager = $this->createMock(StoreManagerInterface::class);
 
         // The carrier extends AbstractCarrierOnline (24 framework dependencies); build it without the

@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 
 /**
  * Class AttributesMapping
@@ -23,12 +23,12 @@ use Frenet\Shipping\Model\Config;
 class AttributesMapping implements AttributesMappingInterface
 {
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     public function __construct(
-        Config $config
+        ConfigInterface $config
     ) {
         $this->config = $config;
     }

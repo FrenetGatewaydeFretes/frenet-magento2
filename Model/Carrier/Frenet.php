@@ -20,12 +20,12 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInte
 use Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface;
 use Frenet\ObjectType\Entity\Tracking\TrackingInfo\EventInterface;
 use Frenet\Shipping\Model\CalculatorInterface;
-use Frenet\Shipping\Model\Config;
-use Frenet\Shipping\Model\DeliveryTimeCalculator;
+use Frenet\Shipping\Model\ConfigInterface;
+use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
 use Frenet\Shipping\Model\ServiceFinderInterface;
 use Frenet\Shipping\Model\TrackingInterface;
 use Frenet\Shipping\Model\Validator\PostcodeValidator;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Directory\Helper\Data as DirectoryData;
 use Magento\Directory\Model\CountryFactory;
@@ -112,10 +112,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         private readonly CalculatorInterface $calculator,
         private readonly TrackingInterface $trackingService,
         private readonly ServiceFinderInterface $serviceFinder,
-        private readonly Config $config,
-        private readonly DeliveryTimeCalculator $deliveryTimeCalculator,
+        private readonly ConfigInterface $config,
+        private readonly DeliveryTimeCalculatorInterface $deliveryTimeCalculator,
         private readonly PostcodeValidator $postcodeValidator,
-        private readonly RateRequestProvider $rateRequestProvider,
+        private readonly RateRequestProviderInterface $rateRequestProvider,
         array $data = []
     ) {
         parent::__construct(

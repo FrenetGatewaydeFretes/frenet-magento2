@@ -10,71 +10,41 @@
  *
  * Copyright (c) 2020.
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
-use Frenet\Shipping\Service\RateRequestProvider;
-use Magento\Catalog\Model\Product;
-use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Class DeliveryTimeCalculator
+ * Adds up the carrier forecast, the slowest product's lead time and the store's extra lead time into a delivery estimate.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-class DeliveryTimeCalculator
+class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface
 {
-    /**
-     * @var \Frenet\Shipping\Model\Config
-     */
-    private $config;
-
-    /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product
-     */
-    private $productResource;
-
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    private $storeManagement;
-
-    /**
-     * @var RateRequestProvider
-     */
-    private $rateRequestProvider;
-
-    /**
-     * DeliveryTimeCalculator constructor.
-     *
-     * @param \Magento\Catalog\Model\ResourceModel\Product $productResource
-     * @param \Magento\Store\Model\StoreManagerInterface   $storeManagement
-     * @param Config                                       $config
-     * @param RateRequestProvider                          $rateRequestProvider
-     */
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\Product $productResource,
-        \Magento\Store\Model\StoreManagerInterface $storeManagement,
-        \Frenet\Shipping\Model\Config $config,
-        RateRequestProvider $rateRequestProvider
+        private readonly ProductResource $productResource,
+        private readonly StoreManagerInterface $storeManagement,
+        private readonly ConfigInterface $config,
+        private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
-        $this->productResource = $productResource;
-        $this->storeManagement = $storeManagement;
-        $this->config = $config;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
-     * @param ServiceInterface $service
-     *
-     * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @inheritDoc
      */
-    public function calculate(ServiceInterface $service)
+    public function calculate(ServiceInterface $service): int
     {
         $rateRequest = $this->rateRequestProvider->getRateRequest();
-        $serviceForecast = $service->getDeliveryTime();
+        $serviceForecast = (int) $service->getDeliveryTime();
         $maxProductForecast = 0;
 
         /** @var QuoteItem $item */
@@ -88,18 +58,20 @@ class DeliveryTimeCalculator
             $maxProductForecast = $leadTime;
         }
 
-        return ($serviceForecast + $maxProductForecast + $this->config->getAdditionalLeadTime());
+        return $serviceForecast + $maxProductForecast + $this->config->getAdditionalLeadTime();
     }
 
     /**
+     * Reads the product's lead time, falling back to the raw store-scoped attribute value when the loaded product has none.
+     *
      * @param Product $product
      *
      * @return int
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    private function extractProductLeadTime(Product $product)
+    private function extractProductLeadTime(Product $product): int
     {
-        $leadTime = max($product->getData('lead_time'), 0);
+        $leadTime = max((int) $product->getData('lead_time'), 0);
 
         if (!$leadTime) {
             $leadTime = $this->productResource->getAttributeRawValue(

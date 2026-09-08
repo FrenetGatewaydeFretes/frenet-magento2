@@ -16,17 +16,17 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Cache\CacheKeyGenerator;
 
 use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 
 class MultiQuoteGenerator implements CacheKeyGeneratorInterface
 {
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     public function __construct(
-        Config $config
+        ConfigInterface $config
     ) {
         $this->config = $config;
     }

@@ -15,9 +15,9 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\PackageLimit;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -26,7 +26,7 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
 class MultiQuoteValidator implements MultiQuoteValidatorInterface
 {
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
@@ -36,14 +36,14 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
     private $packageLimit;
 
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $rateRequestProvider;
 
     public function __construct(
-        Config $config,
+        ConfigInterface $config,
         PackageLimit $packageLimit,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProviderInterface $rateRequestProvider
     ) {
         $this->config = $config;
         $this->packageLimit = $packageLimit;

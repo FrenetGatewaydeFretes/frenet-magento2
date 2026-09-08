@@ -38,7 +38,7 @@ class ApiService implements ApiServiceInterface
 
     public function __construct(
         private readonly DirectoryList $directoryList,
-        private readonly Config $config
+        private readonly ConfigInterface $config
     ) {
     }
 

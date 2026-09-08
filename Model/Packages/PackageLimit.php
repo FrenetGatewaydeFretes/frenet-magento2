@@ -15,7 +15,7 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 
 /**
  * Class PackageLimit
@@ -33,14 +33,14 @@ class PackageLimit
     private $maxWeight = null;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     /**
-     * @param Config $config
+     * @param ConfigInterface $config
      */
-    public function __construct(Config $config)
+    public function __construct(ConfigInterface $config)
     {
         $this->config = $config;
     }
