@@ -15,7 +15,9 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Shipping\Model\Carrier\Frenet;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -25,26 +27,10 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config
 {
-    /**
-     * @var ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * @param ScopeConfigInterface  $scopeConfig
-     * @param StoreManagerInterface $storeManager
-     */
     public function __construct(
-        ScopeConfigInterface $scopeConfig,
-        StoreManagerInterface $storeManager
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly StoreManagerInterface $storeManager
     ) {
-        $this->scopeConfig = $scopeConfig;
-        $this->storeManager = $storeManager;
     }
 
     /**
@@ -69,6 +55,30 @@ class Config
     public function getToken($store = null)
     {
         return $this->getCarrierConfig('token', $store);
+    }
+
+    /**
+     * Returns the configured Frenet API hostname override, or an empty string when unset.
+     *
+     * @param string|int|StoreInterface $store
+     *
+     * @return string
+     */
+    public function getApiHostname($store = null): string
+    {
+        return trim((string) $this->getCarrierConfig('api_hostname', $store));
+    }
+
+    /**
+     * Returns the configured Frenet API protocol override ('http'|'https'), or an empty string when unset.
+     *
+     * @param string|int|StoreInterface $store
+     *
+     * @return string
+     */
+    public function getApiProtocol($store = null): string
+    {
+        return strtolower(trim((string) $this->getCarrierConfig('api_protocol', $store)));
     }
 
     /**
@@ -326,7 +336,7 @@ class Config
      */
     public function getCarrierConfig($field, $store = null)
     {
-        return $this->get('carriers', \Frenet\Shipping\Model\Carrier\Frenet::CARRIER_CODE, $field, $store);
+        return $this->get('carriers', Frenet::CARRIER_CODE, $field, $store);
     }
 
     /**
@@ -357,7 +367,7 @@ class Config
     {
         try {
             return $this->storeManager->getStore($store);
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $exception) {
+        } catch (NoSuchEntityException $exception) {
             return $this->storeManager->getDefaultStoreView();
         }
     }

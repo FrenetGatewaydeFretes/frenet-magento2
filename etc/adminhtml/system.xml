@@ -99,6 +99,17 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
 
+                <!-- API CONNECTION -->
+                <field id="api_hostname" translate="label comment" type="text" sortOrder="450" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>API Hostname</label>
+                    <comment><![CDATA[Overrides the Frenet API hostname. Leave empty to use the default (api.frenet.com.br). Change only if instructed by Frenet support.]]></comment>
+                </field>
+                <field id="api_protocol" translate="label comment" type="select" sortOrder="460" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>API Protocol</label>
+                    <source_model>Frenet\Shipping\Model\Config\Source\ApiProtocol</source_model>
+                    <comment><![CDATA[Protocol used to reach the Frenet API. Leave on "Default" unless instructed by Frenet support.]]></comment>
+                </field>
+
                 <!-- DEBUG -->
                 <field id="debug" translate="label" type="select" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Debug</label>
