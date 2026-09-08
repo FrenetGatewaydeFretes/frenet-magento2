@@ -4,7 +4,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 
 [![Packagist Version](https://img.shields.io/packagist/v/frenet/frenet-magento2)](https://packagist.org/packages/frenet/frenet-magento2)
 ![Packagist Downloads](https://img.shields.io/packagist/dt/frenet/frenet-magento2)
-[![PHP](https://img.shields.io/badge/php-8.2%20%7C%208.3%20%7C%208.4-blue.svg)](http://www.php.net)
+[![PHP](https://img.shields.io/badge/php-8.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-blue.svg)](http://www.php.net)
 [![Magento](https://img.shields.io/badge/magento-2.4-orange.svg)](https://magento.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 
@@ -19,12 +19,15 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 - **Restrição por país e método de envio**, prazo adicional configurável, e opção de exibir ou ocultar métodos indisponíveis.
 - **Log de depuração** opcional, para investigar requisições/respostas trocadas com a API da Frenet.
 - **Limite de segurança configurável** para a quantidade de um mesmo item considerada no empacotamento (`Maximum Item Quantity per Shipping Line`), protegendo o cálculo de frete contra quantidades excessivas.
+- **Unidade de peso do catálogo respeitada automaticamente**: o empacotamento lê `general/locale/weight_unit` da loja e converte para quilogramas quando o catálogo está em libras — sem configuração extra.
+- **Hostname e protocolo da API configuráveis** (uso avançado), para apontar o módulo a um endpoint alternativo da Frenet quando o suporte orientar.
 - Tradução para **pt-BR** incluída.
 
 ## Compatibilidade
 
 | Módulo | Magento | PHP |
 |---|---|---|
+| `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
 | `2.4.8-p1` | 2.4.8 / 2.4.8-p1 | 8.2, 8.3, 8.4 |
 
 O `composer.json` do módulo declara as versões de `magento/framework` e dos módulos `magento/module-*` suportadas; o Composer resolve automaticamente a versão compatível com a sua instalação. Para versões anteriores do Magento (2.3.x, 2.4.0–2.4.7), utilize uma tag anterior do módulo (ex.: `2.4.7-p3`).
@@ -71,6 +74,7 @@ Recursos opcionais, no mesmo painel:
 - **Product Quote**: habilita a cotação de frete diretamente na página de produto, antes do cliente adicionar ao carrinho.
 - **Show Shipping Forecast** / **Shipping Forecast Message**: exibe uma mensagem de prazo estimado de entrega.
 - **Debug**: grava as requisições/respostas da API da Frenet em `var/log/<Debug Filename>`, útil para diagnosticar problemas de cotação.
+- **API Hostname** / **API Protocol**: sobrescrevem o endpoint da API da Frenet. Deixe em branco / *Default* — só altere se o suporte da Frenet orientar.
 
 ## Como funciona
 
