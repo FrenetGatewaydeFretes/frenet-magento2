@@ -11,44 +11,23 @@
  * Copyright (c) 2020.
  */
 
+declare(strict_types=1);
+
 namespace Frenet\Shipping\Service;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 
 /**
- * Class RateRequestProvider
- *
- * @package Frenet\Shipping\Service
+ * Holds the rate request for the current quote so collaborators down the calculation chain can read it without re-plumbing it.
  */
 class RateRequestProvider
 {
-    /**
-     * @var RateRequest
-     */
-    private $rateRequest;
+    private ?RateRequest $rateRequest = null;
 
     /**
-     * @var RateRequestFactory
-     */
-    private $rateRequestFactory;
-
-    public function __construct(
-        RateRequestFactory $rateRequestFactory
-    ) {
-        $this->rateRequestFactory = $rateRequestFactory;
-    }
-
-    /**
-     * @return RateRequest
-     */
-    public function createRateRequest()
-    {
-        return $this->rateRequestFactory->create();
-    }
-
-    /**
+     * Stores the rate request for the current quote.
+     *
      * @param RateRequest $rateRequest
      *
      * @return $this
@@ -60,6 +39,8 @@ class RateRequestProvider
     }
 
     /**
+     * Returns the rate request set for the current quote.
+     *
      * @return RateRequest
      * @throws LocalizedException
      */
@@ -73,6 +54,8 @@ class RateRequestProvider
     }
 
     /**
+     * Drops the stored rate request once the quote is done.
+     *
      * @return $this
      */
     public function clear(): self
