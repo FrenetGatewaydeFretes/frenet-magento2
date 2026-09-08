@@ -178,12 +178,12 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     public function collectRates(RateRequest $request)
     {
         try {
-            
             if (!$this->canCollectRates()) {
-                $errorMessage = $this->getErrorMessage();
-                $this->_logger->debug("Frenet canCollectRates: " . $errorMessage);
+                $this->_logger->debug(
+                    'Frenet carrier unavailable: inactive, or missing origin postcode / API token.'
+                );
 
-                return $errorMessage;
+                return $this->getErrorMessage();
             }
 
             /** This service will be used all the way long. */
@@ -201,10 +201,11 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             $this->rateRequestProvider->clear();
 
             return $this->result;
-        } catch (Exception $e) {
-            $errorMessage = $e->getMessage();
-            $errorStack = $e->getTraceAsString();
-            $this->_logger->critical("Error Frenet canCollectRates: " . $errorMessage." > ". $errorStack);
+        } catch (\Throwable $e) {
+            $this->rateRequestProvider->clear();
+            $this->_logger->critical(
+                "Error Frenet collectRates: " . $e->getMessage() . " > " . $e->getTraceAsString()
+            );
         }
 
         return null;
