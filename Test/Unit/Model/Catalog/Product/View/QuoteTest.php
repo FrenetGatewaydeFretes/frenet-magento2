@@ -12,251 +12,115 @@
  * Copyright (c) 2020.
  */
 
+declare(strict_types=1);
+
 namespace Frenet\Shipping\Test\Unit\Model\Catalog\Product\View;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
-use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
+use Frenet\Shipping\Model\Calculator;
 use Frenet\Shipping\Model\Catalog\Product\View\Quote;
-use Frenet\Shipping\Model\Catalog\ProductType;
-use Frenet\Shipping\Model\Packages\Package;
-use Frenet\Shipping\Model\Packages\PackageItem;
-use Frenet\Shipping\Model\Packages\PackageManager;
-use Frenet\Shipping\Model\Packages\PackageProcessor;
-use Frenet\Shipping\Test\Unit\TestCase;
+use Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
+use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\DeliveryTimeCalculator;
+use Frenet\Shipping\Service\RateRequestProvider;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
-use Magento\Framework\DataObject;
-use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\Quote\Address\RateRequest;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
+/**
+ * Tests that the product-page quote service turns Frenet calculation results into plain rows and stays quiet when the product is gone.
+ */
+#[AllowMockObjectsWithoutExpectations]
 class QuoteTest extends TestCase
 {
-    /**
-     * @var Quote
-     */
-    private $quote;
+    private const POSTCODE = '01310-100';
 
-    /**
-     * @var Product
-     */
-    private $product;
-
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $productRepository;
-
-    /**
-     * @var int
-     */
-    private $productId = 45;
-
-    /**
-     * @var int
-     */
-    private $productSku = 'PRODUCT-SIMPLE-SKU';
-
-    /**
-     * @var MockObject | DataObject
-     */
-    private $dataObject;
-
-    /**
-     * @var \Magento\Framework\DataObjectFactory
-     */
-    private $objectFactory;
-
-    /**
-     * @var Package
-     */
-    private $package;
-
-    /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
-     * @var PackageProcessor
-     */
-    private $packageProcessor;
-
-    /**
-     * @var ServiceFactory
-     */
-    private $serviceFactory;
-
-    /**
-     * @var ServiceInterface
-     */
-    private $service;
+    private ProductRepositoryInterface&MockObject $productRepository;
+    private RateRequestProvider&MockObject $rateRequestProvider;
+    private Calculator&MockObject $calculator;
+    private RateRequestBuilder&MockObject $rateRequestBuilder;
+    private DeliveryTimeCalculator&MockObject $deliveryTimeCalculator;
+    private Config&MockObject $config;
+    private Quote $subject;
 
     protected function setUp(): void
     {
-        $this->product = $this->prepareProduct();
-
         $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
-        $this->productRepository->method('get')->willReturn($this->product);
-        $this->productRepository->method('getById')->willReturn($this->product);
+        $this->rateRequestProvider = $this->createMock(RateRequestProvider::class);
+        $this->calculator = $this->createMock(Calculator::class);
+        $this->rateRequestBuilder = $this->createMock(RateRequestBuilder::class);
+        $this->deliveryTimeCalculator = $this->createMock(DeliveryTimeCalculator::class);
+        $this->config = $this->createMock(Config::class);
 
-        $this->dataObject = $this->createMock(DataObject::class);
-        $this->objectFactory = $this->createMock(\Magento\Framework\DataObjectFactory::class);
-        $this->objectFactory->method('create')->willReturn($this->dataObject);
-
-        /**
-         * Build Package
-         */
-        $dimensionsExtractor = $this->createMock(\Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor::class);
-        $dimensionsExtractor->method('setProductByCartItem')->willReturn($dimensionsExtractor);
-
-        $packageItem = $this->getObject(PackageItem::class);
-
-        $packageItemFactory = $this->createMock(\Frenet\Shipping\Model\Packages\PackageItemFactory::class);
-        $packageItemFactory->method('create')->willReturn($packageItem);
-
-        $this->package = $this->getObject(Package::class, [
-            'dimensionsExtractor' => $dimensionsExtractor,
-            'packageItemFactory' => $packageItemFactory,
-        ]);
-
-        $this->packageManager = $this->createMock(PackageManager::class);
-        $this->packageManager->method('createPackage')->willReturn($this->package);
-
-
-        $quoteItemValidator = $this->createMock(\Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface::class);
-        $quoteItemValidator->method('validate')->willReturn(true);
-
-        $config = $this->createMock(\Frenet\Shipping\Model\Config::class);
-        $config->method('getOriginPostcode')->willReturn('06999-000');
-
-        $quote = $this->getObject(\Frenet\Command\Shipping\Quote::class);
-
-        $apiService = $this->createMock(\Frenet\Shipping\Model\ApiService::class);
-        $apiService->method('shipping')->method('quote')->willReturn($quote);
-
-        $this->packageProcessor = $this->getObject(PackageProcessor::class, [
-            'quoteItemValidator' => $quoteItemValidator,
-            'config' => $config,
-            'apiService' => $apiService,
-        ]);
-
-        /**
-         * Service
-         */
-        $this->service = $this->createServiceInstance();
-
-        /**
-         * Quote Item Processor
-         */
-        $item = $this->getObject(\Magento\Quote\Model\Quote\Item::class);
-
-        $quoteItemFactory = $this->createMock(\Magento\Quote\Model\Quote\ItemFactory::class);
-        $quoteItemFactory->method('create')->willReturn($item);
-
-        $store = $this->createMock(\Magento\Store\Model\Store::class);
-        $store->method('getId')->willReturn(1);
-
-        $storeManager = $this->createMock(StoreManagerInterface::class);
-        $storeManager->method('getStore')->willReturn($store);
-
-        $quoteItemProcessor = $this->getObject(\Magento\Quote\Model\Quote\Item\Processor::class, [
-            'quoteItemFactory' => $quoteItemFactory,
-            'storeManager' => $storeManager,
-        ]);
-
-        $this->quote = $this->getObject(Quote::class, [
-            'objectFactory' => $this->objectFactory,
-            'productRepository' => $this->productRepository,
-            'packageManager' => $this->packageManager,
-            'packageProcessor' => $this->packageProcessor,
-            'quoteItemProcessor' => $quoteItemProcessor,
-        ]);
+        $this->subject = new Quote(
+            $this->productRepository,
+            $this->rateRequestProvider,
+            $this->calculator,
+            $this->rateRequestBuilder,
+            $this->createMock(LoggerInterface::class),
+            $this->deliveryTimeCalculator,
+            $this->config
+        );
     }
 
-    /**
-     * @test
-     */
-//    public function quote()
-//    {
-//        /** @var array $services */
-//        $services = $this->quote->quote($this->product);
-//
-//        $this->assertTrue(is_array($services));
-//        $this->assertFalse(empty($services));
-//
-//        /** @var ServiceInterface $service */
-//        foreach ($services as $service) {
-//            $this->assertInstanceOf(ServiceInterface::class, $service);
-//            $this->assertEquals($this->service, $service);
-//        }
-//    }
-
-    /**
-     * @test
-     */
-    public function quoteByProductId()
+    public function testShouldReturnEmptyArrayWhenTheProductIdDoesNotExist(): void
     {
-        $this->objectFactory->method('create')->willReturn($this->dataObject);
+        $this->productRepository->method('getById')->willThrowException(new NoSuchEntityException());
 
-        $expected = [];
-        $this->assertEquals($expected, $this->quote->quoteByProductId($this->productId));
+        $this->assertSame([], $this->subject->quoteByProductId(404, self::POSTCODE));
     }
 
-    /**
-     * @test
-     */
-    public function quoteByProductSku()
+    public function testShouldReturnEmptyArrayWhenTheProductSkuDoesNotExist(): void
     {
-        $this->objectFactory->method('create')->willReturn($this->dataObject);
+        $this->productRepository->method('get')->willThrowException(new NoSuchEntityException());
 
-        $expected = [];
-        $this->assertEquals($expected, $this->quote->quoteByProductSku($this->productSku));
+        $this->assertSame([], $this->subject->quoteByProductSku('missing-sku', self::POSTCODE));
     }
 
-    /**
-     * @return Product
-     */
-    private function prepareProduct() : Product
+    public function testShouldMapCalculatedServicesIntoRowsWhenQuotingByProductId(): void
     {
-        /** @var Product | MockObject $product */
-        $product = $this->getMockBuilder(Product::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods([
-                'getId',
-                'getSku',
-                'getPrice',
-                'getFinalPrice',
-                'getName',
-                'getWeight',
-                'getTypeId',
-                'getCartQty',
-            ])
-            ->getMock();
+        $this->productRepository->method('getById')->willReturn($this->createMock(ProductInterface::class));
+        $this->rateRequestBuilder->method('build')->willReturn($this->createMock(RateRequest::class));
+        $this->deliveryTimeCalculator->method('calculate')->willReturn(5);
+        $this->config->method('getShippingForecastMessage')->willReturn('Em {{d}} dia(s)');
+        $this->calculator->method('getQuote')->willReturn([
+            $this->service(false, '04510', 'Correios', 'PAC', 25.9),
+            $this->service(true, '04014', 'Correios', 'SEDEX', 42.5),
+        ]);
 
-        $product->method('getId')->willReturn($this->productId);
-        $product->method('getSku')->willReturn($this->productSku);
-        $product->method('getPrice')->willReturn(123.95);
-        $product->method('getFinalPrice')->willReturn(123.95);
-        $product->method('getName')->willReturn('Frenet Testing Product');
-        $product->method('getWeight')->willReturn(1);
-        $product->method('getTypeId')->willReturn(ProductType::TYPE_SIMPLE);
+        $result = $this->subject->quoteByProductId(1, self::POSTCODE);
 
-        $product->method('getCartQty')->will($this->returnValue(1));
-
-        return $product;
+        $this->assertSame([[
+            'service_code' => '04510',
+            'carrier' => 'Correios',
+            'message' => '',
+            'delivery_time' => 5,
+            'delivery_description' => 'Em 5 dia(s)',
+            'service_description' => 'PAC',
+            'shipping_price' => 25.9,
+        ]], $result);
     }
 
-    /**
-     * @return ServiceInterface
-     */
-    private function createServiceInstance() : ServiceInterface
-    {
-        if (!$this->serviceFactory) {
-            $this->serviceFactory = $this->getObject(ServiceFactory::class, [
-                'objectManager' => $this->getObject(\Frenet\Framework\ObjectManager::class)
-            ]);
-        }
+    private function service(
+        bool $isError,
+        string $code,
+        string $carrier,
+        string $description,
+        float $price
+    ): ServiceInterface&MockObject {
+        $service = $this->createMock(ServiceInterface::class);
+        $service->method('isError')->willReturn($isError);
+        $service->method('getServiceCode')->willReturn($code);
+        $service->method('getCarrier')->willReturn($carrier);
+        $service->method('getServiceDescription')->willReturn($description);
+        $service->method('getShippingPrice')->willReturn($price);
+        $service->method('getMessage')->willReturn('');
 
-        return $this->serviceFactory->create();
+        return $service;
     }
 }

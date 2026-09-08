@@ -10,96 +10,87 @@
  *
  * Copyright (c) 2020.
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Test\Unit\Model;
 
 use Frenet\Shipping\Model\ModuleMetadata;
-use Frenet\Shipping\Test\Unit\TestCase;
+use Magento\Framework\App\CacheInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Composer\ComposerInformation;
-use PHPUnit\Framework\MockObject\MockObject;
+use Magento\Framework\Serialize\SerializerInterface;
+use PHPUnit\Framework\MockObject\Stub;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\FinderFactory;
 
 /**
- * Class ModuleMetadata
+ * Tests that ModuleMetadata reports the installed package version, preferring the Composer manifest and caching the result.
  */
 class ModuleMetadataTest extends TestCase
 {
-    /**
-     * @var string
-     */
-    private $version = '2.1.4';
+    private const FIXTURE_VERSION = '248.1.4';
 
-    /**
-     * @var ModuleMetadata
-     */
-    private $productMetadata;
-
-    /**
-     * @var ComposerInformation | MockObject
-     */
-    private $composerInformation;
+    private ComposerInformation&Stub $composerInformation;
+    private CacheInterface&Stub $cache;
+    private SerializerInterface&Stub $serializer;
+    private DirectoryList&Stub $directoryList;
+    private FinderFactory&Stub $finderFactory;
+    private ModuleMetadata $subject;
 
     protected function setUp(): void
     {
-        $this->composerInformation = $this->createMock(ComposerInformation::class);
-        $this->productMetadata = $this->getObject(ModuleMetadata::class, [
-            'composerInformation' => $this->composerInformation
-        ]);
+        $this->composerInformation = $this->createStub(ComposerInformation::class);
+        $this->cache = $this->createStub(CacheInterface::class);
+        $this->cache->method('load')->willReturn(false);
+        $this->serializer = $this->createStub(SerializerInterface::class);
+        $this->directoryList = $this->createStub(DirectoryList::class);
+        $this->directoryList->method('getPath')->willReturn('/frenet-nonexistent-app-dir');
+        // A real Finder pointed at a missing directory throws DirectoryNotFoundException,
+        // which is exactly the "no app/code checkout" branch under test.
+        $this->finderFactory = $this->createStub(FinderFactory::class);
+        $this->finderFactory->method('create')->willReturnCallback(static fn (): Finder => new Finder());
+
+        $this->subject = new ModuleMetadata(
+            $this->composerInformation,
+            $this->cache,
+            $this->serializer,
+            $this->directoryList,
+            $this->finderFactory
+        );
     }
 
-    /**
-     * @test
-     */
-    public function getPackageVersion()
+    public function testShouldReturnTheComposerVersionWhenThePackageIsInstalledViaComposer(): void
     {
-        $this->prepareComposerInformation();
-        $this->assertEquals($this->version, $this->productMetadata->getVersion());
-    }
-
-    /**
-     * @test
-     */
-    public function getPackageUnknownVersion()
-    {
-        $this->assertEquals('Unknown Module Version', $this->productMetadata->getVersion());
-    }
-
-    /**
-     * @test
-     */
-    public function getPackageName()
-    {
-        $this->prepareComposerInformation();
-        $this->assertEquals(ModuleMetadata::PACKAGE_NAME, $this->productMetadata->getName());
-    }
-
-    /**
-     * @test
-     */
-    public function getPackageType()
-    {
-        $this->prepareComposerInformation();
-        $this->assertEquals(ModuleMetadata::PACKAGE_TYPE, $this->productMetadata->getType());
-    }
-
-    private function prepareComposerInformation()
-    {
-        $this->composerInformation->method('getInstalledMagentoPackages')->willReturn($this->getPackageInformation());
-    }
-
-    /**
-     * @return array
-     */
-    private function getPackageInformation()
-    {
-        $packageInformation = [
+        $this->composerInformation->method('getInstalledMagentoPackages')->willReturn([
             ModuleMetadata::PACKAGE_NAME => [
                 'name' => ModuleMetadata::PACKAGE_NAME,
                 'type' => ModuleMetadata::PACKAGE_TYPE,
-                'version' => $this->version
-            ]
-        ];
+                'version' => self::FIXTURE_VERSION,
+            ],
+        ]);
 
-        return $packageInformation;
+        $version = $this->subject->getVersion();
+
+        $this->assertStringContainsString(self::FIXTURE_VERSION, $version);
+        $this->assertStringContainsString('(Installed Via Composer)', $version);
+    }
+
+    public function testShouldReturnUnknownWhenNoVersionSourceIsAvailable(): void
+    {
+        $this->composerInformation->method('getInstalledMagentoPackages')->willReturn([]);
+
+        $this->assertSame('Unknown Module Version', $this->subject->getVersion());
+    }
+
+    public function testShouldReturnThePackageName(): void
+    {
+        $this->assertSame(ModuleMetadata::PACKAGE_NAME, $this->subject->getName());
+    }
+
+    public function testShouldReturnThePackageType(): void
+    {
+        $this->assertSame(ModuleMetadata::PACKAGE_TYPE, $this->subject->getType());
     }
 }
