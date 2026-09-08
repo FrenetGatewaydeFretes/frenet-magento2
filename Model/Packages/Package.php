@@ -88,15 +88,27 @@ class Package
         }
 
         /** @var PackageItem $packageItem */
-        $packageItem = $this->getItemById($item->getId()) ?: $this->packageItemFactory->create([
+        $packageItem = $this->getItemById($this->itemKey($item)) ?: $this->packageItemFactory->create([
             'cartItem' => $item
         ]);
 
         $packageItem->setQty($this->getItemQty($item) + $qty);
 
-        $this->items[$item->getId()] = $packageItem;
+        $this->items[$this->itemKey($item)] = $packageItem;
 
         return true;
+    }
+
+    /**
+     * Returns a stable array key for a cart item, falling back to a prefixed object id when it has no cart item id.
+     *
+     * @param QuoteItem $item
+     *
+     * @return string
+     */
+    private function itemKey(QuoteItem $item): string
+    {
+        return $item->getId() ? (string) $item->getId() : 'obj_' . spl_object_id($item);
     }
 
     /**
@@ -286,7 +298,7 @@ class Package
      */
     private function itemExists(QuoteItem $item)
     {
-        return isset($this->items[$item->getId()]);
+        return isset($this->items[$this->itemKey($item)]);
     }
 
     /**
@@ -299,7 +311,7 @@ class Package
     private function getItemQty(QuoteItem $item)
     {
         if ($this->itemExists($item)) {
-            return (float) $this->getItemById($item->getId())->getQty();
+            return (float) $this->getItemById($this->itemKey($item))->getQty();
         }
 
         return 0.0000;
