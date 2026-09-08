@@ -30,7 +30,7 @@ use Symfony\Component\Finder\FinderFactory;
  */
 class ModuleMetadataTest extends TestCase
 {
-    private const FIXTURE_VERSION = '248.1.4';
+    private const FIXTURE_VERSION = '2.4.9';
 
     private ComposerInformation&Stub $composerInformation;
     private CacheInterface&Stub $cache;
