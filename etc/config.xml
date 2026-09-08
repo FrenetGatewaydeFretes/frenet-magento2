@@ -26,7 +26,6 @@
                 <default_length>16</default_length>
                 <default_width>11</default_width>
                 <default_weight>0.1</default_weight>
-                <weight_type>kg</weight_type>
                 <show_delivery>1</show_delivery>
                 <msgprazo>%s - Em média %d dia(s)</msgprazo>
                 <multi_quote>0</multi_quote>
