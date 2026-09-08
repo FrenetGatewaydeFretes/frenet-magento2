@@ -153,10 +153,11 @@ class Package
             $unitWeight = (float) $this->dimensionsExtractor->getWeight();
         }
 
-        $convertedWeight = (float) $this->weightConverter->convertToKg($unitWeight);
-        $itemWeight = $unitWeight + $convertedWeight * ($qty - 1);
+        // getTotalWeight() and PackageLimit::getMaxWeight() are both in kilograms, so weigh this batch in
+        // kilograms too instead of mixing the raw (possibly lbs) unit weight into the sum.
+        $batchWeight = $this->weightConverter->convertToKg($unitWeight) * $qty;
 
-        if (($itemWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
+        if (($batchWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
             return false;
         }
 
@@ -207,7 +208,7 @@ class Package
             return [['newPackage' => false, 'qty' => $requestedQty, 'unitWeight' => $unitWeight]];
         }
 
-        $convertedUnitWeight = (float) $this->weightConverter->convertToKg($unitWeight);
+        $convertedUnitWeight = $this->weightConverter->convertToKg($unitWeight);
 
         $unitWeightScaled = (int) round($unitWeight * self::WEIGHT_SCALE);
         $convertedUnitWeightScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
