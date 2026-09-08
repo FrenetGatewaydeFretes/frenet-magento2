@@ -286,7 +286,7 @@ class Config
     public function isProductQuoteAllowed(string $productTypeId, $store = null): bool
     {
         $allowedTypes = $this->getProductQuoteProductTypes($store);
-        return in_array($productTypeId, $allowedTypes);
+        return in_array($productTypeId, $allowedTypes, true);
     }
 
     /**
@@ -300,7 +300,7 @@ class Config
     {
         return explode(
             ',',
-            $this->getCarrierConfig('product_quote/product_types', $store)
+            (string) $this->getCarrierConfig('product_quote/product_types', $store)
         );
     }
 
