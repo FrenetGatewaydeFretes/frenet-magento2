@@ -12,69 +12,53 @@
  * Copyright (c) 2020.
  */
 
+declare(strict_types=1);
+
 namespace Frenet\Shipping\Test\Unit\Service;
 
 use Frenet\Shipping\Service\RateRequestProvider;
-use Frenet\Shipping\Test\Unit\TestCase;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
+/**
+ * Tests that RateRequestProvider carries one rate request across the quote flow and fails loudly once it is cleared.
+ */
 class RateRequestProviderTest extends TestCase
 {
-    /**
-     * @var RateRequestProvider
-     */
-    private $rateRequestProvider;
+    private RateRequestProvider $subject;
 
     protected function setUp(): void
     {
-        $this->rateRequestProvider = $this->getObject(RateRequestProvider::class);
+        $this->subject = new RateRequestProvider();
     }
 
-    /**
-     * @test
-     */
-    public function setRateRequest()
+    public function testShouldReturnSelfWhenSettingTheRateRequest(): void
     {
-        /** @var RateRequest | MockObject $rateRequest */
-        $rateRequest = $this->createMock(RateRequest::class);
-        $this->assertInstanceOf(
-            RateRequestProvider::class,
-            $this->rateRequestProvider->setRateRequest($rateRequest)
+        $this->assertSame(
+            $this->subject,
+            $this->subject->setRateRequest($this->createStub(RateRequest::class))
         );
     }
 
-    /**
-     * @test
-     */
-    public function getRateRequest()
+    public function testShouldReturnTheStoredRequestWhenOneWasSet(): void
     {
-        /** @var RateRequest | MockObject $rateRequest */
-        $rateRequest = $this->createMock(RateRequest::class);
+        $rateRequest = $this->createStub(RateRequest::class);
         $rateRequest->method('getData')->willReturn(9.9988);
-        $this->rateRequestProvider->setRateRequest($rateRequest);
-        $this->assertInstanceOf(
-            RateRequest::class,
-            $this->rateRequestProvider->getRateRequest()
-        );
-        $this->assertEquals(
-            9.9988,
-            $this->rateRequestProvider->getRateRequest()->getData()
-        );
+        $this->subject->setRateRequest($rateRequest);
+
+        $this->assertSame($rateRequest, $this->subject->getRateRequest());
+        $this->assertSame(9.9988, $this->subject->getRateRequest()->getData());
     }
 
-    /**
-     * @test
-     */
-    public function clear()
+    public function testShouldThrowWhenGettingTheRateRequestAfterClear(): void
     {
-        /** @var RateRequest | MockObject $rateRequest */
-        $rateRequest = $this->createMock(RateRequest::class);
-        $this->rateRequestProvider->setRateRequest($rateRequest);
-        $this->rateRequestProvider->clear();
-        $this->expectExceptionObject($this->getObject(LocalizedException::class));
+        $this->subject->setRateRequest($this->createStub(RateRequest::class));
+        $this->subject->clear();
+
+        $this->expectException(LocalizedException::class);
         $this->expectExceptionMessage('Rate Request is not set.');
-        $this->rateRequestProvider->getRateRequest();
+
+        $this->subject->getRateRequest();
     }
 }
