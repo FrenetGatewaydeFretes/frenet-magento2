@@ -16,29 +16,35 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model;
 
 /**
- * Class WeightConverterInterface
+ * Converts a weight between pounds and kilograms according to the store's configured catalog weight unit.
  */
 interface WeightConverterInterface
 {
     /**
      * @var float
      */
-    const LBS_TO_KG_FACTOR = 0.453592;
+    public const LBS_TO_KG_FACTOR = 0.453592;
 
     /**
      * @var float
      */
-    const KG_TO_LBS_FACTOR = 2.20462;
+    public const KG_TO_LBS_FACTOR = 2.20462;
 
     /**
+     * Converts a catalog weight to kilograms (a no-op when the store already uses kilograms).
+     *
      * @param float $weight
+     *
      * @return float
      */
-    public function convertToKg($weight);
+    public function convertToKg(float $weight): float;
 
     /**
+     * Converts a catalog weight to pounds (a no-op when the store already uses pounds).
+     *
      * @param float $weight
+     *
      * @return float
      */
-    public function convertToLbs($weight);
+    public function convertToLbs(float $weight): float;
 }
