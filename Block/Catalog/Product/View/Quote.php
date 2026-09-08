@@ -21,7 +21,7 @@ use Magento\Catalog\Block\Product\View;
 /**
  * Class Quote
  *
- * @method ViewModel getViewModel
+ * @method ViewModel getViewModel()
  *
  * @package Frenet\Shipping\Block\Catalog\Product\View
  */

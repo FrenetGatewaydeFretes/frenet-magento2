@@ -34,42 +34,12 @@ class Package
      */
     private $items = [];
 
-    /**
-     * @var PackageLimit
-     */
-    private $packageLimit;
-
-    /**
-     * @var DimensionsExtractorInterface
-     */
-    private $dimensionsExtractor;
-
-    /**
-     * @var PackageItemFactory
-     */
-    private $packageItemFactory;
-
-    /**
-     * @var WeightConverterInterface
-     */
-    private $weightConverter;
-
-    /**
-     * @param DimensionsExtractorInterface $dimensionsExtractor
-     * @param PackageItemFactory           $packageItemFactory
-     * @param PackageLimit                 $packageLimit
-     * @param WeightConverterInterface     $weightConverter
-     */
     public function __construct(
-        DimensionsExtractorInterface $dimensionsExtractor,
-        PackageItemFactory $packageItemFactory,
-        PackageLimit $packageLimit,
-        WeightConverterInterface $weightConverter
+        private readonly DimensionsExtractorInterface $dimensionsExtractor,
+        private readonly PackageItemFactory $packageItemFactory,
+        private readonly PackageLimit $packageLimit,
+        private readonly WeightConverterInterface $weightConverter
     ) {
-        $this->dimensionsExtractor = $dimensionsExtractor;
-        $this->packageItemFactory = $packageItemFactory;
-        $this->packageLimit = $packageLimit;
-        $this->weightConverter = $weightConverter;
     }
 
     /**
