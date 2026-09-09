@@ -17,7 +17,7 @@ use Magento\Framework\Data\OptionSourceInterface;
 use Magento\Framework\Phrase;
 
 /**
- * Offers the API transport choices for the carrier config, with an empty option meaning "keep the frenet-php default".
+ * Offers the API transport choices for the carrier config; HTTPS is the shipped default.
  */
 class ApiProtocol implements OptionSourceInterface
 {
@@ -39,7 +39,6 @@ class ApiProtocol implements OptionSourceInterface
     public function toOptionArray(): array
     {
         return [
-            ['value' => '', 'label' => __('Default')],
             ['value' => self::HTTPS, 'label' => __('HTTPS')],
             ['value' => self::HTTP, 'label' => __('HTTP')],
         ];

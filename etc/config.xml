@@ -68,6 +68,9 @@
                     <product_types>simple,configurable,bundle,grouped</product_types>
                 </product_quote>
 
+                <!-- API CONNECTION -->
+                <api_protocol>https</api_protocol>
+
                 <!-- DEBUG -->
                 <debug>0</debug>
                 <debug_filename>frenet_request_debug.log</debug_filename>
