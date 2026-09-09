@@ -19,10 +19,13 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Holds the rate request for the current quote so collaborators down the calculation chain can read it without re-plumbing it.
+ * Carries the current quote's rate request so downstream collaborators read it without re-plumbing every call.
  */
 class RateRequestProvider implements RateRequestProviderInterface
 {
+    /**
+     * @var RateRequest|null
+     */
     private ?RateRequest $rateRequest = null;
 
     /**

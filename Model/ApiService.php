@@ -32,8 +32,14 @@ use Magento\Framework\Exception\FileSystemException;
  */
 class ApiService implements ApiServiceInterface
 {
+    /**
+     * @var ApiInterface|null
+     */
     private ?ApiInterface $api = null;
 
+    /**
+     * @var bool
+     */
     private bool $isInitialized = false;
 
     public function __construct(

@@ -19,7 +19,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 
 /**
- * Class WeightConverter
+ * Converts weights to or from kilograms according to the store's configured catalog weight unit.
  */
 class WeightConverter implements WeightConverterInterface
 {

@@ -20,7 +20,7 @@ use Frenet\Shipping\Model\WeightConverterInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class Package
+ * One shipping package: accumulates cart items and enforces the configured weight limit as they are added.
  */
 class Package
 {

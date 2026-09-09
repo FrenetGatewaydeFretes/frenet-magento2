@@ -17,7 +17,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 use Magento\Framework\Exception\LocalizedException;
 
 /**
- * Estimates how many days a quoted service takes, combining the carrier forecast, product lead time and the store extra.
+ * Estimates a quoted service's delivery time in days: carrier forecast plus item lead time plus the store extra.
  */
 interface DeliveryTimeCalculatorInterface
 {

@@ -24,7 +24,7 @@ use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Adds up the carrier forecast, the slowest product's lead time and the store's extra lead time into a delivery estimate.
+ * Sums the carrier forecast, the slowest item's lead time and the store's extra days into one delivery estimate.
  *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
@@ -62,7 +62,7 @@ class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface
     }
 
     /**
-     * Reads the product's lead time, falling back to the raw store-scoped attribute value when the loaded product has none.
+     * Reads the product's lead time, falling back to the raw store-scoped attribute value when it is empty.
      *
      * @param Product $product
      *
