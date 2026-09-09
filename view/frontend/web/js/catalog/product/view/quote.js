@@ -16,7 +16,6 @@ define([
     'ko',
     'uiElement',
     'Magento_Catalog/js/price-utils',
-    'jquery/ui',
     'mage/translate',
     'loader',
     'domReady',
