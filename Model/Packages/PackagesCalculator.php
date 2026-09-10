@@ -21,7 +21,7 @@ use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Class PackagesDistributor
+ * Turns the cart into one or more packages, quotes each against the Frenet API and returns a single service list.
  */
 class PackagesCalculator
 {
@@ -84,7 +84,7 @@ class PackagesCalculator
          * If the package is not overweight then we simply process all the package.
          */
         if (!$this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight())) {
-            return $this->processPackages();
+            return $this->consolidatePackages($this->processPackages());
         }
 
         /**
@@ -92,7 +92,7 @@ class PackagesCalculator
          */
         if (!$this->multiQuoteValidator->canProcessMultiQuote()) {
             $this->packageLimit->removeLimit();
-            return $this->processPackages();
+            return $this->consolidatePackages($this->processPackages());
         }
 
         /**
@@ -113,6 +113,67 @@ class PackagesCalculator
          * The other options (not for Correios) are got from the full call (the first one).
          */
         return $this->packageMatching->match($packages);
+    }
+
+    /**
+     * Collapses a split-cart quote into one service list, summing the price per method across packages.
+     *
+     * @param array $packagesServices Service[] when the cart fit one package, Service[][] when it was split
+     *
+     * @return Service[]
+     */
+    private function consolidatePackages(array $packagesServices): array
+    {
+        if (!is_array(reset($packagesServices))) {
+            return $packagesServices;
+        }
+
+        $packageCount = count($packagesServices);
+        $totals = [];
+        $counts = [];
+
+        foreach ($packagesServices as $services) {
+            /** @var Service $service */
+            foreach ($services as $service) {
+                if ($service->isError()) {
+                    continue;
+                }
+
+                $code = (string) $service->getServiceCode();
+
+                if (!isset($totals[$code])) {
+                    $totals[$code] = $service;
+                    $counts[$code] = 1;
+                    continue;
+                }
+
+                $kept = $totals[$code];
+                $kept->setData(
+                    Service::FIELD_SHIPPING_PRICE,
+                    $kept->getShippingPrice() + $service->getShippingPrice()
+                );
+                $kept->setData(
+                    Service::FIELD_ORIGINAL_SHIPPING_PRICE,
+                    $kept->getOriginalShippingPrice() + $service->getOriginalShippingPrice()
+                );
+
+                if ($service->getDeliveryTime() > $kept->getDeliveryTime()) {
+                    $kept->setData(Service::FIELD_DELIVERY_TIME, $service->getDeliveryTime());
+                }
+
+                $counts[$code]++;
+            }
+        }
+
+        $consolidated = [];
+
+        foreach ($totals as $code => $service) {
+            if ($counts[$code] === $packageCount) {
+                $consolidated[] = $service;
+            }
+        }
+
+        return $consolidated;
     }
 
     /**
