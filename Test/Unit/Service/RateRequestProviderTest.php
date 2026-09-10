@@ -1,15 +1,12 @@
 <?php
 /**
- * Frenet Shipping Gateway
+ * Frenet_Shipping
  *
- * @category Frenet
- * @package Frenet\Shipping
+ * @vendor    Frenet
+ * @package   Shipping
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
- *
- * Copyright (c) 2020.
+ * @copyright © 2026 Diego M. Miyabara. All rights reserved.
+ * @author    Diego M. Miyabara <diego.miyabara@frenet.com.br>
  */
 
 declare(strict_types=1);
@@ -27,6 +24,9 @@ use PHPUnit\Framework\TestCase;
  */
 class RateRequestProviderTest extends TestCase
 {
+    /**
+     * @var RateRequestProvider
+     */
     private RateRequestProvider $subject;
 
     protected function setUp(): void

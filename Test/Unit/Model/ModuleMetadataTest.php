@@ -1,14 +1,12 @@
 <?php
 /**
- * Frenet Shipping Gateway
+ * Frenet_Shipping
  *
- * @category Frenet
+ * @vendor    Frenet
+ * @package   Shipping
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
- *
- * Copyright (c) 2020.
+ * @copyright © 2026 Diego M. Miyabara. All rights reserved.
+ * @author    Diego M. Miyabara <diego.miyabara@frenet.com.br>
  */
 
 declare(strict_types=1);
@@ -26,17 +24,43 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\FinderFactory;
 
 /**
- * Tests that ModuleMetadata reports the installed package version, preferring the Composer manifest and caching the result.
+ * Tests that ModuleMetadata resolves the installed version from Composer and reports Unknown when absent.
  */
 class ModuleMetadataTest extends TestCase
 {
+    /**
+     * @var string
+     */
     private const FIXTURE_VERSION = '2.4.9';
 
-    private ComposerInformation&Stub $composerInformation;
-    private CacheInterface&Stub $cache;
-    private SerializerInterface&Stub $serializer;
-    private DirectoryList&Stub $directoryList;
-    private FinderFactory&Stub $finderFactory;
+    /**
+     * @var ComposerInformation&Stub
+     */
+    private Stub $composerInformation;
+
+    /**
+     * @var CacheInterface&Stub
+     */
+    private Stub $cache;
+
+    /**
+     * @var SerializerInterface&Stub
+     */
+    private Stub $serializer;
+
+    /**
+     * @var DirectoryList&Stub
+     */
+    private Stub $directoryList;
+
+    /**
+     * @var FinderFactory&Stub
+     */
+    private Stub $finderFactory;
+
+    /**
+     * @var ModuleMetadata
+     */
     private ModuleMetadata $subject;
 
     protected function setUp(): void

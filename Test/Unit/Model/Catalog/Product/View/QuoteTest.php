@@ -1,15 +1,12 @@
 <?php
 /**
- * Frenet Shipping Gateway
+ * Frenet_Shipping
  *
- * @category Frenet
- * @package  Frenet\Shipping
+ * @vendor    Frenet
+ * @package   Shipping
  *
- * @author   Tiago Sampaio <tiago@tiagosampaio.com>
- * @link     https://github.com/tiagosampaio
- * @link     https://tiagosampaio.com
- *
- * Copyright (c) 2020.
+ * @copyright © 2026 Diego M. Miyabara. All rights reserved.
+ * @author    Diego M. Miyabara <diego.miyabara@frenet.com.br>
  */
 
 declare(strict_types=1);
@@ -33,19 +30,54 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * Tests that the product-page quote service turns Frenet calculation results into plain rows and stays quiet when the product is gone.
+ * Tests that the product-page quote service maps Frenet services to rows and returns nothing when the product is gone.
  */
 #[AllowMockObjectsWithoutExpectations]
 class QuoteTest extends TestCase
 {
+    /**
+     * @var string
+     */
     private const POSTCODE = '01310-100';
 
-    private ProductRepositoryInterface&MockObject $productRepository;
-    private RateRequestProviderInterface&MockObject $rateRequestProvider;
-    private Calculator&MockObject $calculator;
-    private RateRequestBuilder&MockObject $rateRequestBuilder;
-    private DeliveryTimeCalculatorInterface&MockObject $deliveryTimeCalculator;
-    private ConfigInterface&MockObject $config;
+    /**
+     * @var ProductRepositoryInterface&MockObject
+     */
+    private MockObject $productRepository;
+
+    /**
+     * @var RateRequestProviderInterface&MockObject
+     */
+    private MockObject $rateRequestProvider;
+
+    /**
+     * @var Calculator&MockObject
+     */
+    private MockObject $calculator;
+
+    /**
+     * @var RateRequestBuilder&MockObject
+     */
+    private MockObject $rateRequestBuilder;
+
+    /**
+     * @var DeliveryTimeCalculatorInterface&MockObject
+     */
+    private MockObject $deliveryTimeCalculator;
+
+    /**
+     * @var ConfigInterface&MockObject
+     */
+    private MockObject $config;
+
+    /**
+     * @var LoggerInterface&MockObject
+     */
+    private MockObject $logger;
+
+    /**
+     * @var Quote
+     */
     private Quote $subject;
 
     protected function setUp(): void
@@ -56,13 +88,14 @@ class QuoteTest extends TestCase
         $this->rateRequestBuilder = $this->createMock(RateRequestBuilder::class);
         $this->deliveryTimeCalculator = $this->createMock(DeliveryTimeCalculatorInterface::class);
         $this->config = $this->createMock(ConfigInterface::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->subject = new Quote(
             $this->productRepository,
             $this->rateRequestProvider,
             $this->calculator,
             $this->rateRequestBuilder,
-            $this->createMock(LoggerInterface::class),
+            $this->logger,
             $this->deliveryTimeCalculator,
             $this->config
         );

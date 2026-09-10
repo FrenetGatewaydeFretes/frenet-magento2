@@ -23,13 +23,24 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
- * Tests the Frenet carrier gate methods (advertised code and the pre-flight checks that decide whether rates are collected).
+ * Tests the Frenet carrier gate methods: the advertised code and the pre-flight checks that gate rate collection.
  */
 #[AllowMockObjectsWithoutExpectations]
 class FrenetTest extends TestCase
 {
-    private ConfigInterface&MockObject $config;
-    private StoreManagerInterface&MockObject $storeManager;
+    /**
+     * @var ConfigInterface&MockObject
+     */
+    private MockObject $config;
+
+    /**
+     * @var StoreManagerInterface&MockObject
+     */
+    private MockObject $storeManager;
+
+    /**
+     * @var Frenet
+     */
     private Frenet $subject;
 
     protected function setUp(): void
