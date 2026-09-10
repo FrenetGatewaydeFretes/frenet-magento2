@@ -11,65 +11,59 @@
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
+use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 
 /**
- * Class PackageMatching
+ * Merges a split-cart quote: Correios is summed per package, the other carriers come from the full unlimited call.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
- * @todo Review this class.
  */
 class PackageMatching
 {
     /**
      * @var array
      */
-    private $results = [];
+    private array $results = [];
 
     /**
      * @var array
      */
-    private $fullResults;
+    private array $fullResults = [];
 
     /**
      * @var array
      */
-    private $services = [];
+    private array $services = [];
 
-    /**
-     * @var \Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory
-     */
-    private $serviceFactory;
-
-    /**
-     * PackageMatching constructor.
-     *
-     * @param \Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory $serviceFactory
-     */
     public function __construct(
-        \Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory $serviceFactory
+        private readonly ServiceFactory $serviceFactory
     ) {
-        $this->serviceFactory = $serviceFactory;
     }
 
     /**
+     * Consolidates the per-package results ('full' plus one entry per package) into a single service list.
+     *
      * @param array $results
      *
      * @return array
      */
-    public function match(array $results)
+    public function match(array $results): array
     {
         $this->init($results);
         return $this->matchResults();
     }
 
     /**
+     * Binds each package's Correios services, then appends the carriers kept from the full call.
+     *
      * @return array
      */
-    private function matchResults()
+    private function matchResults(): array
     {
         /** @var array $services */
         foreach ($this->results as $services) {
@@ -80,11 +74,13 @@ class PackageMatching
     }
 
     /**
+     * Feeds one package's non-error Correios services into the running per-code totals.
+     *
      * @param array $services
      *
      * @return $this
      */
-    private function prepareServices(array $services)
+    private function prepareServices(array $services): self
     {
         /** @var Service $service */
         foreach ($services as $service) {
@@ -103,13 +99,13 @@ class PackageMatching
     }
 
     /**
+     * Adds a service's price to its per-code total and keeps the slowest delivery time seen so far.
+     *
      * @param Service $service
      *
      * @return $this
-     *
-     * @todo Refactor this method to make it more consistent and maintainable.
      */
-    private function appendService(Service $service)
+    private function appendService(Service $service): self
     {
         $serviceCode = $service->getServiceCode();
 
@@ -149,9 +145,11 @@ class PackageMatching
     }
 
     /**
+     * Builds the bound Correios services and merges them with the carriers kept from the full call.
+     *
      * @return array
      */
-    private function buildServicesResult()
+    private function buildServicesResult(): array
     {
         $results = [];
 
@@ -164,9 +162,11 @@ class PackageMatching
     }
 
     /**
+     * Returns the zeroed accumulator a service code starts from before the first package is added.
+     *
      * @return array
      */
-    private function getNewEmpty()
+    private function getNewEmpty(): array
     {
         return [
             'carrier'                 => null,
@@ -182,9 +182,13 @@ class PackageMatching
     }
 
     /**
+     * Splits the incoming results into the full-call list and the per-package lists.
+     *
      * @param array $results
+     *
+     * @return $this
      */
-    private function init(array $results)
+    private function init(array $results): self
     {
         $this->fullResults = $results['full'] ?? [];
         unset($results['full']);
@@ -199,7 +203,7 @@ class PackageMatching
      *
      * @return $this
      */
-    private function processFullResults()
+    private function processFullResults(): self
     {
         /** @var Service $service */
         foreach ($this->fullResults as $index => $service) {
