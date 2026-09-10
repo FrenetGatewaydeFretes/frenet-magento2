@@ -74,7 +74,7 @@ Recursos opcionais, no mesmo painel:
 - **Product Quote**: habilita a cotação de frete diretamente na página de produto, antes do cliente adicionar ao carrinho.
 - **Show Shipping Forecast** / **Shipping Forecast Message**: exibe uma mensagem de prazo estimado de entrega.
 - **Debug**: grava as requisições/respostas da API da Frenet em `var/log/<Debug Filename>`, útil para diagnosticar problemas de cotação.
-- **API Hostname** / **API Protocol**: sobrescrevem o endpoint da API da Frenet. Deixe em branco / *Default* — só altere se o suporte da Frenet orientar.
+- **API Hostname** / **API Protocol**: sobrescrevem o endpoint da API da Frenet (protocolo padrão HTTPS). Só altere se o suporte da Frenet orientar.
 
 ## Como funciona
 
@@ -86,6 +86,33 @@ Recursos opcionais, no mesmo painel:
 
 - Dúvidas sobre a API/token da Frenet: [contato@frenet.com.br](mailto:contato@frenet.com.br) ou o [painel da Frenet](http://painel.frenet.com.br/).
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
+
+## Changelog
+
+### 2.4.9
+
+**Adicionado**
+
+- Compatibilidade com **Magento 2.4.9** e **PHP 8.5** (mantendo suporte a 8.3 e 8.4).
+- Campos de configuração **API Hostname** e **API Protocol**, para apontar o módulo a um endpoint alternativo da Frenet quando o suporte orientar — protocolo HTTPS por padrão.
+- Leitura automática da **unidade de peso do catálogo** (`general/locale/weight_unit`): o empacotamento converte para quilogramas quando a loja está configurada em libras, sem configuração extra.
+- Traduções pt-BR completas em todos os campos de configuração.
+
+**Corrigido**
+
+- `collectRates()` não deixa mais uma falha ou indisponibilidade da API da Frenet escapar como exceção não tratada.
+- Itens de carrinho sem ID próprio (ex.: certas combinações de opções customizadas) agora são identificados de forma estável durante o empacotamento, em vez de colidirem entre si.
+- A lista de tipos de produto elegíveis à cotação na página de produto não quebra mais quando a configuração está vazia.
+- O cálculo de encaixe de pacotes agora soma o peso dos lotes sempre em quilogramas, evitando misturar unidades ao comparar com o limite configurado.
+- Removido um aviso de performance ("JQueryUI Compat fallback") que o widget de cotação da página de produto disparava por depender de um módulo `jquery/ui` que não usava.
+
+**Alterado**
+
+- `Config`, `DeliveryTimeCalculator` e `RateRequestProvider` passam a ser injetados por interface (`ConfigInterface`, `DeliveryTimeCalculatorInterface`, `RateRequestProviderInterface`), facilitando substituição via `di.xml` em customizações.
+- Construtores promovidos e PHPDoc padronizado nas classes do carrier e do empacotamento.
+- `ModuleMetadata` passou a depender de uma factory de `Finder`, tornando a resolução da versão instalada testável.
+- Metadados de versão obsoletos removidos (`setup_version` do `module.xml`, `<version>` do `config.xml`) — a versão do módulo é sempre lida do Composer.
+- Suíte de testes unitários migrada para PHPUnit 12 e alinhada aos padrões internos de código.
 
 ## Desenvolvimento
 
