@@ -17,7 +17,7 @@ namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -51,7 +51,7 @@ class PackagesCalculator
     private $packageProcessor;
 
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $rateRequestProvider;
 
@@ -61,7 +61,7 @@ class PackagesCalculator
         PackageManager $packagesManager,
         PackageLimit $packageLimit,
         PackageMatching $packageMatching,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProviderInterface $rateRequestProvider
     ) {
         $this->packageManager = $packagesManager;
         $this->multiQuoteValidator = $multiQuoteValidator;

@@ -14,7 +14,7 @@
 namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Command\Shipping\QuoteInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 
 /**
@@ -28,7 +28,7 @@ class CouponProcessor
     private $checkoutSession;
 
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $requestProvider;
 
@@ -39,7 +39,7 @@ class CouponProcessor
      */
     public function __construct(
         CheckoutSession $checkoutSession,
-        RateRequestProvider $requestProvider
+        RateRequestProviderInterface $requestProvider
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->requestProvider = $requestProvider;

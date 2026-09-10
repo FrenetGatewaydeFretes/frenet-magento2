@@ -17,7 +17,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Controller\Product;
 
 use Frenet\Shipping\Api\QuoteProductInterface;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
@@ -38,19 +38,19 @@ class Quote extends Action implements HttpPostActionInterface
     private $quoteProduct;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     /**
      * @param Context               $context
      * @param QuoteProductInterface $quoteProduct
-     * @param Config                $config
+     * @param ConfigInterface       $config
      */
     public function __construct(
         Context $context,
         QuoteProductInterface $quoteProduct,
-        Config $config
+        ConfigInterface $config
     ) {
         parent::__construct($context);
         $this->quoteProduct = $quoteProduct;

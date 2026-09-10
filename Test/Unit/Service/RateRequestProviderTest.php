@@ -1,80 +1,95 @@
 <?php
 /**
- * Frenet Shipping Gateway
+ * Frenet_Shipping
  *
- * @category Frenet
- * @package Frenet\Shipping
+ * @vendor    Frenet
+ * @package   Shipping
  *
- * @author Tiago Sampaio <tiago@tiagosampaio.com>
- * @link https://github.com/tiagosampaio
- * @link https://tiagosampaio.com
- *
- * Copyright (c) 2020.
+ * @copyright © 2026 Diego M. Miyabara. All rights reserved.
+ * @author    Diego M. Miyabara <diego.miyabara@frenet.com.br>
  */
+
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Test\Unit\Service;
 
 use Frenet\Shipping\Service\RateRequestProvider;
-use Frenet\Shipping\Test\Unit\TestCase;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
+/**
+ * Tests that RateRequestProvider carries one rate request across the quote flow and fails loudly once it is cleared.
+ */
 class RateRequestProviderTest extends TestCase
 {
     /**
      * @var RateRequestProvider
      */
-    private $rateRequestProvider;
+    private RateRequestProvider $subject;
 
+    /**
+     * Builds a fresh provider holding no request, the state expected right after DI instantiation.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
-        $this->rateRequestProvider = $this->getObject(RateRequestProvider::class);
+        $this->subject = new RateRequestProvider();
     }
 
     /**
-     * @test
+     * Asserts the concrete class satisfies the interface its consumers are wired against.
+     *
+     * @return void
      */
-    public function setRateRequest()
+    public function testShouldImplementTheRateRequestProviderContract(): void
     {
-        /** @var RateRequest | MockObject $rateRequest */
-        $rateRequest = $this->createMock(RateRequest::class);
-        $this->assertInstanceOf(
-            RateRequestProvider::class,
-            $this->rateRequestProvider->setRateRequest($rateRequest)
+        $this->assertInstanceOf(RateRequestProviderInterface::class, $this->subject);
+    }
+
+    /**
+     * Confirms the fluent return value so callers can chain further calls.
+     *
+     * @return void
+     */
+    public function testShouldReturnSelfWhenSettingTheRateRequest(): void
+    {
+        $this->assertSame(
+            $this->subject,
+            $this->subject->setRateRequest($this->createStub(RateRequest::class))
         );
     }
 
     /**
-     * @test
+     * Confirms the exact instance set is handed back untouched.
+     *
+     * @return void
      */
-    public function getRateRequest()
+    public function testShouldReturnTheStoredRequestWhenOneWasSet(): void
     {
-        /** @var RateRequest | MockObject $rateRequest */
-        $rateRequest = $this->createMock(RateRequest::class);
+        $rateRequest = $this->createStub(RateRequest::class);
         $rateRequest->method('getData')->willReturn(9.9988);
-        $this->rateRequestProvider->setRateRequest($rateRequest);
-        $this->assertInstanceOf(
-            RateRequest::class,
-            $this->rateRequestProvider->getRateRequest()
-        );
-        $this->assertEquals(
-            9.9988,
-            $this->rateRequestProvider->getRateRequest()->getData()
-        );
+        $this->subject->setRateRequest($rateRequest);
+
+        $this->assertSame($rateRequest, $this->subject->getRateRequest());
+        $this->assertSame(9.9988, $this->subject->getRateRequest()->getData());
     }
 
     /**
-     * @test
+     * Confirms clear() resets state so a later read fails loudly instead of returning stale data.
+     *
+     * @return void
      */
-    public function clear()
+    public function testShouldThrowWhenGettingTheRateRequestAfterClear(): void
     {
-        /** @var RateRequest | MockObject $rateRequest */
-        $rateRequest = $this->createMock(RateRequest::class);
-        $this->rateRequestProvider->setRateRequest($rateRequest);
-        $this->rateRequestProvider->clear();
-        $this->expectExceptionObject($this->getObject(LocalizedException::class));
+        $this->subject->setRateRequest($this->createStub(RateRequest::class));
+        $this->subject->clear();
+
+        $this->expectException(LocalizedException::class);
         $this->expectExceptionMessage('Rate Request is not set.');
-        $this->rateRequestProvider->getRateRequest();
+
+        $this->subject->getRateRequest();
     }
 }

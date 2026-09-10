@@ -18,14 +18,14 @@ namespace Frenet\Shipping\Model\Cache\CacheKeyGenerator;
 use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 class QuoteItemGenerator implements CacheKeyGeneratorInterface
 {
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $requestProvider;
 
@@ -46,7 +46,7 @@ class QuoteItemGenerator implements CacheKeyGeneratorInterface
 
     public function __construct(
         SerializerInterface $serializer,
-        RateRequestProvider $requestProvider,
+        RateRequestProviderInterface $requestProvider,
         QuoteItemValidatorInterface $quoteItemValidator,
         ItemQuantityCalculatorInterface $itemQtyCalculator
     ) {

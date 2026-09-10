@@ -19,35 +19,31 @@ use Magento\Framework\App\Config;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Composer\ComposerInformation;
 use Magento\Framework\Serialize\SerializerInterface;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
+use Symfony\Component\Finder\FinderFactory;
 
 /**
- * Class ModuleMetadata
+ * Resolves the human-readable module version shown in the admin, from the Composer manifest or an app/code checkout.
  */
 class ModuleMetadata
 {
     /**
      * @var string
      */
-    const PACKAGE_NAME = 'frenet/frenet-magento2';
+    public const PACKAGE_NAME = 'frenet/frenet-magento2';
 
     /**
      * @var string
      */
-    const PACKAGE_TYPE = 'magento-module';
+    public const PACKAGE_TYPE = 'magento-module';
 
     /**
      * @var string
      */
-    const VERSION_CACHE_KEY = 'module-frenet-shipping-version';
+    public const VERSION_CACHE_KEY = 'module-frenet-shipping-version';
 
     /**
-     * @var ComposerInformation
-     */
-    private $composerInformation;
-
-    /**
-     * @var string
+     * @var string|null
      */
     private $version = null;
 
@@ -56,31 +52,13 @@ class ModuleMetadata
      */
     private $package = [];
 
-    /**
-     * @var CacheInterface
-     */
-    private $cache;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
     public function __construct(
-        ComposerInformation $composerInformation,
-        CacheInterface $cache,
-        SerializerInterface $serializer,
-        DirectoryList $directoryList
+        private readonly ComposerInformation $composerInformation,
+        private readonly CacheInterface $cache,
+        private readonly SerializerInterface $serializer,
+        private readonly DirectoryList $directoryList,
+        private readonly FinderFactory $finderFactory
     ) {
-        $this->composerInformation = $composerInformation;
-        $this->cache = $cache;
-        $this->serializer = $serializer;
-        $this->directoryList = $directoryList;
     }
 
     /**
@@ -100,20 +78,20 @@ class ModuleMetadata
     }
 
     /**
-     * Get Product version
+     * Returns the module version label, reading it from cache or resolving and caching it on first call.
      *
      * @return string
      */
-    public function getVersion()
+    public function getVersion(): string
     {
         $this->version = $this->version ?: $this->cache->load(self::VERSION_CACHE_KEY);
 
         if (!$this->version) {
-            $this->version = $this->getPackageVersion();
+            $this->version = (string) $this->getPackageVersion();
             $this->cache->save($this->version, self::VERSION_CACHE_KEY, [Config::CACHE_TAG]);
         }
 
-        return $this->version;
+        return (string) $this->version;
     }
 
     /**
@@ -192,20 +170,25 @@ class ModuleMetadata
         $mageAppDir = $this->directoryList->getPath(DirectoryList::APP);
         $moduleDir = implode(DIRECTORY_SEPARATOR, [$mageAppDir, 'code', 'Frenet', 'Shipping']);
 
-        $finder = new Finder();
-        $finder->files()->name('composer.json')->depth(0)->in($moduleDir);
+        $finder = $this->finderFactory->create();
+
+        try {
+            $finder->files()->name('composer.json')->depth(0)->in($moduleDir);
+        } catch (DirectoryNotFoundException $exception) {
+            return [];
+        }
 
         if (!$finder->hasResults()) {
             return [];
         }
 
-        $content = [];
+        $content = '';
 
-        /** @var  $file */
         foreach ($finder as $file) {
             $content = $file->getContents();
             break;
         }
+
         return (array) $this->serializer->unserialize($content);
     }
 }

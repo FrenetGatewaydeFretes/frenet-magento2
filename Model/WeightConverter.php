@@ -15,68 +15,60 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
+
 /**
- * Class WeightConverter
+ * Converts weights to or from kilograms according to the store's configured catalog weight unit.
  */
 class WeightConverter implements WeightConverterInterface
 {
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var string
      */
-    private $scopeConfig;
+    private const CONFIG_PATH_WEIGHT_UNIT = 'general/locale/weight_unit';
 
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * WeightConverter constructor.
-     *
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Store\Model\StoreManagerInterface         $storeManager
-     */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        private readonly ScopeConfigInterface $scopeConfig
     ) {
-        $this->scopeConfig = $scopeConfig;
-        $this->storeManager = $storeManager;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function convertToKg($weight)
+    public function convertToKg(float $weight): float
     {
-        switch ($this->getWeightUnit()) {
-            case 'lbs':
-                return $weight * self::LBS_TO_KG_FACTOR;
-            case 'kgs':
-            default:
-                return $weight;
+        if ($this->getWeightUnit() === 'lbs') {
+            return $weight * self::LBS_TO_KG_FACTOR;
         }
+
+        return $weight;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function convertToLbs($weight)
+    public function convertToLbs(float $weight): float
     {
-        switch ($this->getWeightUnit()) {
-            case 'kgs':
-                return $weight * self::KG_TO_LBS_FACTOR;
-            case 'lbs':
-            default:
-                return $weight;
+        if ($this->getWeightUnit() === 'kgs') {
+            return $weight * self::KG_TO_LBS_FACTOR;
         }
+
+        return $weight;
     }
 
     /**
-     * @return string|null
+     * Returns the weight unit configured for the store ('lbs' or 'kgs'), defaulting to 'kgs'.
+     *
+     * @return string
      */
-    private function getWeightUnit()
+    private function getWeightUnit(): string
     {
-        return $this->scopeConfig->getValue('general/locale/weight_unit');
+        $unit = strtolower(trim((string) $this->scopeConfig->getValue(
+            self::CONFIG_PATH_WEIGHT_UNIT,
+            ScopeInterface::SCOPE_STORE
+        )));
+
+        return in_array($unit, ['lb', 'lbs', 'pound', 'pounds'], true) ? 'lbs' : 'kgs';
     }
 }

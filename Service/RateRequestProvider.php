@@ -11,47 +11,25 @@
  * Copyright (c) 2020.
  */
 
+declare(strict_types=1);
+
 namespace Frenet\Shipping\Service;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 
 /**
- * Class RateRequestProvider
- *
- * @package Frenet\Shipping\Service
+ * Carries the current quote's rate request so downstream collaborators read it without re-plumbing every call.
  */
-class RateRequestProvider
+class RateRequestProvider implements RateRequestProviderInterface
 {
     /**
-     * @var RateRequest
+     * @var RateRequest|null
      */
-    private $rateRequest;
+    private ?RateRequest $rateRequest = null;
 
     /**
-     * @var RateRequestFactory
-     */
-    private $rateRequestFactory;
-
-    public function __construct(
-        RateRequestFactory $rateRequestFactory
-    ) {
-        $this->rateRequestFactory = $rateRequestFactory;
-    }
-
-    /**
-     * @return RateRequest
-     */
-    public function createRateRequest()
-    {
-        return $this->rateRequestFactory->create();
-    }
-
-    /**
-     * @param RateRequest $rateRequest
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function setRateRequest(RateRequest $rateRequest): self
     {
@@ -60,8 +38,7 @@ class RateRequestProvider
     }
 
     /**
-     * @return RateRequest
-     * @throws LocalizedException
+     * @inheritDoc
      */
     public function getRateRequest(): RateRequest
     {
@@ -73,7 +50,7 @@ class RateRequestProvider
     }
 
     /**
-     * @return $this
+     * @inheritDoc
      */
     public function clear(): self
     {

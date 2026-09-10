@@ -15,7 +15,7 @@
 namespace Frenet\Shipping\ViewModel\Catalog\Product\View;
 
 use Frenet\Shipping\Block\Catalog\Product\View\Quote as QuoteBlock;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 
 /**
  * Class Quote
@@ -35,12 +35,12 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     private $block;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     public function __construct(
-        Config $config
+        ConfigInterface $config
     ) {
         $this->config = $config;
     }

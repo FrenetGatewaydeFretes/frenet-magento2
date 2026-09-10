@@ -20,7 +20,7 @@ use Frenet\Shipping\Model\WeightConverterInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class Package
+ * One shipping package: accumulates cart items and enforces the configured weight limit as they are added.
  */
 class Package
 {
@@ -34,42 +34,12 @@ class Package
      */
     private $items = [];
 
-    /**
-     * @var PackageLimit
-     */
-    private $packageLimit;
-
-    /**
-     * @var DimensionsExtractorInterface
-     */
-    private $dimensionsExtractor;
-
-    /**
-     * @var PackageItemFactory
-     */
-    private $packageItemFactory;
-
-    /**
-     * @var WeightConverterInterface
-     */
-    private $weightConverter;
-
-    /**
-     * @param DimensionsExtractorInterface $dimensionsExtractor
-     * @param PackageItemFactory           $packageItemFactory
-     * @param PackageLimit                 $packageLimit
-     * @param WeightConverterInterface     $weightConverter
-     */
     public function __construct(
-        DimensionsExtractorInterface $dimensionsExtractor,
-        PackageItemFactory $packageItemFactory,
-        PackageLimit $packageLimit,
-        WeightConverterInterface $weightConverter
+        private readonly DimensionsExtractorInterface $dimensionsExtractor,
+        private readonly PackageItemFactory $packageItemFactory,
+        private readonly PackageLimit $packageLimit,
+        private readonly WeightConverterInterface $weightConverter
     ) {
-        $this->dimensionsExtractor = $dimensionsExtractor;
-        $this->packageItemFactory = $packageItemFactory;
-        $this->packageLimit = $packageLimit;
-        $this->weightConverter = $weightConverter;
     }
 
     /**
@@ -88,15 +58,27 @@ class Package
         }
 
         /** @var PackageItem $packageItem */
-        $packageItem = $this->getItemById($item->getId()) ?: $this->packageItemFactory->create([
+        $packageItem = $this->getItemById($this->itemKey($item)) ?: $this->packageItemFactory->create([
             'cartItem' => $item
         ]);
 
         $packageItem->setQty($this->getItemQty($item) + $qty);
 
-        $this->items[$item->getId()] = $packageItem;
+        $this->items[$this->itemKey($item)] = $packageItem;
 
         return true;
+    }
+
+    /**
+     * Returns a stable array key for a cart item, falling back to a prefixed object id when it has no cart item id.
+     *
+     * @param QuoteItem $item
+     *
+     * @return string
+     */
+    private function itemKey(QuoteItem $item): string
+    {
+        return $item->getId() ? (string) $item->getId() : 'obj_' . spl_object_id($item);
     }
 
     /**
@@ -141,10 +123,11 @@ class Package
             $unitWeight = (float) $this->dimensionsExtractor->getWeight();
         }
 
-        $convertedWeight = (float) $this->weightConverter->convertToKg($unitWeight);
-        $itemWeight = $unitWeight + $convertedWeight * ($qty - 1);
+        // getTotalWeight() and PackageLimit::getMaxWeight() are both in kilograms, so weigh this batch in
+        // kilograms too instead of mixing the raw (possibly lbs) unit weight into the sum.
+        $batchWeight = $this->weightConverter->convertToKg($unitWeight) * $qty;
 
-        if (($itemWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
+        if (($batchWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
             return false;
         }
 
@@ -195,7 +178,7 @@ class Package
             return [['newPackage' => false, 'qty' => $requestedQty, 'unitWeight' => $unitWeight]];
         }
 
-        $convertedUnitWeight = (float) $this->weightConverter->convertToKg($unitWeight);
+        $convertedUnitWeight = $this->weightConverter->convertToKg($unitWeight);
 
         $unitWeightScaled = (int) round($unitWeight * self::WEIGHT_SCALE);
         $convertedUnitWeightScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
@@ -286,7 +269,7 @@ class Package
      */
     private function itemExists(QuoteItem $item)
     {
-        return isset($this->items[$item->getId()]);
+        return isset($this->items[$this->itemKey($item)]);
     }
 
     /**
@@ -299,7 +282,7 @@ class Package
     private function getItemQty(QuoteItem $item)
     {
         if ($this->itemExists($item)) {
-            return (float) $this->getItemById($item->getId())->getQty();
+            return (float) $this->getItemById($this->itemKey($item))->getQty();
         }
 
         return 0.0000;
