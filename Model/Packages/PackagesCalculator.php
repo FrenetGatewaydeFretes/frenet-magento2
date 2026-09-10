@@ -11,7 +11,7 @@
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Packages;
 
@@ -25,56 +25,22 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
  */
 class PackagesCalculator
 {
-    /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
-     * @var MultiQuoteValidatorInterface
-     */
-    private $multiQuoteValidator;
-
-    /**
-     * @var PackageLimit
-     */
-    private $packageLimit;
-
-    /**
-     * @var PackageMatching
-     */
-    private $packageMatching;
-
-    /**
-     * @var PackageProcessor
-     */
-    private $packageProcessor;
-
-    /**
-     * @var RateRequestProviderInterface
-     */
-    private $rateRequestProvider;
-
     public function __construct(
-        MultiQuoteValidatorInterface $multiQuoteValidator,
-        PackageProcessor $packageProcessor,
-        PackageManager $packagesManager,
-        PackageLimit $packageLimit,
-        PackageMatching $packageMatching,
-        RateRequestProviderInterface $rateRequestProvider
+        private readonly MultiQuoteValidatorInterface $multiQuoteValidator,
+        private readonly PackageProcessor $packageProcessor,
+        private readonly PackageManager $packageManager,
+        private readonly PackageLimit $packageLimit,
+        private readonly PackageMatching $packageMatching,
+        private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
-        $this->packageManager = $packagesManager;
-        $this->multiQuoteValidator = $multiQuoteValidator;
-        $this->packageLimit = $packageLimit;
-        $this->packageMatching = $packageMatching;
-        $this->packageProcessor = $packageProcessor;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
+     * Quotes the cart against the Frenet API, splitting it into weight-limited packages when multi-quote is on.
+     *
      * @return Service[]
      */
-    public function calculate()
+    public function calculate(): array
     {
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
@@ -177,9 +143,11 @@ class PackagesCalculator
     }
 
     /**
+     * Quotes each built package: a flat Service[] for a single package, or a Service[] per package.
+     *
      * @return Service[]
      */
-    private function processPackages()
+    private function processPackages(): array
     {
         $this->packageManager->process();
         $results = [];
