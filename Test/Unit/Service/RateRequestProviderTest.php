@@ -29,16 +29,31 @@ class RateRequestProviderTest extends TestCase
      */
     private RateRequestProvider $subject;
 
+    /**
+     * Builds a fresh provider holding no request, the state expected right after DI instantiation.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         $this->subject = new RateRequestProvider();
     }
 
+    /**
+     * Asserts the concrete class satisfies the interface its consumers are wired against.
+     *
+     * @return void
+     */
     public function testShouldImplementTheRateRequestProviderContract(): void
     {
         $this->assertInstanceOf(RateRequestProviderInterface::class, $this->subject);
     }
 
+    /**
+     * Confirms the fluent return value so callers can chain further calls.
+     *
+     * @return void
+     */
     public function testShouldReturnSelfWhenSettingTheRateRequest(): void
     {
         $this->assertSame(
@@ -47,6 +62,11 @@ class RateRequestProviderTest extends TestCase
         );
     }
 
+    /**
+     * Confirms the exact instance set is handed back untouched.
+     *
+     * @return void
+     */
     public function testShouldReturnTheStoredRequestWhenOneWasSet(): void
     {
         $rateRequest = $this->createStub(RateRequest::class);
@@ -57,6 +77,11 @@ class RateRequestProviderTest extends TestCase
         $this->assertSame(9.9988, $this->subject->getRateRequest()->getData());
     }
 
+    /**
+     * Confirms clear() resets state so a later read fails loudly instead of returning stale data.
+     *
+     * @return void
+     */
     public function testShouldThrowWhenGettingTheRateRequestAfterClear(): void
     {
         $this->subject->setRateRequest($this->createStub(RateRequest::class));

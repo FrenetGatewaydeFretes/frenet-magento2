@@ -63,6 +63,11 @@ class ModuleMetadataTest extends TestCase
      */
     private ModuleMetadata $subject;
 
+    /**
+     * Wires ModuleMetadata with stubs that force the Composer-manifest lookup path most tests exercise.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         $this->composerInformation = $this->createStub(ComposerInformation::class);
@@ -85,6 +90,11 @@ class ModuleMetadataTest extends TestCase
         );
     }
 
+    /**
+     * Confirms the version string carries both the Composer-reported number and the installation-source suffix.
+     *
+     * @return void
+     */
     public function testShouldReturnTheComposerVersionWhenThePackageIsInstalledViaComposer(): void
     {
         $this->composerInformation->method('getInstalledMagentoPackages')->willReturn([
@@ -101,6 +111,11 @@ class ModuleMetadataTest extends TestCase
         $this->assertStringContainsString('(Installed Via Composer)', $version);
     }
 
+    /**
+     * Confirms an empty package list falls back to a fixed placeholder instead of an empty or null version.
+     *
+     * @return void
+     */
     public function testShouldReturnUnknownWhenNoVersionSourceIsAvailable(): void
     {
         $this->composerInformation->method('getInstalledMagentoPackages')->willReturn([]);
@@ -108,11 +123,21 @@ class ModuleMetadataTest extends TestCase
         $this->assertSame('Unknown Module Version', $this->subject->getVersion());
     }
 
+    /**
+     * Confirms the exposed name matches the Composer package name constant, not a hardcoded string.
+     *
+     * @return void
+     */
     public function testShouldReturnThePackageName(): void
     {
         $this->assertSame(ModuleMetadata::PACKAGE_NAME, $this->subject->getName());
     }
 
+    /**
+     * Confirms the exposed type matches the Composer package type constant.
+     *
+     * @return void
+     */
     public function testShouldReturnThePackageType(): void
     {
         $this->assertSame(ModuleMetadata::PACKAGE_TYPE, $this->subject->getType());

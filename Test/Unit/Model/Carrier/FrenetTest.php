@@ -43,6 +43,11 @@ class FrenetTest extends TestCase
      */
     private Frenet $subject;
 
+    /**
+     * Builds the carrier without its 24-dependency constructor, wiring only the collaborators the gate methods use.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         $this->config = $this->createMock(ConfigInterface::class);
@@ -55,11 +60,21 @@ class FrenetTest extends TestCase
         $this->setDependency('storeManagement', $this->storeManager);
     }
 
+    /**
+     * Confirms the carrier advertises the code Magento uses to route rate requests to it.
+     *
+     * @return void
+     */
     public function testShouldReportItsCarrierCode(): void
     {
         $this->assertSame(Frenet::CARRIER_CODE, $this->subject->getCarrierCode());
     }
 
+    /**
+     * Confirms the allowed-methods map keys the configured title by the carrier code, as core shipping expects.
+     *
+     * @return void
+     */
     public function testShouldExposeTheCarrierCodeInTheAllowedMethods(): void
     {
         $this->config->method('getCarrierConfig')->with('name')->willReturn('frenet');
@@ -67,6 +82,11 @@ class FrenetTest extends TestCase
         $this->assertSame([Frenet::CARRIER_CODE => 'frenet'], $this->subject->getAllowedMethods());
     }
 
+    /**
+     * Confirms the inactive flag alone is enough to skip rate collection, before any other check runs.
+     *
+     * @return void
+     */
     public function testShouldNotCollectRatesWhenTheCarrierIsInactive(): void
     {
         $this->config->method('isActive')->willReturn(false);
@@ -74,6 +94,11 @@ class FrenetTest extends TestCase
         $this->assertFalse($this->subject->canCollectRates());
     }
 
+    /**
+     * Confirms the carrier proceeds once active with both an origin postcode and a token configured.
+     *
+     * @return void
+     */
     public function testShouldCollectRatesWhenActiveWithAnOriginPostcodeAndToken(): void
     {
         $this->config->method('isActive')->willReturn(true);
@@ -84,6 +109,14 @@ class FrenetTest extends TestCase
         $this->assertTrue($this->subject->canCollectRates());
     }
 
+    /**
+     * Injects a collaborator straight into the carrier's private property, bypassing its skipped constructor.
+     *
+     * @param string $property
+     * @param object $value
+     *
+     * @return void
+     */
     private function setDependency(string $property, object $value): void
     {
         $reflectionProperty = (new ReflectionClass(Frenet::class))->getProperty($property);

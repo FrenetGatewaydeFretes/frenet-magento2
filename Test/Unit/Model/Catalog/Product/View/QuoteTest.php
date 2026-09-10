@@ -80,6 +80,11 @@ class QuoteTest extends TestCase
      */
     private Quote $subject;
 
+    /**
+     * Wires the quote service with mocked collaborators so no real product, cache or API lookup occurs.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
@@ -101,6 +106,11 @@ class QuoteTest extends TestCase
         );
     }
 
+    /**
+     * Confirms a missing product id degrades to an empty result instead of letting the repository exception escape.
+     *
+     * @return void
+     */
     public function testShouldReturnEmptyArrayWhenTheProductIdDoesNotExist(): void
     {
         $this->productRepository->method('getById')->willThrowException(new NoSuchEntityException());
@@ -108,6 +118,11 @@ class QuoteTest extends TestCase
         $this->assertSame([], $this->subject->quoteByProductId(404, self::POSTCODE));
     }
 
+    /**
+     * Confirms the SKU lookup path degrades the same way as the product id lookup path.
+     *
+     * @return void
+     */
     public function testShouldReturnEmptyArrayWhenTheProductSkuDoesNotExist(): void
     {
         $this->productRepository->method('get')->willThrowException(new NoSuchEntityException());
@@ -115,6 +130,11 @@ class QuoteTest extends TestCase
         $this->assertSame([], $this->subject->quoteByProductSku('missing-sku', self::POSTCODE));
     }
 
+    /**
+     * Confirms only the non-error service survives the mapping and that its fields land in the expected row shape.
+     *
+     * @return void
+     */
     public function testShouldMapCalculatedServicesIntoRowsWhenQuotingByProductId(): void
     {
         $this->productRepository->method('getById')->willReturn($this->createMock(ProductInterface::class));
@@ -139,6 +159,17 @@ class QuoteTest extends TestCase
         ]], $result);
     }
 
+    /**
+     * Builds a mocked Frenet service result for use as a Calculator::getQuote() return value.
+     *
+     * @param bool $isError
+     * @param string $code
+     * @param string $carrier
+     * @param string $description
+     * @param float $price
+     *
+     * @return ServiceInterface&MockObject
+     */
     private function service(
         bool $isError,
         string $code,
