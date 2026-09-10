@@ -186,7 +186,7 @@ class PackageMatching
      */
     private function init(array $results)
     {
-        $this->fullResults = $results['full'];
+        $this->fullResults = $results['full'] ?? [];
         unset($results['full']);
         $this->results = $results;
         $this->processFullResults();
@@ -195,13 +195,15 @@ class PackageMatching
     }
 
     /**
+     * Keeps only the non-Correios services from the full call; Correios is rebuilt per package by the matcher.
+     *
      * @return $this
      */
     private function processFullResults()
     {
         /** @var Service $service */
         foreach ($this->fullResults as $index => $service) {
-            if (true === $service->isError()) {
+            if ($service->isError() || $service->getCarrier() === 'Correios') {
                 unset($this->fullResults[$index]);
             }
         }
