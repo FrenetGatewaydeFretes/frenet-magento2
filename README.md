@@ -82,6 +82,25 @@ Recursos opcionais, no mesmo painel:
 - **Página de produto**: se **Product Quote** estiver habilitado, o widget consulta o mesmo mecanismo de cotação para um único produto e quantidade informados, sem a necessidade de adicionar ao carrinho antes.
 - **Rastreio**: pedidos com código de rastreio da Frenet exibem o status de entrega consultado via `getTracking()`.
 
+### Extensibilidade: acréscimos e descontos no valor declarado do frete
+
+`Frenet\Shipping\Model\TotalsCollector` aceita duas listas de collectors, injetáveis via `di.xml`, para ajustar o valor declarado à Frenet (`Shipment Invoice Value`) sem alterar o core do módulo:
+
+```xml
+<type name="Frenet\Shipping\Model\TotalsCollector">
+    <arguments>
+        <argument name="additions" xsi:type="array">
+            <item name="my_addition" xsi:type="object">Vendor\Module\Model\MyAdditionCollector</item>
+        </argument>
+        <argument name="discounts" xsi:type="array">
+            <item name="my_discount" xsi:type="object">Vendor\Module\Model\MyDiscountCollector</item>
+        </argument>
+    </arguments>
+</type>
+```
+
+Cada item implementa `Frenet\Shipping\Model\Totals\CollectorInterface` (`collect(Quote $quote): float`). O módulo não vem com nenhum collector próprio — as listas ficam vazias por padrão — este é um ponto de extensão para customizações, não uma funcionalidade em si.
+
 ## Suporte
 
 - Dúvidas sobre a API/token da Frenet: [contato@frenet.com.br](mailto:contato@frenet.com.br) ou o [painel da Frenet](http://painel.frenet.com.br/).
@@ -105,6 +124,7 @@ Recursos opcionais, no mesmo painel:
 - A lista de tipos de produto elegíveis à cotação na página de produto não quebra mais quando a configuração está vazia.
 - O cálculo de encaixe de pacotes agora soma o peso dos lotes sempre em quilogramas, evitando misturar unidades ao comparar com o limite configurado.
 - Removido um aviso de performance ("JQueryUI Compat fallback") que o widget de cotação da página de produto disparava por depender de um módulo `jquery/ui` que não usava.
+- Removida uma dependência da sessão de checkout durante a coleta de frete (`TotalsCollector`, `PackageProcessor`, `CouponProcessor`), eliminando um risco de erro `"Infinite loop detected"` do Magento core sob condições específicas de reentrância.
 
 **Alterado**
 
