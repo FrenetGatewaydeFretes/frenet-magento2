@@ -15,34 +15,16 @@ namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
-use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Model\Quote;
 
 /**
  * Class QuoteCouponProcessor
  */
 class CouponProcessor
 {
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-
-    /**
-     * @var RateRequestProviderInterface
-     */
-    private $requestProvider;
-
-    /**
-     * CouponProcessor constructor.
-     *
-     * @param CheckoutSession $checkoutSession
-     */
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        RateRequestProviderInterface $requestProvider
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->requestProvider = $requestProvider;
+    public function __construct(private readonly RateRequestProviderInterface $requestProvider)
+    {
     }
 
     /**
@@ -74,31 +56,33 @@ class CouponProcessor
     private function getQuoteCouponCode()
     {
         try {
-            return $this->getQuote()->getCouponCode();
+            return $this->getQuote()?->getCouponCode();
         } catch (\Exception $exception) {
             return null;
         }
     }
 
     /**
-     * @return \Magento\Quote\Api\Data\CartInterface|\Magento\Quote\Model\Quote
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * Reads the quote off the rate request's own items instead of the checkout session.
+     *
+     * Magento\Checkout\Model\Session::getQuote() guards against re-entrancy and throws "Infinite loop
+     * detected" if it is called again while it is already resolving the quote for the current request
+     * (see magento/magento2#34830) - a real risk here since this runs from inside rate collection on
+     * every quote. The rate request always carries non-empty, quote-bound items by the time this method
+     * is reached (Frenet::processAdditionalValidation() rejects an empty item list beforehand), so no
+     * coupon code is returned on the defensive case where none of them do.
+     *
+     * @return Quote|null
+     * @throws LocalizedException
      */
-    private function getQuote()
+    private function getQuote(): ?Quote
     {
-        /**
-         * For some reason the quote from checkout session was creating a new quote.
-         * When this occurs the message "Request Rate is not set" is displayed when placing order.
-         * This is a workaround to solve the problem.
-         */
-        $allItems = $this->requestProvider->getRateRequest()->getAllItems();
-        /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
-        foreach ($allItems as $item) {
+        foreach ($this->requestProvider->getRateRequest()->getAllItems() as $item) {
             if ($item->getQuote()) {
                 return $item->getQuote();
             }
         }
-        return $this->checkoutSession->getQuote();
+
+        return null;
     }
 }
