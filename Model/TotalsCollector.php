@@ -90,6 +90,10 @@ class TotalsCollector
      */
     private function iterateCollectors(array $collectors = [], ?Quote $quote = null) : float
     {
+        if (!$collectors) {
+            return 0.0000;
+        }
+
         $total = 0.0000;
         $quote = $this->getQuote($quote);
 
@@ -101,6 +105,13 @@ class TotalsCollector
     }
 
     /**
+     * Falls back to the checkout session's quote when the caller has none at hand.
+     *
+     * Never call this (with no $quote) from code that may run inside shipping-rate/total collection:
+     * Magento\Checkout\Model\Session::getQuote() guards against re-entrancy and throws "Infinite loop
+     * detected" if it is called again while it is still resolving the quote for the current request
+     * (see magento/magento2#34830). Pass the real quote instead — e.g. from the item under processing.
+     *
      * @param Quote $quote
      *
      * @return Quote
