@@ -20,6 +20,7 @@ use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Model\TotalsCollector;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
+use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -107,11 +108,31 @@ class PackageProcessor
      */
     private function calculateShipmentInvoiceValue(Package $package)
     {
+        $quote = $this->getPackageQuote($package);
+
         $totalPrice = $package->getTotalPrice();
-        $totalPrice += $this->totalsCollector->calculateQuoteAdditions();
-        $totalPrice -= $this->totalsCollector->calculateQuoteDiscounts();
+        $totalPrice += $this->totalsCollector->calculateQuoteAdditions($quote);
+        $totalPrice -= $this->totalsCollector->calculateQuoteDiscounts($quote);
         $this->serviceQuote->setShipmentInvoiceValue($totalPrice);
         return $this;
+    }
+
+    /**
+     * Reads the quote off the package's own items so the totals collector never falls back to the session.
+     *
+     * @param Package $package
+     *
+     * @return Quote|null
+     */
+    private function getPackageQuote(Package $package): ?Quote
+    {
+        foreach ($package->getItems() as $packageItem) {
+            $quote = $packageItem->getCartItem()->getQuote();
+            if ($quote instanceof Quote) {
+                return $quote;
+            }
+        }
+        return null;
     }
 
     /**
