@@ -24,10 +24,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that CouponProcessor reads the coupon code off the rate request's own items and never falls back to
- * the checkout session, since it runs from inside shipping-rate collection on every quote and
- * Magento\Checkout\Model\Session::getQuote() throws "Infinite loop detected" when called re-entrantly
- * from there (magento/magento2#34830).
+ * Tests that CouponProcessor reads the coupon code off the rate request's own items, never the checkout session.
  */
 #[AllowMockObjectsWithoutExpectations]
 class CouponProcessorTest extends TestCase
@@ -62,8 +59,7 @@ class CouponProcessorTest extends TestCase
     }
 
     /**
-     * A defensive edge case (no item carries a quote) must return no coupon code instead of crashing or
-     * reaching into the checkout session.
+     * A defensive edge case (no item carries a quote) must return no coupon code instead of crashing.
      *
      * @return void
      */

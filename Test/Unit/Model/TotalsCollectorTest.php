@@ -22,9 +22,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that TotalsCollector never touches the checkout session while a quote is already at hand, since
- * Magento\Checkout\Model\Session::getQuote() throws "Infinite loop detected" when called re-entrantly
- * from code that runs as part of shipping-rate/total collection (magento/magento2#34830).
+ * Tests that TotalsCollector never touches the checkout session while a quote is already at hand.
  */
 #[AllowMockObjectsWithoutExpectations]
 class TotalsCollectorTest extends TestCase
@@ -54,8 +52,7 @@ class TotalsCollectorTest extends TestCase
     }
 
     /**
-     * When the caller passes the quote it already has, the configured collectors use it and the session
-     * is left untouched.
+     * When the caller passes the quote it already has, the configured collectors use it directly.
      *
      * @return void
      */

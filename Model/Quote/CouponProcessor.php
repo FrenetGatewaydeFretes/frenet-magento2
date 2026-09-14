@@ -65,13 +65,6 @@ class CouponProcessor
     /**
      * Reads the quote off the rate request's own items instead of the checkout session.
      *
-     * Magento\Checkout\Model\Session::getQuote() guards against re-entrancy and throws "Infinite loop
-     * detected" if it is called again while it is already resolving the quote for the current request
-     * (see magento/magento2#34830) - a real risk here since this runs from inside rate collection on
-     * every quote. The rate request always carries non-empty, quote-bound items by the time this method
-     * is reached (Frenet::processAdditionalValidation() rejects an empty item list beforehand), so no
-     * coupon code is returned on the defensive case where none of them do.
-     *
      * @return Quote|null
      * @throws LocalizedException
      */

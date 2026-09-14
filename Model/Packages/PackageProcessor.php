@@ -111,13 +111,6 @@ class PackageProcessor
         $quote = $this->getPackageQuote($package);
         $totalPrice = $package->getTotalPrice();
 
-        /**
-         * Skip the totals collector entirely when there is no quote to give it - never pass null
-         * through. TotalsCollector::getQuote() falls back to the checkout session for a null quote
-         * once a discount/addition collector is configured, reopening the exact re-entrancy hazard
-         * fixed here (magento/magento2#34830). A package built by PackageManager always carries an
-         * item with a quote, so this only guards a theoretical edge case.
-         */
         if ($quote) {
             $totalPrice += $this->totalsCollector->calculateQuoteAdditions($quote);
             $totalPrice -= $this->totalsCollector->calculateQuoteDiscounts($quote);

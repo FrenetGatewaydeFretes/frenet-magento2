@@ -98,8 +98,7 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
-     * The item's own quote must reach the totals collector, so it never falls back to the checkout
-     * session while shipping-rate collection is already in progress on it (magento/magento2#34830).
+     * The item's own quote must reach the totals collector, never the checkout session.
      *
      * @return void
      */
@@ -122,9 +121,7 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
-     * A package whose items carry no quote (a defensive edge case) must skip the totals collector
-     * entirely instead of passing it null - which would fall back to the checkout session as soon as
-     * a discount/addition collector is configured, reopening the same re-entrancy hazard.
+     * A package whose items carry no quote (a defensive edge case) must skip the totals collector entirely.
      *
      * @return void
      */
