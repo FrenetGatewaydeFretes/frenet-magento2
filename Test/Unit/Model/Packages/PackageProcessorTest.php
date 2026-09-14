@@ -122,19 +122,19 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
-     * A package whose items carry no quote (a defensive edge case) must not crash pricing the shipment.
+     * A package whose items carry no quote (a defensive edge case) must skip the totals collector
+     * entirely instead of passing it null - which would fall back to the checkout session as soon as
+     * a discount/addition collector is configured, reopening the same re-entrancy hazard.
      *
      * @return void
      */
-    public function testShouldToleratePackageItemsWithNoQuote(): void
+    public function testShouldNeverCallTheTotalsCollectorWithoutAQuote(): void
     {
         $cartItem = $this->createMock(QuoteItem::class);
         $cartItem->method('getQuote')->willReturn(null);
 
-        $this->totalsCollector->expects($this->once())
-            ->method('calculateQuoteAdditions')
-            ->with($this->isNull())
-            ->willReturn(0.0);
+        $this->totalsCollector->expects($this->never())->method('calculateQuoteAdditions');
+        $this->totalsCollector->expects($this->never())->method('calculateQuoteDiscounts');
 
         $this->subject->process($this->package($cartItem, 10.0));
     }
