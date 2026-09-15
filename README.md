@@ -82,25 +82,6 @@ Recursos opcionais, no mesmo painel:
 - **Página de produto**: se **Product Quote** estiver habilitado, o widget consulta o mesmo mecanismo de cotação para um único produto e quantidade informados, sem a necessidade de adicionar ao carrinho antes.
 - **Rastreio**: pedidos com código de rastreio da Frenet exibem o status de entrega consultado via `getTracking()`.
 
-### Extensibilidade: acréscimos e descontos no valor declarado do frete
-
-`Frenet\Shipping\Model\TotalsCollector` aceita duas listas de collectors, injetáveis via `di.xml`, para ajustar o valor declarado à Frenet (`Shipment Invoice Value`) sem alterar o core do módulo:
-
-```xml
-<type name="Frenet\Shipping\Model\TotalsCollector">
-    <arguments>
-        <argument name="additions" xsi:type="array">
-            <item name="my_addition" xsi:type="object">Vendor\Module\Model\MyAdditionCollector</item>
-        </argument>
-        <argument name="discounts" xsi:type="array">
-            <item name="my_discount" xsi:type="object">Vendor\Module\Model\MyDiscountCollector</item>
-        </argument>
-    </arguments>
-</type>
-```
-
-Cada item implementa `Frenet\Shipping\Model\Totals\CollectorInterface` (`collect(Quote $quote): float`). O módulo não vem com nenhum collector próprio — as listas ficam vazias por padrão — este é um ponto de extensão para customizações, não uma funcionalidade em si.
-
 ## Suporte
 
 - Dúvidas sobre a API/token da Frenet: [contato@frenet.com.br](mailto:contato@frenet.com.br) ou o [painel da Frenet](http://painel.frenet.com.br/).
