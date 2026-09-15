@@ -101,6 +101,8 @@ Recursos opcionais, no mesmo painel:
 **Corrigido**
 
 - `collectRates()` não deixa mais uma falha ou indisponibilidade da API da Frenet escapar como exceção não tratada.
+- Carrinhos que dividem em 2 ou mais pacotes (peso total acima do limite configurado) não quebram mais a cotação com um erro fatal — os preços de cada pacote são somados corretamente por método de envio.
+- Com **Multi Quote** habilitado, o Correios não aparece mais duplicado (uma vez pela chamada cheia, outra pela soma dos pacotes) quando o carrinho é dividido.
 - Itens de carrinho sem ID próprio (ex.: certas combinações de opções customizadas) agora são identificados de forma estável durante o empacotamento, em vez de colidirem entre si.
 - A lista de tipos de produto elegíveis à cotação na página de produto não quebra mais quando a configuração está vazia.
 - O cálculo de encaixe de pacotes agora soma o peso dos lotes sempre em quilogramas, evitando misturar unidades ao comparar com o limite configurado.
