@@ -54,7 +54,7 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:^2.4.8-p1
+composer require frenet/frenet-magento2:^2.4.9
 ```
 
 ## Configuração
