@@ -105,6 +105,7 @@ Recursos opcionais, no mesmo painel:
 - A lista de tipos de produto elegíveis à cotação na página de produto não quebra mais quando a configuração está vazia.
 - O cálculo de encaixe de pacotes agora soma o peso dos lotes sempre em quilogramas, evitando misturar unidades ao comparar com o limite configurado.
 - Removido um aviso de performance ("JQueryUI Compat fallback") que o widget de cotação da página de produto disparava por depender de um módulo `jquery/ui` que não usava.
+- Removida uma dependência da sessão de checkout durante a coleta de frete (`TotalsCollector`, `PackageProcessor`, `CouponProcessor`), eliminando um risco de erro `"Infinite loop detected"` do Magento core sob condições específicas de reentrância.
 
 **Alterado**
 

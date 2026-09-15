@@ -50,7 +50,7 @@ class PackagesCalculator
          * If the package is not overweight then we simply process all the package.
          */
         if (!$this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight())) {
-            return $this->consolidatePackages($this->processPackages());
+            return $this->processPackages();
         }
 
         /**
@@ -58,7 +58,7 @@ class PackagesCalculator
          */
         if (!$this->multiQuoteValidator->canProcessMultiQuote()) {
             $this->packageLimit->removeLimit();
-            return $this->consolidatePackages($this->processPackages());
+            return $this->processPackages();
         }
 
         /**
@@ -82,18 +82,14 @@ class PackagesCalculator
     }
 
     /**
-     * Collapses a split-cart quote into one service list, summing the price per method across packages.
+     * Collapses a per-package quote into one service list, summing the price per method across packages.
      *
-     * @param array $packagesServices Service[] when the cart fit one package, Service[][] when it was split
+     * @param Service[][] $packagesServices
      *
      * @return Service[]
      */
     private function consolidatePackages(array $packagesServices): array
     {
-        if (!is_array(reset($packagesServices))) {
-            return $packagesServices;
-        }
-
         $packageCount = count($packagesServices);
         $totals = [];
         $counts = [];
@@ -143,7 +139,7 @@ class PackagesCalculator
     }
 
     /**
-     * Quotes each built package: a flat Service[] for a single package, or a Service[] per package.
+     * Quotes every built package and consolidates the per-package results into a single service list.
      *
      * @return Service[]
      */
@@ -156,20 +152,9 @@ class PackagesCalculator
         foreach ($this->packageManager->getPackages() as $key => $package) {
             /** @var Service[] $services */
             $services = $this->packageProcessor->process($package);
-
-            /**
-             * If there's only one package then we can simply return the services quote.
-             */
-            if ($this->packageManager->countPackages() == 1) {
-                return $services;
-            }
-
-            /**
-             * Otherwise we need to bind the quotes.
-             */
             $results[$key] = $services;
         }
 
-        return $results;
+        return $this->consolidatePackages($results);
     }
 }
