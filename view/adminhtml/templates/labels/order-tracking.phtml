@@ -1,0 +1,41 @@
+<?php
+/**
+ * Frenet Shipping Gateway — Frenet tracking events on the order view (only when the order has a Frenet code).
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\OrderTracking $vm */
+$vm = $block->getData('view_model');
+$codes = $vm->codes();
+if (!$codes) {
+    return;
+}
+?>
+<section class="admin__page-section frenet-order-tracking">
+    <div class="admin__page-section-title"><span class="title"><?= $escaper->escapeHtml(__('Frenet tracking')) ?></span></div>
+    <div class="frenet-order-panel">
+        <?php foreach ($codes as $c): ?>
+            <div class="frenet-order-tracking__code">
+                <h3><span class="frenet-code"><?= $escaper->escapeHtml($c['number']) ?></span>
+                    <span class="frenet-muted frenet-small"><?= $escaper->escapeHtml($c['synced_at'] ? __('checked %1', substr((string) $c['synced_at'], 0, 16)) : __('not checked yet')) ?></span></h3>
+                <?php if ($c['list']): ?>
+                    <ol class="frenet-timeline">
+                        <?php foreach (array_slice($c['list'], 0, 6) as $e): ?>
+                            <li><strong><?= $escaper->escapeHtml($e['description']) ?></strong>
+                                <span class="frenet-muted"><?= $escaper->escapeHtml(trim($e['date'] . ($e['location'] !== '' ? ' · ' . $e['location'] : ''))) ?></span></li>
+                        <?php endforeach; ?>
+                    </ol>
+                <?php else: ?>
+                    <p class="frenet-muted"><?= $escaper->escapeHtml(__('No movement yet. Events appear once the carrier scans the package.')) ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+        <?php if ($block->getAuthorization()->isAllowed('Frenet_Shipping::tracking')): ?>
+            <form method="post" action="<?= $escaper->escapeUrl($vm->syncUrl()) ?>" class="frenet-actionbar">
+                <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Update now')) ?></button>
+            </form>
+        <?php endif; ?>
+    </div>
+</section>
