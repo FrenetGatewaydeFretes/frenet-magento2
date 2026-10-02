@@ -1,0 +1,126 @@
+<?php
+/**
+ * Frenet Shipping Gateway — "Manage your labels": every label of the Frenet account, pay (cart), print, cancel.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\LabelsList $vm */
+$vm = $block->getData('view_model');
+$route = (string) $block->getData('route');
+?>
+<div class="frenet-labels">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+<?php if (!$common->isAvailable()): ?>
+</div>
+<?php return; endif; ?>
+<?php
+$data = $vm->data();
+$filter = $vm->statusFilter();
+$page = $vm->page();
+$pages = $vm->pages();
+$formKey = $block->getFormKey();
+?>
+    <p class="frenet-lead"><?= $escaper->escapeHtml(__('Every label of your Frenet account, also the ones bought in the Frenet panel. Newest first.')) ?></p>
+    <nav class="frenet-filters" aria-label="<?= $escaper->escapeHtmlAttr(__('Filter by status')) ?>">
+        <a class="frenet-chip<?= $filter === 0 ? ' is-active' : '' ?>" href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['status' => 0])) ?>"><?= $escaper->escapeHtml(__('All')) ?></a>
+        <?php foreach ($vm->statusOptions() as $code => $label): ?>
+            <?php $n = (int) ($data['counts'][$code] ?? 0); ?>
+            <a class="frenet-chip<?= $filter === $code ? ' is-active' : '' ?>" href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['status' => $code])) ?>">
+                <?= $escaper->escapeHtml($label) ?><?php if ($n): ?> <span class="frenet-chip__n"><?= (int) $n ?></span><?php endif; ?></a>
+        <?php endforeach; ?>
+    </nav>
+    <p class="frenet-muted frenet-hint"><?= $escaper->escapeHtml(__('Page %1 of %2 · %3 labels in the account. The filter and the counts apply to this page.', $page + 1, $pages, $data['total'])) ?></p>
+
+    <?php if ($data['error'] !== ''): ?>
+        <div class="message message-error"><div><?= $escaper->escapeHtml(__('Frenet did not answer: %1. Reload the page in a moment.', $data['error'])) ?></div></div>
+    <?php elseif (!$data['rows']): ?>
+        <div class="frenet-empty frenet-empty--small">
+            <p><?= $escaper->escapeHtml($filter ? __('No label with this status on this page.') : __('No Frenet labels yet.')) ?></p>
+            <?php if ($filter): ?><a href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['status' => 0])) ?>"><?= $escaper->escapeHtml(__('Show all')) ?></a><?php endif; ?>
+        </div>
+    <?php else: ?>
+        <form method="post" data-frenet-selectable data-frenet-bulk
+              data-pay-url="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/pay')) ?>"
+              data-print-url="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/printPdf')) ?>">
+            <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($formKey) ?>"/>
+            <div class="frenet-table-wrap">
+                <table class="frenet-table">
+                    <thead><tr>
+                        <th class="is-check"><input type="checkbox" data-frenet-select-all aria-label="<?= $escaper->escapeHtmlAttr(__('Select all')) ?>"/></th>
+                        <th><?= $escaper->escapeHtml(__('Label')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Order')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Status')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Service')) ?></th>
+                        <th class="is-num"><?= $escaper->escapeHtml(__('Shipping')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Tracking')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Updated')) ?></th>
+                        <th><span class="frenet-sr"><?= $escaper->escapeHtml(__('Actions')) ?></span></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($data['rows'] as $r): ?>
+                        <tr>
+                            <td class="is-check">
+                                <?php if ($r['can_pay'] || $r['can_print']): ?>
+                                    <input type="checkbox" name="ids[]" value="<?= $escaper->escapeHtmlAttr($r['id']) ?>" data-frenet-row
+                                           data-pay="<?= $r['can_pay'] ? '1' : '0' ?>" data-print="<?= $r['can_print'] ? '1' : '0' ?>"
+                                           data-price="<?= $escaper->escapeHtmlAttr((string) $r['price']) ?>"
+                                           aria-label="<?= $escaper->escapeHtmlAttr(__('Label %1', $r['id'])) ?>"/>
+                                <?php endif; ?>
+                            </td>
+                            <td class="frenet-code"><?= $escaper->escapeHtml($r['id']) ?></td>
+                            <td><?php if ($r['order_url']): ?><a href="<?= $escaper->escapeUrl($r['order_url']) ?>">#<?= $escaper->escapeHtml($r['order']) ?></a>
+                                <?php else: ?><span class="frenet-muted" title="<?= $escaper->escapeHtmlAttr(__('Order from another store or created in the Frenet panel')) ?>"><?= $escaper->escapeHtml(strlen($r['order']) > 14 ? substr($r['order'], 0, 8) . '…' : $r['order']) ?></span><?php endif; ?></td>
+                            <td><span class="frenet-pill frenet-pill--<?= $escaper->escapeHtmlAttr($r['tone']) ?>"><?= $escaper->escapeHtml($r['status_label']) ?></span></td>
+                            <td><?= $escaper->escapeHtml($r['service'] ?: '—') ?></td>
+                            <td class="is-num"><?= $r['price'] > 0 ? $escaper->escapeHtml($common->money($r['price'])) : '—' ?></td>
+                            <td><?php if ($r['tracking_url']): ?><a class="frenet-code" href="<?= $escaper->escapeUrl($r['tracking_url']) ?>" target="_blank" rel="noopener"><?= $escaper->escapeHtml($r['tracking']) ?></a><?php else: ?><span class="frenet-muted">—</span><?php endif; ?></td>
+                            <td class="frenet-muted frenet-nowrap"><?= $escaper->escapeHtml(substr($r['date'], 0, 16)) ?></td>
+                            <td class="frenet-row-actions">
+                                <?php if ($r['label_url']): ?>
+                                    <a class="action-default frenet-btn-sm" href="<?= $escaper->escapeUrl($r['label_url']) ?>" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml(__('Print')) ?></a>
+                                <?php endif; ?>
+                                <?php if ($r['can_cancel']): ?>
+                                    <button type="submit" class="action-default frenet-btn-sm frenet-danger"
+                                            formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/cancel', ['id' => $r['id']])) ?>"
+                                            data-frenet-confirm="<?= $escaper->escapeHtmlAttr($r['can_print']
+                                                ? __('Cancel label %1? Frenet returns %2 to the wallet (usually overnight).', $r['id'], $common->money($r['price']))
+                                                : __('Delete the unpaid shipment %1?', $r['id'])) ?>"><?= $escaper->escapeHtml(__('Cancel')) ?></button>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="frenet-actionbar">
+                <span class="frenet-muted" data-frenet-count data-zero="<?= $escaper->escapeHtmlAttr(__('Select labels to pay or print.')) ?>"
+                      data-some="<?= $escaper->escapeHtmlAttr(__('%1 label(s) selected')) ?>"><?= $escaper->escapeHtml(__('Select labels to pay or print.')) ?></span>
+                <?php if ($common->config()->batchPrint()): ?>
+                    <label class="frenet-format"><?= $escaper->escapeHtml(__('Format')) ?>
+                        <select name="format" class="admin__control-select">
+                            <option value="A4" <?= $common->config()->printingFormat() === 'A4' ? 'selected' : '' ?>>A4</option>
+                            <option value="10x15" <?= $common->config()->printingFormat() === '10x15' ? 'selected' : '' ?>>10x15</option>
+                        </select></label>
+                    <button type="submit" class="action-default" data-frenet-print disabled
+                            formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/printPdf')) ?>" formtarget="_blank"><?= $escaper->escapeHtml(__('Print selected')) ?></button>
+                <?php endif; ?>
+                <button type="submit" class="action-primary" data-frenet-pay disabled
+                        formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/pay')) ?>"
+                        data-label="<?= $escaper->escapeHtmlAttr(__('Pay %1 · %2')) ?>"
+                        data-confirm="<?= $escaper->escapeHtmlAttr(__('Pay %1 label(s) with the Frenet wallet (%2)?')) ?>"><span><?= $escaper->escapeHtml(__('Pay selected')) ?></span></button>
+            </div>
+        </form>
+    <?php endif; ?>
+    <?php if ($pages > 1): ?>
+        <nav class="frenet-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Pages')) ?>">
+            <?php if ($page > 0): ?><a class="action-default" href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['p' => $page - 1])) ?>"><?= $escaper->escapeHtml(__('Newer')) ?></a><?php endif; ?>
+            <span><?= $escaper->escapeHtml(__('Page %1 of %2', $page + 1, $pages)) ?></span>
+            <?php if ($page + 1 < $pages): ?><a class="action-default" href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['p' => $page + 1])) ?>"><?= $escaper->escapeHtml(__('Older')) ?></a><?php endif; ?>
+        </nav>
+    <?php endif; ?>
+</div>
+<script type="text/x-magento-init">{"*": {"Frenet_Shipping/js/labels/page": {}}}</script>

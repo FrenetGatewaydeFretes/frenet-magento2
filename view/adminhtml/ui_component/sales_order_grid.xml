@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — order grid action that opens "Create shipment" with the selected orders.
+  -->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction">
+            <action name="frenet_shipment_create">
+                <settings>
+                    <url path="frenetshipping/shipment/massCreate"/>
+                    <type>frenet_shipment_create</type>
+                    <label translate="true">Frenet: create shipment</label>
+                </settings>
+            </action>
+        </massaction>
+    </listingToolbar>
+</listing>

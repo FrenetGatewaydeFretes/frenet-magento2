@@ -23,6 +23,9 @@
     <preference for="Frenet\Shipping\Model\TrackingInterface" type="Frenet\Shipping\Model\Tracking"/>
     <preference for="Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface" type="Frenet\Shipping\Model\Quote\MultiQuoteValidator"/>
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
+    <!-- Address by CEP (checkout) -->
+    <preference for="Frenet\Shipping\Api\CepLookupInterface" type="Frenet\Shipping\Model\Cep\CepLookup"/>
+    <preference for="Frenet\Shipping\Api\Data\CepAddressInterface" type="Frenet\Shipping\Model\Cep\CepAddress"/>
     <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
@@ -91,4 +94,17 @@
         </arguments>
     </type>
 
+    <!-- Automatic tracking: CLI (proxy so bin/magento does not build the service on every run). -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="frenet_tracking_sync" xsi:type="object">Frenet\Shipping\Console\Command\TrackingSyncCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Frenet\Shipping\Console\Command\TrackingSyncCommand">
+        <arguments>
+            <argument name="sync" xsi:type="object">Frenet\Shipping\Model\TrackingSync\Sync\Proxy</argument>
+        </arguments>
+    </type>
 </config>
