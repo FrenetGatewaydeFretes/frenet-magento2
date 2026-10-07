@@ -22,7 +22,7 @@ use Frenet\Shipping\Model\Packages\PackageMatching;
 use Frenet\Shipping\Model\Packages\PackageProcessor;
 use Frenet\Shipping\Model\Packages\PackagesCalculator;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
-use Frenet\Shipping\Service\RateRequestProviderInterface;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -60,7 +60,7 @@ class PackagesCalculatorTest extends TestCase
     private MockObject $packageMatching;
 
     /**
-     * @var RateRequestProviderInterface&MockObject
+     * @var RateRequestProvider&MockObject
      */
     private MockObject $rateRequestProvider;
 
@@ -81,7 +81,7 @@ class PackagesCalculatorTest extends TestCase
         $this->packageManager = $this->createMock(PackageManager::class);
         $this->packageLimit = $this->createMock(PackageLimit::class);
         $this->packageMatching = $this->createMock(PackageMatching::class);
-        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProvider::class);
         $this->serializer = $this->createMock(SerializerInterface::class);
 
         $this->rateRequestProvider->method('getRateRequest')->willReturn($this->createMock(RateRequest::class));

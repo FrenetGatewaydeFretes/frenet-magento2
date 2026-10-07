@@ -15,7 +15,7 @@ namespace Frenet\Shipping\Test\Unit\Model\Quote;
 
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
-use Frenet\Shipping\Service\RateRequestProviderInterface;
+use Frenet\Shipping\Service\RateRequestProvider;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
@@ -33,7 +33,7 @@ use PHPUnit\Framework\TestCase;
 class CouponProcessorTest extends TestCase
 {
     /**
-     * @var RateRequestProviderInterface&MockObject
+     * @var RateRequestProvider&MockObject
      */
     private MockObject $rateRequestProvider;
 
@@ -44,7 +44,7 @@ class CouponProcessorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProvider::class);
         $this->subject = new CouponProcessor($this->rateRequestProvider);
     }
 
