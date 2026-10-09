@@ -28,6 +28,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 | Módulo | Magento | PHP |
 |---|---|---|
 | `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
+| `2.4.8-p2` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 | 8.2, 8.3, 8.4 |
 | `2.4.8-p1` | 2.4.8 / 2.4.8-p1 | 8.2, 8.3, 8.4 |
 
 O `composer.json` do módulo declara as versões de `magento/framework` e dos módulos `magento/module-*` suportadas; o Composer resolve automaticamente a versão compatível com a sua instalação. Para versões anteriores do Magento (2.3.x, 2.4.0–2.4.7), utilize uma tag anterior do módulo (ex.: `2.4.7-p3`).
@@ -54,7 +55,7 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:^2.4.9
+composer require frenet/frenet-magento2:2.4.8-p2
 ```
 
 ## Configuração
@@ -88,6 +89,17 @@ Recursos opcionais, no mesmo painel:
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
 
 ## Changelog
+
+### 2.4.8-p2
+
+**Adicionado**
+
+- Compatibilidade com **Magento 2.4.8-p2** (PHP 8.2, 8.3 e 8.4), validada contra as correções de segurança do boletim APSB25-71.
+- A linha 2.4.8 passa a usar a mesma base de código da 2.4.9: tudo o que está listado na seção **2.4.9** abaixo vale também para lojas em 2.4.8, incluindo os campos **API Hostname** / **API Protocol** (HTTPS por padrão) e as traduções pt-BR completas.
+
+**Corrigido**
+
+- Todas as correções listadas na seção **2.4.9**, em especial: carrinhos acima do peso máximo do pacote (padrão 30 kg) não retornam mais erro na estimativa de frete e no checkout.
 
 ### 2.4.9
 
