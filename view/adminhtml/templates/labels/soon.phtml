@@ -1,0 +1,25 @@
+<?php
+/**
+ * Frenet Shipping Gateway — placeholder of features that are coming (WhatsApp, returns, proof, control tower).
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$features = [
+    'whatsapp' => [__('WhatsApp'), __('Send the tracking of each order to the customer by WhatsApp.')],
+    'reverse' => [__('Returns (reverse logistics)'), __('Create the return label of an order and follow it until it arrives.')],
+    'receipt' => [__('Proof of delivery'), __('See and download the proof that the package was delivered.')],
+    'tower' => [__('Control tower'), __('All your shipments in one panel: delays, problems and what needs attention.')],
+];
+$key = (string) $block->getRequest()->getParam('feature');
+[$title, $text] = $features[$key] ?? [__('Coming soon'), __('This feature is being prepared.')];
+?>
+<div class="frenet-labels">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+    <div class="frenet-empty">
+        <span class="frenet-pill frenet-pill--wait"><?= $escaper->escapeHtml(__('Coming soon')) ?></span>
+        <h2><?= $escaper->escapeHtml($title) ?></h2>
+        <p><?= $escaper->escapeHtml($text) ?></p>
+        <a class="action-default" href="<?= $escaper->escapeUrl($block->getUrl('frenetshipping/shipment/index')) ?>"><?= $escaper->escapeHtml(__('Back to Create shipment')) ?></a>
+    </div>
+</div>

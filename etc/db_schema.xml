@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — Frenet shipments created from orders and the NF-e key of each order.
+  -->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="frenet_shipping_label" resource="sales" engine="innodb" comment="Frenet shipments created from orders">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="shipment_id" length="32" nullable="false" comment="Frenet shipment ID"/>
+        <column xsi:type="varchar" name="journey" length="10" nullable="false" default="here" comment="here or panel"/>
+        <column xsi:type="smallint" name="status" unsigned="true" nullable="false" default="2" comment="Frenet ShipmentStatus"/>
+        <column xsi:type="varchar" name="carrier_code" length="32" nullable="true" comment="Carrier code"/>
+        <column xsi:type="varchar" name="service_code" length="64" nullable="true" comment="Frenet service code"/>
+        <column xsi:type="varchar" name="service_name" length="255" nullable="true" comment="Service name"/>
+        <column xsi:type="decimal" name="price" scale="2" precision="12" unsigned="false" nullable="true" comment="Label price"/>
+        <column xsi:type="text" name="label_url" nullable="true" comment="Label URL (admin only)"/>
+        <column xsi:type="text" name="declaration_url" nullable="true" comment="Declaration URL (admin only)"/>
+        <column xsi:type="varchar" name="tracking_url" length="255" nullable="true" comment="Tracking URL"/>
+        <column xsi:type="varchar" name="tracking_code" length="64" nullable="true" comment="Tracking code"/>
+        <column xsi:type="smallint" name="poll_attempts" unsigned="true" nullable="false" default="0" comment="Label polls"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="FRENET_SHIPPING_LABEL_SHIPMENT_ID">
+            <column name="shipment_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FRENET_SHIPPING_LABEL_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="frenet_shipping_label" column="order_id" referenceTable="sales_order"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="FRENET_SHIPPING_LABEL_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <index referenceId="FRENET_SHIPPING_LABEL_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+    <table name="frenet_shipping_invoice" resource="sales" engine="innodb" comment="NF-e access key of the order">
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="access_key" length="44" nullable="false" comment="NF-e access key"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="order_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FRENET_SHIPPING_INVOICE_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="frenet_shipping_invoice" column="order_id" referenceTable="sales_order"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+    <table name="frenet_shipping_tracking" resource="sales" engine="innodb" comment="Frenet: tracking events of the Frenet tracking codes">
+        <column xsi:type="int" name="track_id" unsigned="true" nullable="false" comment="sales_shipment_track.entity_id"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="service_code" length="64" nullable="true" comment="Frenet service code"/>
+        <column xsi:type="varchar" name="track_number" length="64" nullable="false" comment="Tracking code"/>
+        <column xsi:type="mediumtext" name="events" nullable="true" comment="Events (JSON)"/>
+        <column xsi:type="varchar" name="last_description" length="255" nullable="true" comment="Latest event"/>
+        <column xsi:type="timestamp" name="synced_at" nullable="true" comment="Last check (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="track_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FRENET_SHIPPING_TRACKING_TRACK_ID_SALES_SHIPMENT_TRACK_ENTITY_ID"
+                    table="frenet_shipping_tracking" column="track_id" referenceTable="sales_shipment_track"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="FRENET_SHIPPING_TRACKING_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <index referenceId="FRENET_SHIPPING_TRACKING_SYNCED_AT" indexType="btree">
+            <column name="synced_at"/>
+        </index>
+    </table>
+</schema>

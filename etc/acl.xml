@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — admin permissions of the Frenet menu (labels).
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Frenet_Shipping::frenet" title="Frenet" translate="title" sortOrder="75">
+                    <resource id="Frenet_Shipping::labels_create" title="Create shipments and buy labels" translate="title" sortOrder="10"/>
+                    <resource id="Frenet_Shipping::labels" title="Manage labels (pay, cancel)" translate="title" sortOrder="20"/>
+                    <resource id="Frenet_Shipping::print" title="Print labels" translate="title" sortOrder="30"/>
+                    <resource id="Frenet_Shipping::tracking" title="Tracking" translate="title" sortOrder="40"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

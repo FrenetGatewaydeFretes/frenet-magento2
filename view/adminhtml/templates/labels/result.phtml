@@ -1,0 +1,76 @@
+<?php
+/**
+ * Frenet Shipping Gateway — result of "Create shipment".
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\Result $vm */
+$vm = $block->getData('view_model');
+$data = $vm->data();
+?>
+<div class="frenet-labels">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+<?php if (!$data): ?>
+    <div class="frenet-empty frenet-empty--small">
+        <p><?= $escaper->escapeHtml(__('There is no recent result to show.')) ?></p>
+        <a class="action-primary" href="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index')) ?>"><span><?= $escaper->escapeHtml(__('Create shipment')) ?></span></a>
+    </div>
+</div>
+<?php return; endif; ?>
+<?php
+$ok = array_filter($data['results'], static fn ($r) => $r['ok']);
+$failed = count($data['results']) - count($ok);
+$charged = ($data['before'] && $data['after']) ? round($data['before']['balance'] - $data['after']['balance'], 2) : null;
+$panel = $data['journey'] === 'panel';
+?>
+    <div class="frenet-summary__totals frenet-card">
+        <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Created')) ?></span><strong><?= count($ok) ?></strong></div>
+        <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Failed')) ?></span><strong class="<?= $failed ? 'frenet-bad' : '' ?>"><?= (int) $failed ?></strong></div>
+        <?php if (!$panel && $charged !== null): ?>
+            <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Charged by Frenet')) ?></span><strong><?= $escaper->escapeHtml($common->money($charged)) ?></strong></div>
+            <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Balance now')) ?></span><strong><?= $escaper->escapeHtml($common->money($data['after']['balance'])) ?></strong></div>
+        <?php endif; ?>
+    </div>
+    <?php if ($panel && $ok): ?>
+        <p class="frenet-note"><?= $escaper->escapeHtml(__('The shipments are in the Frenet panel, waiting for payment and printing there.')) ?>
+            <a href="<?= $escaper->escapeUrl($common->panelUrl()) ?>" target="_blank" rel="noopener"><?= $escaper->escapeHtml(__('Open the Frenet panel')) ?></a></p>
+    <?php endif; ?>
+    <div class="frenet-table-wrap">
+        <table class="frenet-table">
+            <thead><tr>
+                <th><?= $escaper->escapeHtml(__('Order')) ?></th>
+                <th><?= $escaper->escapeHtml(__('Result')) ?></th>
+                <th><?= $escaper->escapeHtml(__('Frenet shipment')) ?></th>
+                <th><?= $escaper->escapeHtml(__('Carrier and service')) ?></th>
+                <th class="is-num"><?= $escaper->escapeHtml(__('Price')) ?></th>
+                <th><?= $escaper->escapeHtml(__('Details')) ?></th>
+            </tr></thead>
+            <tbody>
+            <?php foreach ($data['results'] as $r): ?>
+                <tr>
+                    <td><a href="<?= $escaper->escapeUrl($common->url('sales/order/view', ['order_id' => $r['order_id']])) ?>">#<?= $escaper->escapeHtml($r['number'] ?: (string) $r['order_id']) ?></a></td>
+                    <td><?php if ($r['ok']): ?>
+                            <span class="frenet-pill frenet-pill--<?= $escaper->escapeHtmlAttr($common->statusTone((int) $r['status'])) ?>"><?= $escaper->escapeHtml($common->statusLabel((int) $r['status'])) ?></span>
+                        <?php else: ?>
+                            <span class="frenet-pill frenet-pill--bad"><?= $escaper->escapeHtml(__('Not created')) ?></span>
+                        <?php endif; ?></td>
+                    <td class="frenet-code"><?= $escaper->escapeHtml($r['shipment_id'] ?: '—') ?></td>
+                    <td><?= $escaper->escapeHtml($r['service'] ?: '—') ?></td>
+                    <td class="is-num"><?= $r['ok'] ? $escaper->escapeHtml($common->money((float) $r['price'])) : '—' ?></td>
+                    <td class="frenet-small"><?= $escaper->escapeHtml($r['message']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="frenet-actionbar">
+        <a class="action-default" href="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index')) ?>"><?= $escaper->escapeHtml(__('Create more shipments')) ?></a>
+        <a class="action-default" href="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/index')) ?>"><?= $escaper->escapeHtml(__('Manage labels')) ?></a>
+        <?php if (!$panel && $ok): ?>
+            <a class="action-primary" href="<?= $escaper->escapeUrl($common->url('frenetshipping/printing/index')) ?>"><span><?= $escaper->escapeHtml(__('Print labels')) ?></span></a>
+        <?php endif; ?>
+    </div>
+</div>

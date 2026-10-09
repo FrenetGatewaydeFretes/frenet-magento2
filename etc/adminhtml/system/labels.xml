@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — Labels (Frenet shipments, wallet, printing).
+  New keys only, under carriers/frenetshipping/labels/*.
+  -->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="labels" translate="label comment" type="text" sortOrder="220" showInDefault="1" showInWebsite="0" showInStore="0">
+        <label>Labels (create shipments and print)</label>
+        <comment><![CDATA[Create Frenet shipments from your orders, compare carriers, pay with the Frenet wallet and print the labels. Requires the Frenet partner token (x-partner-token).]]></comment>
+        <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1">
+            <label>Enabled</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+        <field id="store_token" translate="label comment" type="obscure" sortOrder="20" showInDefault="1">
+            <label>Customer token</label>
+            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+            <comment>Leave empty to use the token of the Frenet shipping method above (recommended).</comment>
+        </field>
+        <field id="partner_token" translate="label comment" type="obscure" sortOrder="30" showInDefault="1">
+            <label>Partner token</label>
+            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+            <comment>Given by Frenet to integration partners (x-partner-token). Keep it secret like a password.</comment>
+        </field>
+        <field id="status" translate="label" type="label" sortOrder="35" showInDefault="1">
+            <label>Connection</label>
+            <frontend_model>Frenet\Shipping\Block\Adminhtml\System\LabelsStatus</frontend_model>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+        </field>
+        <field id="api_url" translate="label comment" type="text" sortOrder="40" showInDefault="1">
+            <label>API URL</label>
+            <validate>validate-url</validate>
+            <comment>https://whitelabel.frenet.com.br/v1 — any other address is treated as a test simulator.</comment>
+        </field>
+        <field id="journey" translate="label comment" type="select" sortOrder="50" showInDefault="1">
+            <label>How to create the shipment</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Labels\Journey</source_model>
+            <comment>Buy here: the label is paid and printed in this admin. Send to the Frenet panel: the order goes to the Frenet panel, where it is paid and printed.</comment>
+        </field>
+        <field id="default_service" translate="label" type="select" sortOrder="60" showInDefault="1">
+            <label>Default service</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Labels\DefaultService</source_model>
+        </field>
+        <field id="auto_best" translate="label comment" type="select" sortOrder="70" showInDefault="1">
+            <label>Automatically select the best option</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <comment>No: the carrier the customer chose comes selected. Yes: the best option by "Default service" comes selected. It can always be changed before creating.</comment>
+        </field>
+        <field id="wallet_payment" translate="label comment" type="select" sortOrder="80" showInDefault="1">
+            <label>Pay with the Frenet wallet</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <comment>Yes: labels bought here are paid at once with the wallet balance. No: they wait in Labels until you pay them.</comment>
+        </field>
+        <field id="batch_print" translate="label" type="select" sortOrder="90" showInDefault="1">
+            <label>Batch printing</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+        <field id="printing_format" translate="label" type="select" sortOrder="100" showInDefault="1">
+            <label>Label format</label>
+            <source_model>Frenet\Shipping\Model\Config\Source\Labels\PrintingFormat</source_model>
+        </field>
+    </group>
+</include>

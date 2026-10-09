@@ -1,0 +1,51 @@
+<?php
+/**
+ * Frenet Shipping Gateway — shared header of the labels screens: brand strip (logo + wallet),
+ * simulator banner and "not configured" state.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+$wallet = $common->isAvailable() ? $common->wallet() : null;
+?>
+<header class="frenet-brand" role="banner">
+    <div class="frenet-brand__id">
+        <img class="frenet-brand__logo" src="<?= $escaper->escapeUrl($block->getViewFileUrl('Frenet_Shipping::images/frenet-logo.png')) ?>"
+             alt="Frenet" width="96" height="40"/>
+        <span class="frenet-brand__tag"><?= $escaper->escapeHtml(__('Shipping management')) ?></span>
+    </div>
+    <?php if ($common->isAvailable()): ?>
+        <div class="frenet-brand__wallet">
+            <span class="frenet-brand__label"><?= $escaper->escapeHtml(__('Frenet wallet balance')) ?></span>
+            <strong class="frenet-brand__value" data-frenet-balance="<?= $wallet ? $escaper->escapeHtmlAttr((string) $wallet['balance']) : '' ?>">
+                <?= $wallet ? $escaper->escapeHtml($common->money($wallet['balance'])) : $escaper->escapeHtml(__('Unavailable')) ?>
+            </strong>
+            <?php if ($wallet): ?>
+                <span class="frenet-brand__meta"><?= $escaper->escapeHtml(__('%1 labels available', $wallet['labels'])) ?></span>
+            <?php endif; ?>
+            <form class="frenet-brand__deposit" method="post" action="<?= $escaper->escapeUrl($block->getUrl('frenetshipping/wallet/deposit')) ?>">
+                <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                <label class="admin__control-support-text" for="frenet-deposit-value"><?= $escaper->escapeHtml(__('R$')) ?></label>
+                <input id="frenet-deposit-value" class="frenet-brand__amount" type="text" inputmode="decimal" name="value" value="50,00" required
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Amount to add (R$)')) ?>"/>
+                <button type="submit" class="frenet-brand__cta"><?= $escaper->escapeHtml(__('Add balance')) ?></button>
+                <a class="frenet-brand__meta" href="<?= $escaper->escapeUrl($common->panelUrl()) ?>" target="_blank" rel="noopener"><?= $escaper->escapeHtml(__('or in the Frenet panel')) ?></a>
+            </form>
+        </div>
+    <?php endif; ?>
+</header>
+<?php if ($common->isSimulated()): ?>
+    <p class="frenet-sim" role="note">
+        <strong><?= $escaper->escapeHtml(__('Simulator mode')) ?></strong>
+        <?= $escaper->escapeHtml(__('Labels, balance and lists come from the local test simulator. Nothing is sent to Frenet or charged.')) ?>
+    </p>
+<?php endif; ?>
+<?php if (!$common->isAvailable() && !$block->getData('works_without_labels')): ?>
+    <div class="frenet-empty">
+        <h2><?= $escaper->escapeHtml(__('Connect your Frenet partner token')) ?></h2>
+        <p><?= $escaper->escapeHtml(__('To create shipments and labels, turn on "Labels" in the Frenet Shipping settings and paste the partner token (x-partner-token) that Frenet gave you.')) ?></p>
+        <a class="action-primary" href="<?= $escaper->escapeUrl($common->settingsUrl()) ?>"><span><?= $escaper->escapeHtml(__('Open settings')) ?></span></a>
+    </div>
+<?php endif; ?>
