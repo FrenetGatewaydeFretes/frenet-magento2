@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
@@ -46,14 +46,14 @@ class DimensionsExtractor implements ProductExtractorInterface
     private $attributesMapping;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     public function __construct(
         ProductResource $productResource,
         AttributesMappingInterface $attributesMapping,
-        Config $config
+        ConfigInterface $config
     ) {
         $this->productResource = $productResource;
         $this->attributesMapping = $attributesMapping;

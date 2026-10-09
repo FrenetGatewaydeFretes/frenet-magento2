@@ -17,14 +17,14 @@ use Frenet\Command\Shipping\Quote as ShippingQuoteCommand;
 use Frenet\Command\ShippingInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
 use Frenet\Shipping\Model\ApiServiceInterface;
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\Package;
 use Frenet\Shipping\Model\Packages\PackageItem;
 use Frenet\Shipping\Model\Packages\PackageProcessor;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\TotalsCollector;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote as CartQuote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
@@ -44,7 +44,7 @@ class PackageProcessorTest extends TestCase
     private MockObject $quoteItemValidator;
 
     /**
-     * @var Config&MockObject
+     * @var ConfigInterface&MockObject
      */
     private MockObject $config;
 
@@ -54,7 +54,7 @@ class PackageProcessorTest extends TestCase
     private MockObject $apiService;
 
     /**
-     * @var RateRequestProvider&MockObject
+     * @var RateRequestProviderInterface&MockObject
      */
     private MockObject $rateRequestProvider;
 
@@ -78,9 +78,9 @@ class PackageProcessorTest extends TestCase
         $this->quoteItemValidator = $this->createMock(QuoteItemValidatorInterface::class);
         $this->quoteItemValidator->method('validate')->willReturn(true);
 
-        $this->config = $this->createMock(Config::class);
+        $this->config = $this->createMock(ConfigInterface::class);
         $this->apiService = $this->createMock(ApiServiceInterface::class);
-        $this->rateRequestProvider = $this->createMock(RateRequestProvider::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
         $this->couponProcessor = $this->createMock(CouponProcessor::class);
         $this->totalsCollector = $this->createMock(TotalsCollector::class);
 
@@ -98,8 +98,7 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
-     * The item's own quote must reach the totals collector, so it never falls back to the checkout
-     * session while shipping-rate collection is already in progress on it (magento/magento2#34830).
+     * The item's own quote must reach the totals collector, never the checkout session.
      *
      * @return void
      */
@@ -122,9 +121,7 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
-     * A package whose items carry no quote (a defensive edge case) must skip the totals collector
-     * entirely instead of passing it null - which would fall back to the checkout session as soon as
-     * a discount/addition collector is configured, reopening the same re-entrancy hazard.
+     * A package whose items carry no quote (a defensive edge case) must skip the totals collector entirely.
      *
      * @return void
      */

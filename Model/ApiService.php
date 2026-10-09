@@ -4,9 +4,9 @@
  *
  * @category Frenet
  *
- * @author   Tiago Sampaio <tiago@tiagosampaio.com>
- * @link     https://github.com/tiagosampaio
- * @link     https://tiagosampaio.com
+ * @author Tiago Sampaio <tiago@tiagosampaio.com>
+ * @link https://github.com/tiagosampaio
+ * @link https://tiagosampaio.com
  *
  * Copyright (c) 2020.
  */
@@ -15,65 +15,61 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
+use DI\DependencyException;
+use DI\NotFoundException;
+use Frenet\ApiFactory;
+use Frenet\ApiInterface;
+use Frenet\Command\PostcodeInterface;
+use Frenet\Command\ShippingInterface;
+use Frenet\Command\TrackingInterface;
+use Frenet\Framework\Exception\WrongDataTypeException;
+use Frenet\Shipping\Model\Config\Source\ApiProtocol;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\FileSystemException;
 
 /**
- * Class ApiService
- *
- * Used for communication with the API Service.
+ * Boots the frenet-php API client once per request and applies the store's connection/debug settings to it.
  */
 class ApiService implements ApiServiceInterface
 {
     /**
-     * @var \Frenet\ApiInterface
+     * @var ApiInterface|null
      */
-    private $api;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @var Config
-     */
-    private $config;
+    private ?ApiInterface $api = null;
 
     /**
      * @var bool
      */
-    private $isInitialized = false;
+    private bool $isInitialized = false;
 
     public function __construct(
-        DirectoryList $directoryList,
-        Config $config
+        private readonly DirectoryList $directoryList,
+        private readonly ConfigInterface $config
     ) {
-        $this->config = $config;
-        $this->directoryList = $directoryList;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public function postcode()
+    public function postcode(): PostcodeInterface
     {
         $this->init();
         return $this->api->postcode();
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public function tracking()
+    public function tracking(): TrackingInterface
     {
         $this->init();
         return $this->api->tracking();
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public function shipping()
+    public function shipping(): ShippingInterface
     {
         $this->init();
         return $this->api->shipping();
@@ -82,28 +78,52 @@ class ApiService implements ApiServiceInterface
     /**
      * Initializes the API Service.
      *
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws WrongDataTypeException
+     * @throws FileSystemException
      * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    private function init()
+    private function init(): void
     {
-        if (true === $this->isInitialized) {
+        if ($this->isInitialized) {
             return;
         }
 
-        $this->api = \Frenet\ApiFactory::create($this->config->getToken());
+        $this->api = ApiFactory::create($this->config->getToken());
 
+        $this->initConnection();
         $this->initLogs();
         $this->isInitialized = true;
     }
 
     /**
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * Applies the optional API hostname/protocol overrides from the store configuration.
+     *
+     * @throws WrongDataTypeException
      */
-    private function initLogs()
+    private function initConnection(): void
     {
-        if (true == $this->config->isDebugModeEnabled()) {
+        $hostname = $this->config->getApiHostname();
+        $protocol = $this->config->getApiProtocol();
+
+        if ($hostname !== '') {
+            $this->api->config()->service()->setHostname($hostname);
+        }
+
+        if (in_array($protocol, [ApiProtocol::HTTP, ApiProtocol::HTTPS], true)) {
+            $this->api->config()->service()->setProtocol($protocol);
+        }
+    }
+
+    /**
+     * Enables the frenet-php file debugger when the module debug mode is on.
+     *
+     * @throws FileSystemException
+     */
+    private function initLogs(): void
+    {
+        if ($this->config->isDebugModeEnabled()) {
             $this->api
                 ->config()
                 ->debugger()

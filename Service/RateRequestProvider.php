@@ -19,18 +19,17 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Holds the rate request for the current quote so collaborators down the calculation chain can read it without re-plumbing it.
+ * Carries the current quote's rate request so downstream collaborators read it without re-plumbing every call.
  */
-class RateRequestProvider
+class RateRequestProvider implements RateRequestProviderInterface
 {
+    /**
+     * @var RateRequest|null
+     */
     private ?RateRequest $rateRequest = null;
 
     /**
-     * Stores the rate request for the current quote.
-     *
-     * @param RateRequest $rateRequest
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function setRateRequest(RateRequest $rateRequest): self
     {
@@ -39,10 +38,7 @@ class RateRequestProvider
     }
 
     /**
-     * Returns the rate request set for the current quote.
-     *
-     * @return RateRequest
-     * @throws LocalizedException
+     * @inheritDoc
      */
     public function getRateRequest(): RateRequest
     {
@@ -54,9 +50,7 @@ class RateRequestProvider
     }
 
     /**
-     * Drops the stored rate request once the quote is done.
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function clear(): self
     {

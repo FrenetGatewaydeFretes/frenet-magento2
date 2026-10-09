@@ -15,21 +15,21 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Cache\CacheKeyGenerator;
 
-use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 
 class PostcodeGenerator implements CacheKeyGeneratorInterface
 {
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $requestProvider;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
@@ -46,8 +46,8 @@ class PostcodeGenerator implements CacheKeyGeneratorInterface
     public function __construct(
         PostcodeNormalizer $postcodeNormalizer,
         SerializerInterface $serializer,
-        RateRequestProvider $requestProvider,
-        Config $config
+        RateRequestProviderInterface $requestProvider,
+        ConfigInterface $config
     ) {
         $this->serializer = $serializer;
         $this->requestProvider = $requestProvider;

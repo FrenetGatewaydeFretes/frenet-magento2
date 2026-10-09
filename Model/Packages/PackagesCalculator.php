@@ -11,13 +11,13 @@
  * Copyright (c) 2020.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
@@ -25,56 +25,22 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
  */
 class PackagesCalculator
 {
-    /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
-     * @var MultiQuoteValidatorInterface
-     */
-    private $multiQuoteValidator;
-
-    /**
-     * @var PackageLimit
-     */
-    private $packageLimit;
-
-    /**
-     * @var PackageMatching
-     */
-    private $packageMatching;
-
-    /**
-     * @var PackageProcessor
-     */
-    private $packageProcessor;
-
-    /**
-     * @var RateRequestProvider
-     */
-    private $rateRequestProvider;
-
     public function __construct(
-        MultiQuoteValidatorInterface $multiQuoteValidator,
-        PackageProcessor $packageProcessor,
-        PackageManager $packagesManager,
-        PackageLimit $packageLimit,
-        PackageMatching $packageMatching,
-        RateRequestProvider $rateRequestProvider
+        private readonly MultiQuoteValidatorInterface $multiQuoteValidator,
+        private readonly PackageProcessor $packageProcessor,
+        private readonly PackageManager $packageManager,
+        private readonly PackageLimit $packageLimit,
+        private readonly PackageMatching $packageMatching,
+        private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
-        $this->packageManager = $packagesManager;
-        $this->multiQuoteValidator = $multiQuoteValidator;
-        $this->packageLimit = $packageLimit;
-        $this->packageMatching = $packageMatching;
-        $this->packageProcessor = $packageProcessor;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
+     * Quotes the cart against the Frenet API, splitting it into weight-limited packages when multi-quote is on.
+     *
      * @return Service[]
      */
-    public function calculate()
+    public function calculate(): array
     {
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
@@ -84,7 +50,7 @@ class PackagesCalculator
          * If the package is not overweight then we simply process all the package.
          */
         if (!$this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight())) {
-            return $this->consolidatePackages($this->processPackages());
+            return $this->processPackages();
         }
 
         /**
@@ -92,7 +58,7 @@ class PackagesCalculator
          */
         if (!$this->multiQuoteValidator->canProcessMultiQuote()) {
             $this->packageLimit->removeLimit();
-            return $this->consolidatePackages($this->processPackages());
+            return $this->processPackages();
         }
 
         /**
@@ -116,18 +82,14 @@ class PackagesCalculator
     }
 
     /**
-     * Collapses a split-cart quote into one service list, summing the price per method across packages.
+     * Collapses a per-package quote into one service list, summing the price per method across packages.
      *
-     * @param array $packagesServices Service[] when the cart fit one package, Service[][] when it was split
+     * @param Service[][] $packagesServices
      *
      * @return Service[]
      */
     private function consolidatePackages(array $packagesServices): array
     {
-        if (!is_array(reset($packagesServices))) {
-            return $packagesServices;
-        }
-
         $packageCount = count($packagesServices);
         $totals = [];
         $counts = [];
@@ -177,9 +139,11 @@ class PackagesCalculator
     }
 
     /**
+     * Quotes every built package and consolidates the per-package results into a single service list.
+     *
      * @return Service[]
      */
-    private function processPackages()
+    private function processPackages(): array
     {
         $this->packageManager->process();
         $results = [];
@@ -188,20 +152,9 @@ class PackagesCalculator
         foreach ($this->packageManager->getPackages() as $key => $package) {
             /** @var Service[] $services */
             $services = $this->packageProcessor->process($package);
-
-            /**
-             * If there's only one package then we can simply return the services quote.
-             */
-            if ($this->packageManager->countPackages() == 1) {
-                return $services;
-            }
-
-            /**
-             * Otherwise we need to bind the quotes.
-             */
             $results[$key] = $services;
         }
 
-        return $results;
+        return $this->consolidatePackages($results);
     }
 }

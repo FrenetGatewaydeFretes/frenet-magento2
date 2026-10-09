@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 
 /**
  * Class Calculator
@@ -34,7 +34,7 @@ class Calculator implements CalculatorInterface
     private $packagesCalculator;
 
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $rateRequestProvider;
 
@@ -47,7 +47,7 @@ class Calculator implements CalculatorInterface
     public function __construct(
         CacheManager $cacheManager,
         Packages\PackagesCalculator $packagesCalculator,
-        RateRequestProvider $rateRequestProvider
+        RateRequestProviderInterface $rateRequestProvider
     ) {
         $this->cacheManager = $cacheManager;
         $this->packagesCalculator = $packagesCalculator;

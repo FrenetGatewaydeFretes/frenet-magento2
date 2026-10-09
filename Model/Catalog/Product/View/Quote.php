@@ -18,9 +18,9 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface;
 use Frenet\Shipping\Api\QuoteProductInterface;
 use Frenet\Shipping\Model\Calculator;
-use Frenet\Shipping\Model\Config;
-use Frenet\Shipping\Service\RateRequestProvider;
-use Frenet\Shipping\Model\DeliveryTimeCalculator;
+use Frenet\Shipping\Model\ConfigInterface;
+use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -44,7 +44,7 @@ class Quote implements QuoteProductInterface
     private $logger;
 
     /**
-     * @var RateRequestProvider
+     * @var RateRequestProviderInterface
      */
     private $rateRequestProvider;
 
@@ -59,23 +59,23 @@ class Quote implements QuoteProductInterface
     private $rateRequestBuilder;
 
     /**
-     * @var DeliveryTimeCalculator
+     * @var DeliveryTimeCalculatorInterface
      */
     private $deliveryTimeCalculator;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $config;
 
     public function __construct(
         ProductRepositoryInterface $productRepository,
-        RateRequestProvider $rateRequestProvider,
+        RateRequestProviderInterface $rateRequestProvider,
         Calculator $calculator,
         RateRequestBuilder $rateRequestBuilder,
         LoggerInterface $logger,
-        DeliveryTimeCalculator $deliveryTimeCalculator,
-        Config $config
+        DeliveryTimeCalculatorInterface $deliveryTimeCalculator,
+        ConfigInterface $config
     ) {
         $this->productRepository = $productRepository;
         $this->rateRequestProvider = $rateRequestProvider;

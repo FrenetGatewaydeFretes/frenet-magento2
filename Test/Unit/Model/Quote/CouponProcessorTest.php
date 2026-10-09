@@ -15,7 +15,7 @@ namespace Frenet\Shipping\Test\Unit\Model\Quote;
 
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
-use Frenet\Shipping\Service\RateRequestProvider;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
@@ -24,16 +24,13 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that CouponProcessor reads the coupon code off the rate request's own items and never falls back to
- * the checkout session, since it runs from inside shipping-rate collection on every quote and
- * Magento\Checkout\Model\Session::getQuote() throws "Infinite loop detected" when called re-entrantly
- * from there (magento/magento2#34830).
+ * Tests that CouponProcessor reads the coupon code off the rate request's own items, never the checkout session.
  */
 #[AllowMockObjectsWithoutExpectations]
 class CouponProcessorTest extends TestCase
 {
     /**
-     * @var RateRequestProvider&MockObject
+     * @var RateRequestProviderInterface&MockObject
      */
     private MockObject $rateRequestProvider;
 
@@ -44,7 +41,7 @@ class CouponProcessorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->rateRequestProvider = $this->createMock(RateRequestProvider::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
         $this->subject = new CouponProcessor($this->rateRequestProvider);
     }
 
@@ -62,8 +59,7 @@ class CouponProcessorTest extends TestCase
     }
 
     /**
-     * A defensive edge case (no item carries a quote) must return no coupon code instead of crashing or
-     * reaching into the checkout session.
+     * A defensive edge case (no item carries a quote) must return no coupon code instead of crashing.
      *
      * @return void
      */

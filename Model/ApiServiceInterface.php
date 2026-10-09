@@ -15,23 +15,33 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Command\PostcodeInterface;
+use Frenet\Command\ShippingInterface;
+use Frenet\Command\TrackingInterface;
+
 /**
- * Class ApiServiceInterface
+ * Entry points into the frenet-php API used by the module: the postcode, tracking and shipping commands.
  */
 interface ApiServiceInterface
 {
     /**
-     * @return \Frenet\Command\PostcodeInterface
+     * Returns the Frenet postcode command.
+     *
+     * @return PostcodeInterface
      */
-    public function postcode();
+    public function postcode(): PostcodeInterface;
 
     /**
-     * @return \Frenet\Command\TrackingInterface
+     * Returns the Frenet tracking command.
+     *
+     * @return TrackingInterface
      */
-    public function tracking();
+    public function tracking(): TrackingInterface;
 
     /**
-     * @return \Frenet\Command\ShippingInterface
+     * Returns the Frenet shipping command.
+     *
+     * @return ShippingInterface
      */
-    public function shipping();
+    public function shipping(): ShippingInterface;
 }
