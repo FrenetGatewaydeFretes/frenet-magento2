@@ -16,6 +16,7 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product\Option as ProductOption;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -57,6 +58,7 @@ class RateRequestBuilder
         \Magento\Quote\Model\QuoteFactory $quoteFactory,
         RateRequestFactory $rateRequestFactory,
         DimensionsExtractorInterface $dimensionsExtractor,
+        private readonly ProductOption $productOption,
         array $builders = []
     ) {
         $this->dataObjectFactory = $dataObjectFactory;
@@ -155,9 +157,8 @@ class RateRequestBuilder
         if (isset($options['options']) && !empty($options['options'])) {
             // sync options: https://magento.stackexchange.com/questions/286402/error-exception-message-the-products-required-options-werent-entered-make
             $optionsRequest = $options["options"];
-            $objtManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $customOptions = $objtManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($product);
-            
+            $customOptions = $this->productOption->getProductOptionCollection($product);
+
             $optionsValues = [];
             foreach ($customOptions->getItems() as $option) {
                 if (array_key_exists($option->getId(), $optionsRequest)) {
