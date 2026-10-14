@@ -35,7 +35,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Phrase;
 use Magento\Framework\Xml\Security;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateResult\Error as RateResultError;
@@ -388,13 +387,13 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             );
 
             $description = $this->prepareMethodDescription(
-                $service->getCarrier(),
-                $serviceDescription,
+                (string) $service->getCarrier(),
+                (string) $serviceDescription,
                 $deliveryTime
             );
 
             $method = $this->prepareMethod(
-                $service->getServiceCode(),
+                (string) $service->getServiceCode(),
                 $title,
                 $description,
                 (float) $service->getShippingPrice(),
@@ -455,14 +454,13 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      * @param string $description
      * @param int    $deliveryTime
      *
-     * @return Phrase|string
+     * @return string
      */
-    private function prepareMethodDescription(string $carrier, string $description, $deliveryTime = 0)
+    private function prepareMethodDescription(string $carrier, string $description, $deliveryTime = 0): string
     {
         $title = __('%1' . self::STR_SEPARATOR . '%2', $carrier, $description);
-        $title = $this->appendInformation($title, $deliveryTime);
 
-        return $title;
+        return (string) $this->appendInformation($title, $deliveryTime);
     }
 
     /**
