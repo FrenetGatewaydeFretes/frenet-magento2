@@ -91,4 +91,18 @@
         </arguments>
     </type>
 
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="carriers/frenetshipping/token" xsi:type="string">1</item>
+            </argument>
+            <argument name="environment" xsi:type="array">
+                <item name="carriers/frenetshipping/api_hostname" xsi:type="string">1</item>
+                <item name="carriers/frenetshipping/api_protocol" xsi:type="string">1</item>
+                <item name="carriers/frenetshipping/debug" xsi:type="string">1</item>
+                <item name="carriers/frenetshipping/debug_filename" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>

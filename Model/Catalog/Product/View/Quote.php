@@ -23,13 +23,18 @@ use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * Class Quote
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Quote implements QuoteProductInterface
 {
@@ -75,7 +80,8 @@ class Quote implements QuoteProductInterface
         RateRequestBuilder $rateRequestBuilder,
         LoggerInterface $logger,
         DeliveryTimeCalculatorInterface $deliveryTimeCalculator,
-        ConfigInterface $config
+        ConfigInterface $config,
+        private readonly StoreManagerInterface $storeManager
     ) {
         $this->productRepository = $productRepository;
         $this->rateRequestProvider = $rateRequestProvider;
@@ -123,11 +129,37 @@ class Quote implements QuoteProductInterface
      */
     private function quote(ProductInterface $product, string $postcode, int $qty = 1, $options = []): array
     {
+        if (!$this->isQuotable($product)) {
+            return [];
+        }
+
         $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty, $options);
         $this->rateRequestProvider->setRateRequest($rateRequest);
         $services = $this->calculator->getQuote();
 
         return $this->prepareResult($services);
+    }
+
+    /**
+     * Checks whether the product is enabled, sold in the current website and of a type allowed for the quote.
+     *
+     * @param ProductInterface $product
+     *
+     * @return bool
+     */
+    private function isQuotable(ProductInterface $product): bool
+    {
+        if (!$product instanceof Product || (int) $product->getStatus() !== Status::STATUS_ENABLED) {
+            return false;
+        }
+
+        if (!$this->config->isProductQuoteAllowed((string) $product->getTypeId())) {
+            return false;
+        }
+
+        $websiteId = (int) $this->storeManager->getStore()->getWebsiteId();
+
+        return in_array($websiteId, array_map('intval', (array) $product->getWebsiteIds()), true);
     }
 
     /**

@@ -28,6 +28,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 | Módulo | Magento | PHP |
 |---|---|---|
 | `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
+| `2.4.8-p3` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 | 8.2, 8.3, 8.4 |
 | `2.4.8-p2` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 | 8.2, 8.3, 8.4 |
 | `2.4.8-p1` | 2.4.8 / 2.4.8-p1 | 8.2, 8.3, 8.4 |
 
@@ -55,7 +56,7 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:2.4.8-p2
+composer require frenet/frenet-magento2:2.4.8-p3
 ```
 
 ## Configuração
@@ -89,6 +90,29 @@ Recursos opcionais, no mesmo painel:
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
 
 ## Changelog
+
+### 2.4.8-p3
+
+**Adicionado**
+
+- Compatibilidade com **Magento 2.4.8-p3** (PHP 8.2, 8.3 e 8.4), validada contra as correções de segurança do boletim APSB25-94, incluindo a estimativa de totais via GraphQL e a nova validação de parâmetros da API REST.
+
+**Corrigido**
+
+- Com **Show Shipping Forecast** desligado, os fretes Frenet voltam a aparecer no carrinho e no checkout.
+- Os campos **Package Max Weight** e **Max Unit Quantity** salvos em branco voltam a usar os valores padrão (30 kg e 5000 unidades) em vez de zerar a cotação.
+- A tela de envio no admin não oferece mais a opção **Create Shipping Label**, que a Frenet não gera.
+
+**Segurança**
+
+- A cotação na página do produto só responde quando o recurso está habilitado, o CEP tem 8 dígitos e o produto está ativo, à venda no website atual e com tipo permitido.
+- Erros inesperados na cotação da página do produto são registrados no log e não exibem mais detalhes internos ao visitante.
+- O arquivo de debug é sempre gravado em `var/log` e precisa terminar em `.log`.
+- O token da Frenet é marcado como dado sensível e não é mais gravado no `app/etc/config.php` pelo `app:config:dump`.
+
+**Alterado**
+
+- O `composer.json` declara todos os módulos Magento usados pelo módulo, e o `module.xml` define a ordem de carga.
 
 ### 2.4.8-p2
 
