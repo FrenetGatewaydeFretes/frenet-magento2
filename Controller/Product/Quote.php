@@ -24,6 +24,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Class Quote
@@ -41,11 +44,13 @@ class Quote extends Action implements HttpPostActionInterface
      * @param Context               $context
      * @param QuoteProductInterface $quoteProduct
      * @param ConfigInterface       $config
+     * @param LoggerInterface       $logger
      */
     public function __construct(
         Context $context,
         private readonly QuoteProductInterface $quoteProduct,
-        private readonly ConfigInterface $config
+        private readonly ConfigInterface $config,
+        private readonly LoggerInterface $logger
     ) {
         parent::__construct($context);
     }
@@ -84,8 +89,13 @@ class Quote extends Action implements HttpPostActionInterface
                 'error' => false,
                 'rates' => $rates
             ]);
-        } catch (\Exception $exception) {
+        } catch (LocalizedException $exception) {
             $this->jsonError($page, $exception->getMessage());
+        } catch (Throwable $exception) {
+            $this->logger->critical('Frenet product quote failed: ' . $exception->getMessage(), [
+                'exception' => $exception,
+            ]);
+            $this->jsonError($page, (string) __('Unable to quote the shipping right now. Please try again later.'));
         }
 
         return $page;
