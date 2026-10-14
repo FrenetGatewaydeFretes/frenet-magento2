@@ -20,10 +20,13 @@ use Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -39,6 +42,11 @@ class QuoteTest extends TestCase
      * @var string
      */
     private const POSTCODE = '01310-100';
+
+    /**
+     * @var int
+     */
+    private const WEBSITE_ID = 1;
 
     /**
      * @var ProductRepositoryInterface&MockObject
@@ -76,6 +84,11 @@ class QuoteTest extends TestCase
     private MockObject $logger;
 
     /**
+     * @var StoreManagerInterface&MockObject
+     */
+    private MockObject $storeManager;
+
+    /**
      * @var Quote
      */
     private Quote $subject;
@@ -94,6 +107,10 @@ class QuoteTest extends TestCase
         $this->deliveryTimeCalculator = $this->createMock(DeliveryTimeCalculatorInterface::class);
         $this->config = $this->createMock(ConfigInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
+        $this->storeManager = $this->createMock(StoreManagerInterface::class);
+        $store = $this->createMock(StoreInterface::class);
+        $store->method('getWebsiteId')->willReturn(self::WEBSITE_ID);
+        $this->storeManager->method('getStore')->willReturn($store);
 
         $this->subject = new Quote(
             $this->productRepository,
@@ -102,7 +119,8 @@ class QuoteTest extends TestCase
             $this->rateRequestBuilder,
             $this->logger,
             $this->deliveryTimeCalculator,
-            $this->config
+            $this->config,
+            $this->storeManager
         );
     }
 
@@ -137,7 +155,8 @@ class QuoteTest extends TestCase
      */
     public function testShouldMapCalculatedServicesIntoRowsWhenQuotingByProductId(): void
     {
-        $this->productRepository->method('getById')->willReturn($this->createMock(ProductInterface::class));
+        $this->productRepository->method('getById')->willReturn($this->product());
+        $this->config->method('isProductQuoteAllowed')->willReturn(true);
         $this->rateRequestBuilder->method('build')->willReturn($this->createMock(RateRequest::class));
         $this->deliveryTimeCalculator->method('calculate')->willReturn(5);
         $this->config->method('getShippingForecastMessage')->willReturn('Em {{d}} dia(s)');
@@ -157,6 +176,66 @@ class QuoteTest extends TestCase
             'service_description' => 'PAC',
             'shipping_price' => 25.9,
         ]], $result);
+    }
+
+    /**
+     * Confirms a disabled product is never quoted, even though the repository still loads it.
+     *
+     * @return void
+     */
+    public function testShouldNotQuoteADisabledProduct(): void
+    {
+        $this->productRepository->method('getById')->willReturn($this->product(Status::STATUS_DISABLED));
+        $this->config->method('isProductQuoteAllowed')->willReturn(true);
+        $this->calculator->expects($this->never())->method('getQuote');
+
+        $this->assertSame([], $this->subject->quoteByProductId(1, self::POSTCODE));
+    }
+
+    /**
+     * Confirms a product type left out of the product page quote configuration is never quoted.
+     *
+     * @return void
+     */
+    public function testShouldNotQuoteAProductTypeThatIsNotAllowed(): void
+    {
+        $this->productRepository->method('getById')->willReturn($this->product());
+        $this->config->method('isProductQuoteAllowed')->with('simple')->willReturn(false);
+        $this->calculator->expects($this->never())->method('getQuote');
+
+        $this->assertSame([], $this->subject->quoteByProductId(1, self::POSTCODE));
+    }
+
+    /**
+     * Confirms a product that is not assigned to the current website is never quoted.
+     *
+     * @return void
+     */
+    public function testShouldNotQuoteAProductOutsideTheCurrentWebsite(): void
+    {
+        $this->productRepository->method('getById')->willReturn($this->product(Status::STATUS_ENABLED, [2]));
+        $this->config->method('isProductQuoteAllowed')->willReturn(true);
+        $this->calculator->expects($this->never())->method('getQuote');
+
+        $this->assertSame([], $this->subject->quoteByProductId(1, self::POSTCODE));
+    }
+
+    /**
+     * Builds a mocked simple product with the given status and website assignment.
+     *
+     * @param int   $status
+     * @param int[] $websiteIds
+     *
+     * @return Product&MockObject
+     */
+    private function product(int $status = Status::STATUS_ENABLED, array $websiteIds = [self::WEBSITE_ID]): MockObject
+    {
+        $product = $this->createMock(Product::class);
+        $product->method('getStatus')->willReturn($status);
+        $product->method('getTypeId')->willReturn('simple');
+        $product->method('getWebsiteIds')->willReturn($websiteIds);
+
+        return $product;
     }
 
     /**
