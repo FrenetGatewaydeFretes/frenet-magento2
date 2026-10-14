@@ -27,6 +27,16 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config implements ConfigInterface
 {
+    /**
+     * @var float
+     */
+    public const DEFAULT_PACKAGE_MAX_WEIGHT = 30.0;
+
+    /**
+     * @var int
+     */
+    public const DEFAULT_MAX_UNIT_QUANTITY = 5000;
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager
@@ -166,7 +176,9 @@ class Config implements ConfigInterface
      */
     public function getPackageMaxWeight($store = null): float
     {
-        return (float) $this->getCarrierConfig('package_max_weight', $store);
+        $weight = (float) $this->getCarrierConfig('package_max_weight', $store);
+
+        return $weight > 0 ? $weight : self::DEFAULT_PACKAGE_MAX_WEIGHT;
     }
 
     /**
@@ -174,7 +186,9 @@ class Config implements ConfigInterface
      */
     public function getMaxUnitQuantity($store = null): int
     {
-        return (int) $this->getCarrierConfig('max_unit_quantity', $store);
+        $quantity = (int) $this->getCarrierConfig('max_unit_quantity', $store);
+
+        return $quantity > 0 ? $quantity : self::DEFAULT_MAX_UNIT_QUANTITY;
     }
 
     /**
