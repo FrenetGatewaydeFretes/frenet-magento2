@@ -13,8 +13,15 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Test\Unit\Model\Carrier;
 
+use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInterface;
 use Frenet\Shipping\Model\Carrier\Frenet;
 use Frenet\Shipping\Model\ConfigInterface;
+use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Quote\Model\Quote\Address\RateResult\Method;
+use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
+use Magento\Shipping\Model\Rate\Result as RateResult;
+use Magento\Shipping\Model\Rate\ResultFactory as RateResultFactory;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -83,6 +90,16 @@ class FrenetTest extends TestCase
     }
 
     /**
+     * Confirms the carrier does not offer label creation, since it has no label service behind it.
+     *
+     * @return void
+     */
+    public function testShouldNotOfferShippingLabels(): void
+    {
+        $this->assertFalse($this->subject->isShippingLabelsAvailable());
+    }
+
+    /**
      * Confirms the inactive flag alone is enough to skip rate collection, before any other check runs.
      *
      * @return void
@@ -107,6 +124,101 @@ class FrenetTest extends TestCase
         $this->storeManager->method('getStore')->willReturn($this->createMock(StoreInterface::class));
 
         $this->assertTrue($this->subject->canCollectRates());
+    }
+
+    /**
+     * Confirms a rate is still built, without the forecast suffix, when the shipping forecast is turned off.
+     *
+     * @return void
+     */
+    public function testShouldBuildRatesWhenTheShippingForecastIsDisabled(): void
+    {
+        $this->config->method('canShowShippingForecast')->willReturn(false);
+
+        $methods = $this->prepareResultFor($this->createQuoteService('03298', 'PAC', 'Correios', 34.03));
+
+        $this->assertCount(1, $methods);
+        $this->assertSame('03298', $methods[0]->getMethod());
+        $this->assertSame('PAC', $methods[0]->getMethodTitle());
+        $this->assertSame('Correios - PAC', $methods[0]->getMethodDescription());
+        $this->assertSame(34.03, $methods[0]->getPrice());
+    }
+
+    /**
+     * Confirms the configured forecast message is appended to the title and description when the forecast is on.
+     *
+     * @return void
+     */
+    public function testShouldAppendTheShippingForecastWhenItIsEnabled(): void
+    {
+        $this->config->method('canShowShippingForecast')->willReturn(true);
+        $this->config->method('getShippingForecastMessage')->willReturn('{{d}} dia(s)');
+
+        $methods = $this->prepareResultFor($this->createQuoteService('03298', 'PAC', 'Correios', 34.03));
+
+        $this->assertSame('PAC - 5 dia(s)', $methods[0]->getMethodTitle());
+        $this->assertSame('Correios - PAC - 5 dia(s)', $methods[0]->getMethodDescription());
+    }
+
+    /**
+     * Runs the carrier's private result builder over the given services and returns the appended rate methods.
+     *
+     * @param QuoteServiceInterface ...$services
+     *
+     * @return Method[]
+     */
+    private function prepareResultFor(QuoteServiceInterface ...$services): array
+    {
+        $methods = [];
+        $result = $this->createMock(RateResult::class);
+        $result->method('append')->willReturnCallback(function (Method $method) use (&$methods, $result) {
+            $methods[] = $method;
+
+            return $result;
+        });
+
+        $rateFactory = $this->createMock(RateResultFactory::class);
+        $rateFactory->method('create')->willReturn($result);
+
+        $priceCurrency = $this->createMock(PriceCurrencyInterface::class);
+        $priceCurrency->method('round')->willReturnArgument(0);
+        $methodFactory = $this->createMock(MethodFactory::class);
+        $methodFactory->method('create')->willReturnCallback(fn () => new Method($priceCurrency));
+
+        $deliveryTimeCalculator = $this->createMock(DeliveryTimeCalculatorInterface::class);
+        $deliveryTimeCalculator->method('calculate')->willReturn(5);
+
+        $this->config->method('getCarrierConfig')->willReturn('Frenet Shipping Gateway');
+        $this->setDependency('_rateFactory', $rateFactory);
+        $this->setDependency('_rateMethodFactory', $methodFactory);
+        $this->setDependency('deliveryTimeCalculator', $deliveryTimeCalculator);
+
+        (new ReflectionClass(Frenet::class))->getMethod('prepareResult')->invoke($this->subject, $services);
+
+        return $methods;
+    }
+
+    /**
+     * Builds a successful Frenet quote service stub.
+     *
+     * @param string $code
+     * @param string $description
+     * @param string $carrier
+     * @param float  $price
+     *
+     * @return QuoteServiceInterface&MockObject
+     */
+    private function createQuoteService(string $code, string $description, string $carrier, float $price): MockObject
+    {
+        $service = $this->createMock(QuoteServiceInterface::class);
+        $service->method('isError')->willReturn(false);
+        $service->method('getServiceCode')->willReturn($code);
+        $service->method('getServiceDescription')->willReturn($description);
+        $service->method('getCarrier')->willReturn($carrier);
+        $service->method('getMessage')->willReturn('');
+        $service->method('getShippingPrice')->willReturn($price);
+
+        return $service;
     }
 
     /**

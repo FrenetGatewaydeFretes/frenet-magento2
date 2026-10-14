@@ -120,8 +120,9 @@
                     <label>Debug</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="debug_filename" translate="label" type="text" sortOrder="510" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="debug_filename" translate="label comment" type="text" sortOrder="510" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Debug Filename</label>
+                    <comment><![CDATA[A file name ending in .log, written to var/log.]]></comment>
                     <depends>
                         <field id="debug">1</field>
                     </depends>

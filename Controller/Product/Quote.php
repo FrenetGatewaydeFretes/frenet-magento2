@@ -24,6 +24,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Class Quote
@@ -33,28 +36,23 @@ use Magento\Framework\Controller\ResultInterface;
 class Quote extends Action implements HttpPostActionInterface
 {
     /**
-     * @var QuoteProductInterface
+     * @var int
      */
-    private $quoteProduct;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
+    private const POSTCODE_LENGTH = 8;
 
     /**
      * @param Context               $context
      * @param QuoteProductInterface $quoteProduct
      * @param ConfigInterface       $config
+     * @param LoggerInterface       $logger
      */
     public function __construct(
         Context $context,
-        QuoteProductInterface $quoteProduct,
-        ConfigInterface $config
+        private readonly QuoteProductInterface $quoteProduct,
+        private readonly ConfigInterface $config,
+        private readonly LoggerInterface $logger
     ) {
         parent::__construct($context);
-        $this->quoteProduct = $quoteProduct;
-        $this->config = $config;
     }
 
     /**
@@ -72,6 +70,14 @@ class Quote extends Action implements HttpPostActionInterface
         /** @var Json $page */
         $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
 
+        if (!$this->isQuoteAvailable()) {
+            return $this->jsonError($page, (string) __('The shipping quote is not available.'));
+        }
+
+        if ($productId <= 0 || !$this->isValidPostcode($postcode)) {
+            return $this->jsonError($page, (string) __('Please inform a valid postcode'));
+        }
+
         if ($qty <= 0 || $qty > $this->config->getMaxUnitQuantity()) {
             return $this->jsonError($page, (string) __('Invalid quantity informed.'));
         }
@@ -83,11 +89,40 @@ class Quote extends Action implements HttpPostActionInterface
                 'error' => false,
                 'rates' => $rates
             ]);
-        } catch (\Exception $exception) {
+        } catch (LocalizedException $exception) {
             $this->jsonError($page, $exception->getMessage());
+        } catch (Throwable $exception) {
+            $this->logger->critical('Frenet product quote failed: ' . $exception->getMessage(), [
+                'exception' => $exception,
+            ]);
+            $this->jsonError($page, (string) __('Unable to quote the shipping right now. Please try again later.'));
         }
 
         return $page;
+    }
+
+    /**
+     * Checks whether the carrier and the product page quote are enabled with an API token.
+     *
+     * @return bool
+     */
+    private function isQuoteAvailable(): bool
+    {
+        return $this->config->isActive()
+            && $this->config->getToken() !== ''
+            && $this->config->isProductQuoteEnabled();
+    }
+
+    /**
+     * Checks whether the postcode holds exactly the eight digits of a Brazilian CEP.
+     *
+     * @param string $postcode
+     *
+     * @return bool
+     */
+    private function isValidPostcode(string $postcode): bool
+    {
+        return strlen((string) preg_replace('/\D/', '', $postcode)) === self::POSTCODE_LENGTH;
     }
 
     /**
