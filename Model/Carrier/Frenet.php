@@ -356,6 +356,16 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     }
 
     /**
+     * Reports that Frenet does not generate shipping labels, hiding the admin "Create Shipping Label" option.
+     *
+     * @return bool
+     */
+    public function isShippingLabelsAvailable()
+    {
+        return false;
+    }
+
+    /**
      * Builds the rate result from the quote services returned by the Frenet API.
      *
      * @param QuoteServiceInterface[] $services

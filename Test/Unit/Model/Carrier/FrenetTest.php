@@ -90,6 +90,16 @@ class FrenetTest extends TestCase
     }
 
     /**
+     * Confirms the carrier does not offer label creation, since it has no label service behind it.
+     *
+     * @return void
+     */
+    public function testShouldNotOfferShippingLabels(): void
+    {
+        $this->assertFalse($this->subject->isShippingLabelsAvailable());
+    }
+
+    /**
      * Confirms the inactive flag alone is enough to skip rate collection, before any other check runs.
      *
      * @return void
