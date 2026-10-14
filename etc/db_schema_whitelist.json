@@ -1,0 +1,61 @@
+{
+    "frenet_shipping_label": {
+        "column": {
+            "entity_id": true,
+            "order_id": true,
+            "shipment_id": true,
+            "journey": true,
+            "status": true,
+            "carrier_code": true,
+            "service_code": true,
+            "service_name": true,
+            "price": true,
+            "label_url": true,
+            "declaration_url": true,
+            "tracking_url": true,
+            "tracking_code": true,
+            "poll_attempts": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "FRENET_SHIPPING_LABEL_ORDER_ID": true,
+            "FRENET_SHIPPING_LABEL_STATUS": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FRENET_SHIPPING_LABEL_SHIPMENT_ID": true,
+            "FRENET_SHIPPING_LABEL_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "frenet_shipping_invoice": {
+        "column": {
+            "order_id": true,
+            "access_key": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FRENET_SHIPPING_INVOICE_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "frenet_shipping_tracking": {
+        "column": {
+            "track_id": true,
+            "order_id": true,
+            "service_code": true,
+            "track_number": true,
+            "events": true,
+            "last_description": true,
+            "synced_at": true
+        },
+        "index": {
+            "FRENET_SHIPPING_TRACKING_ORDER_ID": true,
+            "FRENET_SHIPPING_TRACKING_SYNCED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FRENET_SHIPPING_TRACKING_TRACK_ID_SALES_SHIPMENT_TRACK_ENTITY_ID": true
+        }
+    }
+}

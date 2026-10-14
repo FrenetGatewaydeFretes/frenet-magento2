@@ -1,0 +1,54 @@
+<?php
+/**
+ * Frenet Shipping Gateway — Frenet box on the order view.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\OrderPanel $vm */
+$vm = $block->getData('view_model');
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+if (!$vm->isAvailable()) {
+    return;
+}
+$s = $vm->shipment();
+?>
+<section class="admin__page-section">
+    <div class="admin__page-section-title"><span class="title"><?= $escaper->escapeHtml(__('Frenet')) ?></span></div>
+    <div class="frenet-order-panel">
+        <?php if (!$s): ?>
+            <p class="frenet-muted"><?= $escaper->escapeHtml(__('No Frenet shipment for this order yet. Compare carriers and create it in one step.')) ?></p>
+            <div class="frenet-actionbar">
+                <a class="action-primary" href="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index', ['ids' => $vm->orderId()])) ?>"><span><?= $escaper->escapeHtml(__('Create Frenet shipment')) ?></span></a>
+            </div>
+        <?php else: ?>
+            <h3><?= $escaper->escapeHtml(__('Shipment %1', $s['shipment_id'])) ?>
+                <span class="frenet-pill frenet-pill--<?= $escaper->escapeHtmlAttr($common->statusTone((int) $s['status'])) ?>"><?= $escaper->escapeHtml($common->statusLabel((int) $s['status'])) ?></span></h3>
+            <p class="frenet-muted"><?= $escaper->escapeHtml(trim((string) $s['service_name'] . ' · ' . $common->money((float) $s['price']), ' ·')) ?>
+                <?php if ($s['journey'] === 'panel'): ?> · <?= $escaper->escapeHtml(__('sent to the Frenet panel')) ?><?php endif; ?></p>
+            <?php if (!empty($s['tracking_code'])): ?>
+                <p><?= $escaper->escapeHtml(__('Tracking')) ?>: <a class="frenet-code" href="<?= $escaper->escapeUrl((string) $s['tracking_url']) ?>" target="_blank" rel="noopener"><?= $escaper->escapeHtml((string) $s['tracking_code']) ?></a></p>
+            <?php endif; ?>
+            <div class="frenet-actionbar">
+                <?php if (!empty($s['label_url'])): ?>
+                    <a class="action-primary" href="<?= $escaper->escapeUrl((string) $s['label_url']) ?>" target="_blank" rel="noopener noreferrer"><span><?= $escaper->escapeHtml(__('Print label')) ?></span></a>
+                    <?php if (!empty($s['declaration_url'])): ?>
+                        <a class="action-default" href="<?= $escaper->escapeUrl((string) $s['declaration_url']) ?>" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml(__('Content declaration')) ?></a>
+                    <?php endif; ?>
+                <?php elseif ($s['journey'] === 'here' && in_array((int) $s['status'], [4, 5, 18], true)): ?>
+                    <p class="frenet-note"><?= $escaper->escapeHtml(__('Frenet is generating the label. The store checks every minute; you can also check now.')) ?></p>
+                    <form method="post" action="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/refresh', ['id' => $s['shipment_id']])) ?>">
+                        <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                        <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Check now')) ?></button>
+                    </form>
+                <?php elseif ($s['journey'] === 'here'): ?>
+                    <p class="frenet-note"><?= $escaper->escapeHtml(__('Waiting for payment. Pay it in Labels to release the label.')) ?></p>
+                <?php elseif ($s['journey'] === 'panel'): ?>
+                    <a class="action-default" href="<?= $escaper->escapeUrl($common->panelUrl()) ?>" target="_blank" rel="noopener"><?= $escaper->escapeHtml(__('Open the Frenet panel')) ?></a>
+                <?php endif; ?>
+                <a class="action-default" href="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/index')) ?>"><?= $escaper->escapeHtml(__('Manage labels')) ?></a>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>

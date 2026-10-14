@@ -1,0 +1,85 @@
+<?php
+/**
+ * Frenet Shipping Gateway — "Label printing": paid labels in one PDF (A4 or 10x15).
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\LabelsList $vm */
+$vm = $block->getData('view_model');
+$route = (string) $block->getData('route');
+?>
+<div class="frenet-labels">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+<?php if (!$common->isAvailable()): ?>
+</div>
+<?php return; endif; ?>
+<?php
+$data = $vm->data();
+$page = $vm->page();
+$pages = $vm->pages();
+?>
+    <p class="frenet-lead"><?= $escaper->escapeHtml(__('Paid labels ready to print. Select them and print one PDF; on a thermal printer use 10x15.')) ?></p>
+    <?php if (!$common->config()->batchPrint()): ?>
+        <div class="message message-notice"><div><?= $escaper->escapeHtml(__('Batch printing is off in the settings: print each label from its own button.')) ?></div></div>
+    <?php endif; ?>
+    <?php if ($data['error'] !== ''): ?>
+        <div class="message message-error"><div><?= $escaper->escapeHtml(__('Frenet did not answer: %1. Reload the page in a moment.', $data['error'])) ?></div></div>
+    <?php elseif (!$data['rows']): ?>
+        <div class="frenet-empty frenet-empty--small"><p><?= $escaper->escapeHtml(__('No paid label on this page.')) ?></p>
+            <a href="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index')) ?>"><?= $escaper->escapeHtml(__('Create shipment')) ?></a></div>
+    <?php else: ?>
+        <form method="post" action="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/printPdf')) ?>" target="_blank" data-frenet-selectable>
+            <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+            <div class="frenet-table-wrap">
+                <table class="frenet-table">
+                    <thead><tr>
+                        <th class="is-check"><input type="checkbox" data-frenet-select-all aria-label="<?= $escaper->escapeHtmlAttr(__('Select all')) ?>"/></th>
+                        <th><?= $escaper->escapeHtml(__('Label')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Order')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Status')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Service')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Tracking')) ?></th>
+                        <th><span class="frenet-sr"><?= $escaper->escapeHtml(__('Actions')) ?></span></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($data['rows'] as $r): ?>
+                        <tr>
+                            <td class="is-check"><input type="checkbox" name="ids[]" value="<?= $escaper->escapeHtmlAttr($r['id']) ?>" data-frenet-row
+                                                        aria-label="<?= $escaper->escapeHtmlAttr(__('Label %1', $r['id'])) ?>"/></td>
+                            <td class="frenet-code"><?= $escaper->escapeHtml($r['id']) ?></td>
+                            <td><?php if ($r['order_url']): ?><a href="<?= $escaper->escapeUrl($r['order_url']) ?>">#<?= $escaper->escapeHtml($r['order']) ?></a><?php else: ?><span class="frenet-muted"><?= $escaper->escapeHtml($r['order']) ?></span><?php endif; ?></td>
+                            <td><span class="frenet-pill frenet-pill--<?= $escaper->escapeHtmlAttr($r['tone']) ?>"><?= $escaper->escapeHtml($r['status_label']) ?></span></td>
+                            <td><?= $escaper->escapeHtml($r['service'] ?: '—') ?></td>
+                            <td class="frenet-code"><?= $escaper->escapeHtml($r['tracking'] ?: '—') ?></td>
+                            <td><?php if ($r['label_url']): ?><a class="action-default frenet-btn-sm" href="<?= $escaper->escapeUrl($r['label_url']) ?>" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml(__('Print')) ?></a><?php endif; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if ($common->config()->batchPrint()): ?>
+                <div class="frenet-actionbar">
+                    <span class="frenet-muted" data-frenet-count data-zero="<?= $escaper->escapeHtmlAttr(__('Select the labels to print.')) ?>"
+                          data-some="<?= $escaper->escapeHtmlAttr(__('%1 label(s) selected')) ?>"><?= $escaper->escapeHtml(__('Select the labels to print.')) ?></span>
+                    <fieldset class="frenet-journey frenet-journey--inline">
+                        <legend><?= $escaper->escapeHtml(__('Format')) ?></legend>
+                        <label><input type="radio" name="format" value="A4" <?= $common->config()->printingFormat() === 'A4' ? 'checked' : '' ?>/> A4</label>
+                        <label><input type="radio" name="format" value="10x15" <?= $common->config()->printingFormat() === '10x15' ? 'checked' : '' ?>/> 10x15</label>
+                    </fieldset>
+                    <button type="submit" class="action-primary" data-frenet-needs-selection disabled><span><?= $escaper->escapeHtml(__('Print selected')) ?></span></button>
+                </div>
+            <?php endif; ?>
+        </form>
+    <?php endif; ?>
+    <?php if ($pages > 1): ?>
+        <nav class="frenet-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Pages')) ?>">
+            <?php if ($page > 0): ?><a class="action-default" href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['p' => $page - 1])) ?>"><?= $escaper->escapeHtml(__('Newer')) ?></a><?php endif; ?>
+            <span><?= $escaper->escapeHtml(__('Page %1 of %2', $page + 1, $pages)) ?></span>
+            <?php if ($page + 1 < $pages): ?><a class="action-default" href="<?= $escaper->escapeUrl($vm->pageUrl($route, ['p' => $page + 1])) ?>"><?= $escaper->escapeHtml(__('Older')) ?></a><?php endif; ?>
+        </nav>
+    <?php endif; ?>
+</div>
+<script type="text/x-magento-init">{"*": {"Frenet_Shipping/js/labels/page": {}}}</script>

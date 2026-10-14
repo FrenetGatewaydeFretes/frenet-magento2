@@ -77,6 +77,30 @@
 
                 <!-- OTHER OPTIONS -->
                 <sort_order>90</sort_order>
+
+                <!-- Address by CEP: read only, on by default. -->
+                <cep_autofill>
+                    <active>1</active>
+                </cep_autofill>
+                <!-- Automatic tracking: reading is on; changing statuses and e-mailing customers is opt-in. -->
+                <tracking_sync>
+                    <active>1</active>
+                    <auto_status>0</auto_status>
+                    <notify_customer>0</notify_customer>
+                </tracking_sync>
+                <!-- LABELS (Frenet shipments, wallet and printing) -->
+                <labels>
+                    <active>0</active>
+                    <store_token backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                    <partner_token backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                    <api_url>https://whitelabel.frenet.com.br/v1</api_url>
+                    <journey>here</journey>
+                    <default_service>price</default_service>
+                    <auto_best>0</auto_best>
+                    <wallet_payment>1</wallet_payment>
+                    <batch_print>1</batch_print>
+                    <printing_format>A4</printing_format>
+                </labels>
             </frenetshipping>
         </carriers>
     </default>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — frenetshipping_shipment_index.
+  -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Frenet_Shipping::css/labels.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Backend\Block\Template" name="frenet.labels.page" template="Frenet_Shipping::labels/shipment.phtml">
+                <arguments>
+                    <argument name="common" xsi:type="object">Frenet\Shipping\ViewModel\Labels\Common</argument>
+                    <argument name="view_model" xsi:type="object">Frenet\Shipping\ViewModel\Labels\CreateShipment</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

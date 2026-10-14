@@ -1,0 +1,183 @@
+<?php
+/**
+ * Frenet Shipping Gateway — "Shipment tracking": automatic tracking of every Frenet code of the store,
+ * the timeline of one code and the bulk import of codes (preview, then confirm).
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\Tracking $vm */
+$vm = $block->getData('view_model');
+$data = $vm->overview();
+$filter = $vm->filter();
+$auto = $vm->automation();
+$selected = $vm->selected();
+$import = $vm->importPreview();
+$pages = max(1, (int) ceil($data['total'] / $vm::PER_PAGE));
+$formKey = $escaper->escapeHtmlAttr($block->getFormKey());
+?>
+<div class="frenet-labels frenet-tracking">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+
+    <div class="frenet-auto">
+        <ul class="frenet-auto__list" aria-label="<?= $escaper->escapeHtmlAttr(__('Automation')) ?>">
+            <li class="<?= $auto['sync'] ? 'is-on' : 'is-off' ?>"><?= $escaper->escapeHtml($auto['sync'] ? __('Events read every 30 minutes') : __('Automatic reading is off')) ?></li>
+            <li class="<?= $auto['status'] ? 'is-on' : 'is-off' ?>"><?= $escaper->escapeHtml($auto['status'] ? __('Order status follows the tracking') : __('Order status is not changed')) ?></li>
+            <li class="<?= $auto['notify'] && $auto['status'] ? 'is-on' : 'is-off' ?>"><?= $escaper->escapeHtml($auto['notify'] && $auto['status'] ? __('Customers get an e-mail') : __('No e-mail to customers')) ?></li>
+        </ul>
+        <div class="frenet-auto__actions">
+            <a class="frenet-link" href="<?= $escaper->escapeUrl($vm->url('adminhtml/system_config/edit', ['section' => 'carriers', '_fragment' => 'carriers_frenetshipping-link'])) ?>"><?= $escaper->escapeHtml(__('Change in settings')) ?></a>
+            <form method="post" action="<?= $escaper->escapeUrl($vm->url('frenetshipping/tracking/sync')) ?>">
+                <input name="form_key" type="hidden" value="<?= /* @noEscape */ $formKey ?>"/>
+                <button type="submit" class="action-primary"><span><?= $escaper->escapeHtml(__('Update now')) ?></span></button>
+            </form>
+        </div>
+    </div>
+
+    <?php if ($selected): ?>
+        <section class="frenet-card" aria-labelledby="frenet-events-title">
+            <h2 id="frenet-events-title" class="frenet-h2"><?= $escaper->escapeHtml(__('Tracking %1', $selected['track_number'])) ?>
+                <span class="frenet-muted frenet-small">· <a href="<?= $escaper->escapeUrl($selected['order_url']) ?>">#<?= $escaper->escapeHtml((string) $selected['increment_id']) ?></a></span></h2>
+            <?php if (!$selected['list']): ?>
+                <p class="frenet-muted"><?= $escaper->escapeHtml($selected['synced_at'] ? __('No movement yet. Events appear once the carrier scans the package.') : __('Not checked yet. Use "Update now" or wait for the next automatic check.')) ?></p>
+            <?php else: ?>
+                <ol class="frenet-timeline">
+                    <?php foreach ($selected['list'] as $e): ?>
+                        <li><strong><?= $escaper->escapeHtml($e['description']) ?></strong>
+                            <span class="frenet-muted"><?= $escaper->escapeHtml(trim($e['date'] . ($e['location'] !== '' ? ' · ' . $e['location'] : ''))) ?></span></li>
+                    <?php endforeach; ?>
+                </ol>
+            <?php endif; ?>
+            <p><a class="frenet-link" href="<?= $escaper->escapeUrl($vm->pageUrl()) ?>"><?= $escaper->escapeHtml(__('Close')) ?></a></p>
+        </section>
+    <?php endif; ?>
+
+    <section aria-labelledby="frenet-tracking-list">
+        <h2 id="frenet-tracking-list" class="frenet-h2"><?= $escaper->escapeHtml(__('Shipments with a Frenet tracking code')) ?></h2>
+        <nav class="frenet-filters" aria-label="<?= $escaper->escapeHtmlAttr(__('Filter by status')) ?>">
+            <?php foreach ($vm->filters() as $key => $label): ?>
+                <a class="frenet-chip<?= $filter === $key ? ' is-active' : '' ?>"
+                   href="<?= $escaper->escapeUrl($vm->url('frenetshipping/tracking/index', $key === 'all' ? [] : ['show' => $key])) ?>"
+                   <?= $filter === $key ? 'aria-current="page"' : '' ?>><?= $escaper->escapeHtml($label) ?><?php if ($key === 'never' && $data['never']): ?> <span class="frenet-chip__n"><?= (int) $data['never'] ?></span><?php endif; ?></a>
+            <?php endforeach; ?>
+        </nav>
+        <?php if (!$data['rows']): ?>
+            <div class="frenet-empty frenet-empty--small">
+                <p><?= $escaper->escapeHtml($filter === 'all'
+                    ? __('No order shipped with a Frenet tracking code yet. Codes appear here when a label is bought or a code is added to a shipment, also in bulk below.')
+                    : __('No shipment in this status.')) ?></p>
+            </div>
+        <?php else: ?>
+            <div class="frenet-table-wrap">
+                <table class="frenet-table">
+                    <thead><tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Tracking code')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Order')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Latest event')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Order status')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Checked')) ?></th>
+                        <th scope="col"><span class="frenet-sr"><?= $escaper->escapeHtml(__('Actions')) ?></span></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($data['rows'] as $r): ?>
+                        <tr<?= $selected && (int) $selected['track_id'] === (int) $r['track_id'] ? ' class="is-selected"' : '' ?>>
+                            <td class="frenet-code"><?= $escaper->escapeHtml((string) $r['track_number']) ?></td>
+                            <td><a href="<?= $escaper->escapeUrl($r['order_url']) ?>">#<?= $escaper->escapeHtml((string) $r['increment_id']) ?></a></td>
+                            <td>
+                                <?php if ($r['last']): ?>
+                                    <?= $escaper->escapeHtml((string) $r['last']['description']) ?>
+                                    <span class="frenet-muted frenet-small"><?= $escaper->escapeHtml(trim($r['last']['date'] . ($r['last']['location'] !== '' ? ' · ' . $r['last']['location'] : ''))) ?></span>
+                                <?php else: ?>
+                                    <span class="frenet-muted"><?= $escaper->escapeHtml($r['synced_at'] ? __('No movement yet') : __('Not checked yet')) ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><span class="frenet-pill frenet-pill--<?= $escaper->escapeHtmlAttr($r['tone']) ?>"<?= $r['tone'] === 'off' && $r['status_label'] === (string) $r['status'] ? ' title="' . $escaper->escapeHtmlAttr(__('This status no longer exists in the store')) . '"' : '' ?>><?= $escaper->escapeHtml($r['status_label']) ?></span></td>
+                            <td class="frenet-muted frenet-nowrap"><?= $escaper->escapeHtml($r['synced_at'] ? substr((string) $r['synced_at'], 0, 16) : '—') ?></td>
+                            <td class="frenet-row-actions"><a class="action-default frenet-btn-sm" href="<?= $escaper->escapeUrl($r['events_url']) ?>"><?= $escaper->escapeHtml(__('See events')) ?><?php if ($r['count']): ?> (<?= (int) $r['count'] ?>)<?php endif; ?></a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if ($pages > 1): ?>
+                <nav class="frenet-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Pages')) ?>">
+                    <?php if ($vm->page() > 0): ?><a class="action-default" href="<?= $escaper->escapeUrl($vm->pageUrl(['p' => $vm->page() - 1 ?: null])) ?>"><?= $escaper->escapeHtml(__('Newer')) ?></a><?php endif; ?>
+                    <span><?= $escaper->escapeHtml(__('Page %1 of %2', $vm->page() + 1, $pages)) ?></span>
+                    <?php if ($vm->page() + 1 < $pages): ?><a class="action-default" href="<?= $escaper->escapeUrl($vm->pageUrl(['p' => $vm->page() + 1])) ?>"><?= $escaper->escapeHtml(__('Older')) ?></a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        <?php endif; ?>
+    </section>
+
+    <section id="frenet-import" class="frenet-card frenet-import" aria-labelledby="frenet-import-title">
+        <h2 id="frenet-import-title" class="frenet-h2"><?= $escaper->escapeHtml(__('Import tracking codes')) ?></h2>
+        <?php if ($import && !empty($import['preview'])): ?>
+            <?php $counts = $vm->previewCounts($import['preview']); $ready = $counts['ship'] + $counts['add']; ?>
+            <p class="frenet-lead"><?= $escaper->escapeHtml(__('Check what will happen before importing. Nothing changed yet.')) ?></p>
+            <ul class="frenet-import__counts">
+                <li><strong><?= (int) $counts['ship'] ?></strong> <?= $escaper->escapeHtml(__('orders will be shipped')) ?></li>
+                <li><strong><?= (int) $counts['add'] ?></strong> <?= $escaper->escapeHtml(__('codes added to shipments')) ?></li>
+                <li><strong><?= (int) ($counts['exists'] + $counts['not_found'] + $counts['cannot']) ?></strong> <?= $escaper->escapeHtml(__('skipped')) ?></li>
+            </ul>
+            <?php if (!empty($import['invalid'])): ?>
+                <p class="frenet-warning"><?= $escaper->escapeHtml(__('Lines not read (not "order;code"): %1', implode(', ', $import['invalid']))) ?></p>
+            <?php endif; ?>
+            <?php if (!empty($import['truncated'])): ?>
+                <p class="frenet-warning"><?= $escaper->escapeHtml(__('Only the first 500 lines are imported at once.')) ?></p>
+            <?php endif; ?>
+            <div class="frenet-table-wrap">
+                <table class="frenet-table frenet-table--compact">
+                    <thead><tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Order')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Customer')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Tracking code')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('What will happen')) ?></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($import['preview'] as $r): [$what, $tone] = $vm->actionLabel($r['action']); ?>
+                        <tr>
+                            <td><?php if ($r['order_id']): ?><a href="<?= $escaper->escapeUrl($vm->url('sales/order/view', ['order_id' => $r['order_id']])) ?>">#<?= $escaper->escapeHtml($r['order']) ?></a><?php else: ?>#<?= $escaper->escapeHtml($r['order']) ?><?php endif; ?></td>
+                            <td><?= $escaper->escapeHtml($r['customer'] ?: '—') ?></td>
+                            <td class="frenet-code"><?= $escaper->escapeHtml($r['code']) ?></td>
+                            <td><span class="frenet-pill frenet-pill--<?= $escaper->escapeHtmlAttr($tone) ?>"><?= $escaper->escapeHtml($what) ?></span></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <p class="frenet-muted frenet-small"><?= $escaper->escapeHtml(!empty($import['notify']) ? __('Customers will get the shipment e-mail with the code.') : __('Customers will not be e-mailed.')) ?></p>
+            <div class="frenet-actionbar">
+                <form method="post" action="<?= $escaper->escapeUrl($vm->url('frenetshipping/tracking/import')) ?>">
+                    <input name="form_key" type="hidden" value="<?= /* @noEscape */ $formKey ?>"/>
+                    <input name="step" type="hidden" value="cancel"/>
+                    <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Back')) ?></button>
+                </form>
+                <form method="post" action="<?= $escaper->escapeUrl($vm->url('frenetshipping/tracking/import')) ?>">
+                    <input name="form_key" type="hidden" value="<?= /* @noEscape */ $formKey ?>"/>
+                    <input name="step" type="hidden" value="confirm"/>
+                    <button type="submit" class="action-primary"<?= $ready ? '' : ' disabled' ?>><span><?= $escaper->escapeHtml($ready ? __('Import %1 code(s)', $ready) : __('Nothing to import')) ?></span></button>
+                </form>
+            </div>
+        <?php else: ?>
+            <p class="frenet-lead"><?= $escaper->escapeHtml(__('One order per line: order number and tracking code, separated by ";", "," or a tab. You can paste two columns straight from a spreadsheet.')) ?></p>
+            <?php if ($import && !empty($import['invalid'])): ?>
+                <p class="frenet-warning" role="alert"><?= $escaper->escapeHtml(__('Lines not read (not "order;code"): %1', implode(', ', $import['invalid']))) ?></p>
+            <?php endif; ?>
+            <form method="post" action="<?= $escaper->escapeUrl($vm->url('frenetshipping/tracking/import')) ?>" class="frenet-import__form">
+                <input name="form_key" type="hidden" value="<?= /* @noEscape */ $formKey ?>"/>
+                <input name="step" type="hidden" value="preview"/>
+                <label for="frenet-import-lines"><?= $escaper->escapeHtml(__('Orders and codes')) ?></label>
+                <textarea id="frenet-import-lines" name="lines" rows="8" required spellcheck="false" class="admin__control-textarea"
+                          placeholder="000000012;AA123456789BR&#10;000000013;AA987654321BR"><?= $escaper->escapeHtml((string) ($import['raw'] ?? '')) ?></textarea>
+                <label class="frenet-import__check" for="frenet-import-notify">
+                    <input id="frenet-import-notify" type="checkbox" name="notify" value="1"/>
+                    <?= $escaper->escapeHtml(__('E-mail the code to each customer')) ?>
+                </label>
+                <p class="frenet-muted frenet-small"><?= $escaper->escapeHtml(__('Orders that can still ship are shipped with the code; the others get it on their last shipment. You see the list before anything changes.')) ?></p>
+                <div class="frenet-actionbar"><button type="submit" class="action-primary"><span><?= $escaper->escapeHtml(__('Preview')) ?></span></button></div>
+            </form>
+        <?php endif; ?>
+    </section>
+</div>

@@ -1,0 +1,243 @@
+/*
+ * Frenet Shipping Gateway — labels screens (Create shipment, Labels, Printing, Tracking, Coming soon),
+ * the order panel and the settings status box.
+ *
+ * Frenet brand (frenet.com.br, measured 2026-10-01): action violet #7B3FF3, titles navy #0C005A
+ * in Host Grotesk 700, UI text in Inter, buttons 8px radius / weight 500, mint accent #5FE3B0.
+ * Data zones are flat (no gradient, no translucency behind numbers). The navy-to-violet gradient
+ * is only used on the thin brand strip at the top. Text contrast >= 4.5:1; fonts are bundled
+ * (OFL, see web/fonts) so nothing is loaded from outside the store.
+ */
+@font-face {
+    font-family: "Frenet Inter";
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url("../fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Frenet Host Grotesk";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/host-grotesk-700-latin.woff2") format("woff2");
+}
+
+.frenet-labels,
+.frenet-order-panel,
+.frenet-status {
+    --fr-violet: #7b3ff3;
+    --fr-violet-dark: #5b21d6;
+    --fr-violet-soft: #f9f5ff;
+    --fr-violet-tint: #f2ecfe;
+    --fr-lavender: #c4aeff;
+    --fr-navy: #0c005a;
+    --fr-ink: #344054;
+    --fr-muted: #565a72;
+    --fr-line: #eaecf0;
+    --fr-row: #f2f4f7;
+    --fr-surface: #fafaff;
+    --fr-mint: #5fe3b0;
+    --fr-ok-bg: #e4faf1;
+    --fr-ok: #0b6b47;
+    --fr-wait-bg: #fff4dc;
+    --fr-wait: #7a4b00;
+    --fr-bad-bg: #fde8e8;
+    --fr-bad: #a4161a;
+    --fr-off-bg: #f2f4f7;
+    --fr-off: #4a4f63;
+    --fr-font: "Frenet Inter", Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --fr-display: "Frenet Host Grotesk", "Host Grotesk", "Frenet Inter", -apple-system, sans-serif;
+    --fr-radius: 8px;
+    color: var(--fr-ink);
+    font-family: var(--fr-font);
+}
+.frenet-labels h2, .frenet-labels h3,
+.frenet-order-panel h3 { font-family: var(--fr-display); letter-spacing: -.01em; }
+
+/* Buttons: Frenet style (Inter 500, 8px radius). Magento keeps its markup and states. */
+.frenet-labels .action-primary,
+.frenet-labels .action-default,
+.frenet-labels .action-secondary,
+.frenet-order-panel .action-primary,
+.frenet-order-panel .action-default { border-radius: var(--fr-radius); font-family: var(--fr-font); font-weight: 500; }
+.frenet-labels .action-primary,
+.frenet-order-panel .action-primary { border-color: var(--fr-violet); background: var(--fr-violet); color: #f9f5ff; }
+.frenet-labels .action-primary:hover,
+.frenet-labels .action-primary:focus,
+.frenet-order-panel .action-primary:hover,
+.frenet-order-panel .action-primary:focus { border-color: var(--fr-violet-dark); background: var(--fr-violet-dark); color: #fff; }
+.frenet-labels .action-primary[disabled],
+.frenet-order-panel .action-primary[disabled] { border-color: var(--fr-lavender); background: var(--fr-lavender); color: #fff; opacity: 1; cursor: not-allowed; }
+.frenet-labels .action-default,
+.frenet-order-panel .action-default { border-color: var(--fr-violet-tint); background: var(--fr-violet-soft); color: var(--fr-violet-dark); }
+.frenet-labels .action-default:hover,
+.frenet-order-panel .action-default:hover { border-color: var(--fr-lavender); background: var(--fr-violet-tint); color: var(--fr-violet-dark); }
+.frenet-labels .action-default[disabled] { border-color: var(--fr-line); background: var(--fr-row); color: #8a8fa3; }
+.frenet-labels .action-primary:focus-visible,
+.frenet-labels .action-default:focus-visible,
+.frenet-order-panel .action-primary:focus-visible,
+.frenet-order-panel .action-default:focus-visible { outline: 2px solid var(--fr-violet); outline-offset: 2px; box-shadow: none; }
+
+/* Text helpers */
+.frenet-muted { color: var(--fr-muted); }
+.frenet-bad { color: var(--fr-bad); }
+.frenet-small { font-size: 1.2rem; line-height: 1.45; }
+.frenet-nowrap { white-space: nowrap; }
+.frenet-code { font-family: "SFMono-Regular", Menlo, Consolas, monospace; letter-spacing: .03em; color: var(--fr-navy); }
+.frenet-link { color: var(--fr-violet); font-weight: 600; }
+.frenet-link:hover { color: var(--fr-violet-dark); }
+.frenet-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.frenet-lead { margin: 0 0 1.8rem; color: var(--fr-muted); font-size: 1.5rem; line-height: 1.5; }
+.frenet-hint { margin: 1rem 0 1.4rem; font-size: 1.2rem; }
+.frenet-h2 { margin: 2.8rem 0 1.2rem; color: var(--fr-navy); font-family: var(--fr-display); font-size: 2rem; font-weight: 700; }
+
+/* Brand strip: the only gradient, never behind data */
+.frenet-brand { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.2rem 2.4rem;
+    margin: 0 0 2rem; padding: 1.4rem 2.4rem; border-radius: 12px; color: #f9f5ff;
+    background: #0c005a linear-gradient(110deg, #0c005a 0%, #2a0f8f 58%, #7b3ff3 100%); }
+.frenet-brand__id { display: flex; align-items: center; gap: 1.6rem; }
+.frenet-brand__logo { display: block; width: auto; height: 52px; filter: brightness(0) invert(1); }
+.frenet-brand__tag { padding: .3rem 1.2rem; border: 1px solid rgba(196, 174, 255, .55); border-radius: 999px; color: #e9e1ff; font-size: 1.2rem; }
+.frenet-brand__wallet { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1.4rem; }
+.frenet-brand__label { color: #d9ccff; font-size: 1.3rem; }
+.frenet-brand__value { color: #fff; font-family: var(--fr-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.frenet-brand__meta { color: #d9ccff; font-size: 1.3rem; }
+.frenet-brand__cta { display: inline-flex; align-items: center; min-height: 36px; padding: 0 1.6rem; border-radius: var(--fr-radius);
+    background: #fff; color: var(--fr-navy); font-weight: 500; text-decoration: none; }
+.frenet-brand__cta:hover { background: var(--fr-violet-soft); color: var(--fr-navy); text-decoration: none; }
+.frenet-brand__cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+button.frenet-brand__cta { border: 0; cursor: pointer; }
+.frenet-brand__deposit { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .8rem; color: #fff; }
+.frenet-brand__deposit label { color: inherit; }
+.frenet-brand__amount { width: 8rem; color: var(--fr-navy); background: #fff; min-height: 36px; border: 0; border-radius: var(--fr-radius); padding: 0 .8rem; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Banners and states */
+.frenet-sim { margin: 0 0 1.8rem; padding: 1rem 1.4rem; border: 1px dashed #d98e04; border-radius: var(--fr-radius); background: #fffaf0; color: var(--fr-wait); }
+.frenet-empty { max-width: 680px; margin: 2rem auto; padding: 3.6rem 3.2rem; border: 1px dashed var(--fr-lavender); border-radius: 12px; background: var(--fr-violet-soft); text-align: center; }
+.frenet-empty h2 { margin: 1rem 0 .8rem; color: var(--fr-navy); font-size: 2.2rem; font-weight: 700; }
+.frenet-empty p { color: var(--fr-muted); }
+.frenet-empty--small { padding: 2.4rem; }
+.frenet-note,
+.frenet-warning { margin: 1.2rem 0; padding: 1.1rem 1.4rem; border-left: 3px solid; border-radius: 0 var(--fr-radius) var(--fr-radius) 0; }
+.frenet-note { border-color: var(--fr-violet); background: var(--fr-violet-soft); color: var(--fr-navy); }
+.frenet-warning { border-color: #d98e04; background: var(--fr-wait-bg); color: var(--fr-wait); }
+.frenet-card { margin-bottom: 2.4rem; padding: 2.2rem 2.4rem; border: 1px solid var(--fr-line); border-radius: 12px; background: #fff; }
+.frenet-card h2 { margin: 0 0 1.4rem; color: var(--fr-navy); font-size: 2rem; font-weight: 700; }
+
+/* Pills (text + colour, never colour alone) */
+.frenet-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .3rem 1rem; border-radius: 999px; font-size: 1.2rem; font-weight: 600; line-height: 1.4; white-space: nowrap; }
+.frenet-pill::before { content: ""; width: .7rem; height: .7rem; border-radius: 50%; background: currentColor; }
+.frenet-pill--ok { background: var(--fr-ok-bg); color: var(--fr-ok); }
+.frenet-pill--ok::before { background: var(--fr-mint); box-shadow: 0 0 0 1px var(--fr-ok); }
+.frenet-pill--wait { background: var(--fr-wait-bg); color: var(--fr-wait); }
+.frenet-pill--bad { background: var(--fr-bad-bg); color: var(--fr-bad); }
+.frenet-pill--off { background: var(--fr-off-bg); color: var(--fr-off); }
+
+/* Search, filters */
+.frenet-search { display: flex; gap: 1rem; max-width: 560px; margin-bottom: 1.6rem; }
+.frenet-search input { flex: 1; border-radius: var(--fr-radius); }
+.frenet-filters { display: flex; flex-wrap: wrap; gap: .8rem; }
+.frenet-chip { display: inline-flex; align-items: center; gap: .5rem; min-height: 34px; padding: 0 1.4rem; border: 1px solid var(--fr-line); border-radius: 999px; background: #fff; color: var(--fr-ink); font-weight: 500; text-decoration: none; }
+.frenet-chip:hover { border-color: var(--fr-lavender); background: var(--fr-violet-soft); color: var(--fr-violet-dark); text-decoration: none; }
+.frenet-chip.is-active { border-color: var(--fr-violet); background: var(--fr-violet); color: #fff; }
+.frenet-chip__n { min-width: 1.8rem; padding: 0 .6rem; border-radius: 999px; background: var(--fr-violet-tint); color: var(--fr-navy); font-size: 1.1rem; text-align: center; }
+.frenet-chip.is-active .frenet-chip__n { background: rgba(255, 255, 255, .25); color: #fff; }
+.frenet-chip:focus-visible,
+.frenet-link:focus-visible { outline: 2px solid var(--fr-violet); outline-offset: 2px; }
+
+/* Tables: flat surfaces */
+.frenet-table-wrap { overflow-x: auto; border: 1px solid var(--fr-line); border-radius: 12px; background: #fff; }
+.frenet-table { width: 100%; border-collapse: collapse; }
+.frenet-table th { padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--fr-line); background: var(--fr-surface); color: var(--fr-muted); font-size: 1.2rem; font-weight: 600; letter-spacing: .02em; text-align: left; white-space: nowrap; }
+.frenet-table td { padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--fr-row); vertical-align: top; }
+.frenet-table tbody tr:last-child td { border-bottom: 0; }
+.frenet-table tbody tr:hover td { background: var(--fr-surface); }
+.frenet-table tfoot th { border-top: 1px solid var(--fr-line); border-bottom: 0; background: var(--fr-violet-soft); color: var(--fr-navy); font-size: 1.4rem; }
+.frenet-table .is-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.frenet-table .is-check { width: 3.6rem; text-align: center; }
+.frenet-table tr.is-nok td { background: #fffafa; }
+.frenet-table tr.is-selected td { background: var(--fr-violet-soft); }
+.frenet-table--compact td { padding: .9rem 1.4rem; vertical-align: middle; }
+.frenet-table--orders .frenet-service select { min-width: 300px; max-width: 420px; border-radius: var(--fr-radius); }
+.frenet-table input[type="checkbox"]:checked { accent-color: var(--fr-violet); }
+.frenet-nfe { min-width: 220px; border-radius: var(--fr-radius); font-family: "SFMono-Regular", Menlo, Consolas, monospace; }
+.frenet-nfe[aria-invalid="true"] { border-color: var(--fr-bad); }
+.frenet-row-actions { white-space: nowrap; }
+.frenet-row-actions > * { margin-right: .6rem; }
+.frenet-btn-sm { padding: .5rem 1.2rem; font-size: 1.3rem; }
+.frenet-labels .frenet-danger,
+.frenet-labels .frenet-danger:focus { border: 1px solid var(--fr-bad); border-radius: var(--fr-radius); background: #fff; color: var(--fr-bad); box-shadow: none; }
+.frenet-labels .frenet-danger:hover { background: var(--fr-bad-bg); }
+
+/* Action bar, summary, journey */
+.frenet-actionbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem; margin-top: 1.8rem; }
+.frenet-actionbar [data-frenet-count] { margin-right: auto; color: var(--fr-muted); }
+.frenet-format { display: inline-flex; align-items: center; gap: .6rem; }
+.frenet-format select { border-radius: var(--fr-radius); }
+.frenet-summary { position: sticky; bottom: 0; z-index: 2; margin-top: 2.4rem; padding: 1.8rem 2.4rem; border: 1px solid var(--fr-line); border-top: 3px solid var(--fr-violet); border-radius: 12px 12px 0 0; background: #fff; box-shadow: 0 -6px 16px rgba(12, 0, 90, .07); }
+.frenet-summary__totals { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.2rem 3.6rem; }
+.frenet-summary__totals > div { display: flex; flex-direction: column; color: var(--fr-muted); }
+.frenet-summary__totals strong { color: var(--fr-navy); font-family: var(--fr-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.frenet-summary__carriers { margin: 0; padding: 0; list-style: none; color: var(--fr-muted); font-size: 1.2rem; }
+.frenet-journey { display: flex; flex-wrap: wrap; gap: .8rem 1.2rem; margin: 1.6rem 0 0; padding: 0; border: 0; }
+.frenet-journey legend { margin-bottom: .8rem; color: var(--fr-navy); font-weight: 600; }
+.frenet-journey label { display: inline-flex; align-items: center; gap: .8rem; padding: .9rem 1.4rem; border: 1px solid var(--fr-line); border-radius: var(--fr-radius); background: #fff; cursor: pointer; }
+.frenet-journey label:has(input:checked) { border-color: var(--fr-violet); background: var(--fr-violet-soft); color: var(--fr-navy); }
+.frenet-journey input { accent-color: var(--fr-violet); }
+.frenet-journey--inline { margin: 0; }
+.frenet-pager { display: flex; align-items: center; justify-content: center; gap: 1.6rem; margin-top: 2rem; color: var(--fr-muted); }
+
+/* Tracking timeline */
+.frenet-timeline { margin: 0; padding: 0 0 0 1.6rem; border-left: 2px solid var(--fr-violet-tint); list-style: none; }
+.frenet-timeline li { position: relative; display: flex; flex-direction: column; margin: 0 0 1.2rem; }
+.frenet-timeline li::before { content: ""; position: absolute; left: -2.15rem; top: .5rem; width: .9rem; height: .9rem; border: 2px solid #fff; border-radius: 50%; background: var(--fr-lavender); }
+.frenet-timeline li:first-child::before { background: var(--fr-violet); }
+
+/* Order view panel and settings status */
+.frenet-order-panel { padding: 1.8rem 2.2rem; border: 1px solid var(--fr-line); border-top: 4px solid var(--fr-violet); border-radius: 12px; background: #fff; }
+.frenet-order-panel h3 { margin: 0 0 1.2rem; color: var(--fr-navy); font-size: 1.8rem; font-weight: 700; }
+.frenet-order-panel .frenet-actionbar { justify-content: flex-start; }
+.frenet-status { display: flex; flex-direction: column; gap: .4rem; padding: 1.2rem 1.4rem; border-left: 3px solid; border-radius: 0 var(--fr-radius) var(--fr-radius) 0; }
+.frenet-status--ok { border-color: var(--fr-mint); background: var(--fr-ok-bg); color: var(--fr-ok); }
+.frenet-status--bad { border-color: var(--fr-bad); background: var(--fr-bad-bg); color: var(--fr-bad); }
+.frenet-status--off { border-color: #b8b8c6; background: var(--fr-off-bg); color: var(--fr-off); }
+.page-actions .page-actions-buttons > button.frenet-button,
+.page-actions._fixed .page-actions-buttons > button.frenet-button { border-color: #7b3ff3; border-radius: 8px; background: #7b3ff3; color: #f9f5ff; }
+.page-actions .page-actions-buttons > button.frenet-button:hover { border-color: #5b21d6; background: #5b21d6; color: #fff; }
+
+@media (forced-colors: active) {
+    .frenet-brand { border: 1px solid CanvasText; }
+    .frenet-pill { border: 1px solid CanvasText; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .frenet-labels *, .frenet-order-panel * { transition: none !important; animation: none !important; }
+}
+
+/* ---- Automatic tracking and bulk import (Frenet › Shipment tracking) ---- */
+.frenet-order-tracking { --fr-violet: #7b3ff3; --fr-navy: #0c005a; --fr-muted: #565a72; --fr-line: #eaecf0; --fr-radius: 8px; }
+.frenet-auto { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between;
+    margin: 0 0 2.4rem; padding: 1.4rem 1.8rem; border: 1px solid var(--fr-line); border-radius: var(--fr-radius); background: #fff; }
+.frenet-auto__list { display: flex; flex-wrap: wrap; gap: .8rem 1.6rem; margin: 0; padding: 0; list-style: none; }
+.frenet-auto__list li { display: inline-flex; align-items: center; gap: .6rem; font-size: 1.3rem; }
+.frenet-auto__list li::before { content: ""; width: .8rem; height: .8rem; border-radius: 50%; background: #b8bccb; }
+.frenet-auto__list li.is-on { color: var(--fr-navy); font-weight: 500; }
+.frenet-auto__list li.is-on::before { background: var(--fr-mint); box-shadow: 0 0 0 3px var(--fr-ok-bg); }
+.frenet-auto__list li.is-off { color: var(--fr-muted); }
+.frenet-auto__actions { display: flex; align-items: center; gap: 1.6rem; }
+.frenet-auto__actions form { margin: 0; }
+.frenet-tracking tr.is-selected td { background: var(--fr-violet-soft); }
+.frenet-import { margin-top: 3.2rem; }
+.frenet-import__form { display: grid; gap: .8rem; max-width: 72rem; }
+.frenet-import__form label { font-weight: 600; color: var(--fr-navy); }
+.frenet-import__form textarea { width: 100%; box-sizing: border-box; font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 1.3rem; border-radius: var(--fr-radius); }
+.frenet-import__form textarea:focus { border-color: var(--fr-violet); box-shadow: 0 0 0 3px var(--fr-violet-tint); outline: 0; }
+.frenet-import__check { display: inline-flex; align-items: center; gap: .6rem; font-weight: 400 !important; color: var(--fr-ink) !important; }
+.frenet-import__counts { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0 0 1.6rem; padding: 0; list-style: none; }
+.frenet-import__counts li { padding: .9rem 1.4rem; border-radius: var(--fr-radius); background: var(--fr-violet-soft); color: var(--fr-muted); font-size: 1.3rem; }
+.frenet-import__counts strong { margin-right: .3rem; font-family: var(--fr-display); font-size: 2rem; color: var(--fr-navy); font-variant-numeric: tabular-nums; }
+.frenet-import .frenet-actionbar { display: flex; gap: 1rem; flex-wrap: wrap; }
+.frenet-import .frenet-actionbar form { margin: 0; }
+.frenet-order-tracking__code + .frenet-order-tracking__code { margin-top: 1.6rem; padding-top: 1.6rem; border-top: 1px solid var(--fr-line); }
+.frenet-order-tracking h3 { display: flex; gap: .8rem; align-items: baseline; margin: 0 0 .8rem; }

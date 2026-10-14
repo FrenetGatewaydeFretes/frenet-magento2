@@ -1,0 +1,247 @@
+<?php
+/**
+ * Frenet Shipping Gateway — "Create shipment".
+ * Step 1: pick orders. Step 2: compare carriers (price and delivery time) per order, then create.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\CreateShipment $vm */
+$vm = $block->getData('view_model');
+?>
+<div class="frenet-labels">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+<?php if (!$common->isAvailable()): ?>
+</div>
+<?php return; endif; ?>
+
+<?php if (!$vm->ids()): ?>
+    <?php $candidates = $vm->candidates(); ?>
+    <p class="frenet-lead"><?= $escaper->escapeHtml(__('1. Choose the orders · 2. Compare carriers · 3. Create the shipment')) ?></p>
+    <form class="frenet-search" method="get" action="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index')) ?>">
+        <label class="frenet-sr" for="frenet-q"><?= $escaper->escapeHtml(__('Search orders')) ?></label>
+        <input id="frenet-q" name="q" type="search" class="admin__control-text" value="<?= $escaper->escapeHtmlAttr($vm->search()) ?>"
+               placeholder="<?= $escaper->escapeHtmlAttr(__('Order number or customer name')) ?>"/>
+        <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Search')) ?></button>
+    </form>
+    <?php if (!$candidates): ?>
+        <div class="frenet-empty frenet-empty--small">
+            <p><?= $escaper->escapeHtml($vm->search() !== '' ? __('No order found for this search.') : __('No order is waiting for a Frenet shipment.')) ?></p>
+        </div>
+    <?php else: ?>
+        <form method="get" action="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index')) ?>" data-frenet-selectable>
+            <div class="frenet-table-wrap">
+                <table class="frenet-table">
+                    <thead><tr>
+                        <th class="is-check"><input type="checkbox" data-frenet-select-all aria-label="<?= $escaper->escapeHtmlAttr(__('Select all')) ?>"/></th>
+                        <th><?= $escaper->escapeHtml(__('Order')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Date')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Customer')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Destination')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Shipping chosen by the customer')) ?></th>
+                        <th class="is-num"><?= $escaper->escapeHtml(__('Order total')) ?></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($candidates as $c): ?>
+                        <tr>
+                            <td class="is-check"><input type="checkbox" name="ids[]" value="<?= (int) $c['id'] ?>" data-frenet-row
+                                                        aria-label="<?= $escaper->escapeHtmlAttr(__('Order #%1', $c['number'])) ?>"/></td>
+                            <td><a href="<?= $escaper->escapeUrl($common->url('sales/order/view', ['order_id' => $c['id']])) ?>">#<?= $escaper->escapeHtml($c['number']) ?></a></td>
+                            <td class="frenet-muted"><?= $escaper->escapeHtml(substr($c['date'], 0, 16)) ?></td>
+                            <td><?= $escaper->escapeHtml($c['customer']) ?></td>
+                            <td><?= $escaper->escapeHtml($c['city']) ?></td>
+                            <td><?= $escaper->escapeHtml($c['shipping']) ?>
+                                <?php if (!$c['frenet']): ?><span class="frenet-pill frenet-pill--off"><?= $escaper->escapeHtml(__('other method')) ?></span><?php endif; ?></td>
+                            <td class="is-num"><?= $escaper->escapeHtml($common->money($c['total'])) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="frenet-actionbar">
+                <span class="frenet-muted" data-frenet-count data-zero="<?= $escaper->escapeHtmlAttr(__('Select the orders to compare carriers.')) ?>"
+                      data-some="<?= $escaper->escapeHtmlAttr(__('%1 order(s) selected')) ?>"><?= $escaper->escapeHtml(__('Select the orders to compare carriers.')) ?></span>
+                <button type="submit" class="action-primary" data-frenet-needs-selection disabled><span><?= $escaper->escapeHtml(__('Calculate shipping')) ?></span></button>
+            </div>
+        </form>
+    <?php endif; ?>
+
+<?php else: ?>
+    <?php
+    $review = $vm->review();
+    $header = $review['header'];
+    $wallet = $review['wallet'];
+    $summary = $vm->initialSummary();
+    $journey = $common->config()->journey();
+    $okRows = array_filter($review['rows'], static fn ($r) => $r['ok']);
+    ?>
+    <?php if ($review['truncated']): ?>
+        <div class="message message-notice"><div><?= $escaper->escapeHtml(__('Only the first 50 orders are compared at once.')) ?></div></div>
+    <?php endif; ?>
+
+    <?php if ($header['carriers']): ?>
+        <section class="frenet-card" aria-labelledby="frenet-compare-title">
+            <h2 id="frenet-compare-title"><?= $escaper->escapeHtml(__('Carriers for the %1 selected order(s)', $header['orders'])) ?></h2>
+            <div class="frenet-table-wrap">
+                <table class="frenet-table frenet-table--compact">
+                    <thead><tr>
+                        <th><?= $escaper->escapeHtml(__('Carrier')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Available')) ?></th>
+                        <th class="is-num"><?= $escaper->escapeHtml(__('Best price')) ?></th>
+                        <th class="is-num"><?= $escaper->escapeHtml(__('Best delivery time')) ?></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($header['carriers'] as $c): ?>
+                        <tr>
+                            <td><strong><?= $escaper->escapeHtml($c['carrier']) ?></strong></td>
+                            <td><?= $c['all'] ? '<span class="frenet-pill frenet-pill--ok">' . $escaper->escapeHtml(__('all orders')) . '</span>'
+                                    : $escaper->escapeHtml(__('%1 of %2', $c['available'], $header['orders'])) ?></td>
+                            <td class="is-num"><?= $escaper->escapeHtml($common->money($c['best_price'])) ?></td>
+                            <td class="is-num"><?= $escaper->escapeHtml($common->money($c['best_time'])) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                    <tfoot><tr>
+                        <th colspan="3"><?= $escaper->escapeHtml(__('Best option (total)')) ?></th>
+                        <th class="is-num"><?= $escaper->escapeHtml($common->money($header['best_total'])) ?></th>
+                    </tr></tfoot>
+                </table>
+            </div>
+            <p class="frenet-muted frenet-hint"><?= $escaper->escapeHtml(__('Totals of each carrier over the orders it delivers: its cheapest service and its fastest service. Best option: the cheapest service of every order.')) ?></p>
+        </section>
+    <?php endif; ?>
+
+    <form method="post" action="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/create')) ?>" data-frenet-review
+          data-balance="<?= $wallet ? $escaper->escapeHtmlAttr((string) $wallet['balance']) : '' ?>">
+        <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+        <h2 class="frenet-h2"><?= $escaper->escapeHtml(__('Orders')) ?></h2>
+        <div class="frenet-table-wrap">
+            <table class="frenet-table frenet-table--orders">
+                <thead><tr>
+                    <th class="is-check"><input type="checkbox" data-frenet-select-all checked aria-label="<?= $escaper->escapeHtmlAttr(__('Select all')) ?>"/></th>
+                    <th><?= $escaper->escapeHtml(__('Order')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Check')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Carrier and service')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('NF-e access key')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Products')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Package')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Customer')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Destination')) ?></th>
+                </tr></thead>
+                <tbody>
+                <?php foreach ($review['rows'] as $r): ?>
+                    <?php $p = $r['package']; ?>
+                    <tr class="<?= $r['ok'] ? '' : 'is-nok' ?>">
+                        <td class="is-check">
+                            <?php if ($r['ok']): ?>
+                                <input type="checkbox" name="order_ids[]" value="<?= (int) $r['id'] ?>" checked data-frenet-row
+                                       aria-label="<?= $escaper->escapeHtmlAttr(__('Order #%1', $r['number'])) ?>"/>
+                            <?php endif; ?>
+                        </td>
+                        <td><a href="<?= $escaper->escapeUrl($common->url('sales/order/view', ['order_id' => $r['id']])) ?>">#<?= $escaper->escapeHtml($r['number']) ?></a>
+                            <div class="frenet-muted frenet-small"><?= $escaper->escapeHtml($common->money($r['value'])) ?></div></td>
+                        <td>
+                            <?php if ($r['ok']): ?>
+                                <span class="frenet-pill frenet-pill--ok"><?= $escaper->escapeHtml(__('OK')) ?></span>
+                            <?php else: ?>
+                                <span class="frenet-pill frenet-pill--bad"><?= $escaper->escapeHtml(__('NOK')) ?></span>
+                                <div class="frenet-small frenet-bad"><?= $escaper->escapeHtml($r['reason']) ?></div>
+                            <?php endif; ?>
+                        </td>
+                        <td class="frenet-service">
+                            <?php if ($r['ok']): ?>
+                                <label class="frenet-sr" for="frenet-svc-<?= (int) $r['id'] ?>"><?= $escaper->escapeHtml(__('Service for order #%1', $r['number'])) ?></label>
+                                <select id="frenet-svc-<?= (int) $r['id'] ?>" name="service[<?= (int) $r['id'] ?>]" class="admin__control-select" data-frenet-service>
+                                    <?php foreach ($r['services'] as $i => $s): ?>
+                                        <?php
+                                        $tags = [];
+                                        if ($i === $r['best_price']) {
+                                            $tags[] = (string) __('best price');
+                                        }
+                                        if ($i === $r['best_time']) {
+                                            $tags[] = (string) __('best time');
+                                        }
+                                        if ($s['code'] === $r['customer_code']) {
+                                            $tags[] = (string) __('customer choice');
+                                        }
+                                        $text = $s['carrier'] . ' ' . $s['name'] . ' — ' . $common->money($s['price']) . ' — '
+                                            . __('%1 day(s)', $s['days']) . ($tags ? ' · ' . implode(' · ', $tags) : '');
+                                        ?>
+                                        <option value="<?= $escaper->escapeHtmlAttr($s['code']) ?>"
+                                                data-price="<?= $escaper->escapeHtmlAttr((string) $s['price']) ?>"
+                                                data-carrier="<?= $escaper->escapeHtmlAttr($s['carrier'] ?: $s['carrier_code']) ?>"
+                                            <?= $i === $r['selected'] ? 'selected' : '' ?>><?= $escaper->escapeHtml($text) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="frenet-small frenet-muted"><?= $escaper->escapeHtml(__('Customer paid %1 · %2', $common->money($r['paid_by_customer']), $r['customer_service'])) ?></div>
+                            <?php else: ?>
+                                <span class="frenet-muted">—</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ($r['ok']): ?>
+                                <label class="frenet-sr" for="frenet-nfe-<?= (int) $r['id'] ?>"><?= $escaper->escapeHtml(__('NF-e access key of order #%1', $r['number'])) ?></label>
+                                <input id="frenet-nfe-<?= (int) $r['id'] ?>" name="nfe[<?= (int) $r['id'] ?>]" type="text" inputmode="numeric" autocomplete="off"
+                                       spellcheck="false" maxlength="60" class="admin__control-text frenet-nfe" data-frenet-nfe
+                                       value="<?= $escaper->escapeHtmlAttr($r['nfe']) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('optional · 44 digits')) ?>"/>
+                                <div class="frenet-small frenet-bad" data-frenet-nfe-error hidden><?= $escaper->escapeHtml(__('Invalid key: 44 digits, the last one is a check digit.')) ?></div>
+                            <?php else: ?>
+                                <span class="frenet-muted"><?= $escaper->escapeHtml($r['nfe'] ?: '—') ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="frenet-small"><?= $escaper->escapeHtml($r['items']) ?></td>
+                        <td class="frenet-small frenet-nowrap"><?= $escaper->escapeHtml(__('%1 kg', number_format($p['weight'], 3, ',', '.'))) ?><br>
+                            <span class="frenet-muted"><?= $escaper->escapeHtml(sprintf('%s × %s × %s cm', (float) $p['length'], (float) $p['width'], (float) $p['height'])) ?></span></td>
+                        <td class="frenet-small"><?= $escaper->escapeHtml($r['customer']) ?><br>
+                            <span class="frenet-muted"><?= $escaper->escapeHtml(trim($r['phone'] . ' · ' . $r['document'], ' ·')) ?></span><br>
+                            <span class="frenet-muted"><?= $escaper->escapeHtml($r['email']) ?></span></td>
+                        <td class="frenet-small"><?= $escaper->escapeHtml($r['postcode']) ?><br>
+                            <span class="frenet-muted"><?= $escaper->escapeHtml($r['street']) ?></span><br>
+                            <span class="frenet-muted"><?= $escaper->escapeHtml($r['city']) ?></span></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="frenet-summary" aria-live="polite">
+            <div class="frenet-summary__totals">
+                <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Labels')) ?></span>
+                    <strong data-frenet-sum-count><?= (int) $summary['count'] ?></strong></div>
+                <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Total')) ?></span>
+                    <strong data-frenet-sum-total><?= $escaper->escapeHtml($common->money($summary['total'])) ?></strong></div>
+                <div><span class="frenet-muted"><?= $escaper->escapeHtml(__('Balance after')) ?></span>
+                    <strong data-frenet-sum-after><?= $wallet ? $escaper->escapeHtml($common->money($wallet['balance'] - $summary['total'])) : '—' ?></strong></div>
+                <ul class="frenet-summary__carriers" data-frenet-sum-carriers>
+                    <?php foreach ($summary['carriers'] as $name => $c): ?>
+                        <li><?= $escaper->escapeHtml($name) ?>: <?= (int) $c['count'] ?> · <?= $escaper->escapeHtml($common->money($c['total'])) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <p class="frenet-warning" data-frenet-low-balance hidden role="status"><?= $escaper->escapeHtml(__('The Frenet balance does not cover these labels. Add balance or create fewer.')) ?></p>
+            <fieldset class="frenet-journey">
+                <legend><?= $escaper->escapeHtml(__('How to create')) ?></legend>
+                <label><input type="radio" name="journey" value="here" <?= $journey === 'here' ? 'checked' : '' ?>/>
+                    <?= $escaper->escapeHtml($common->config()->walletPayment() ? __('Buy here: pay with the wallet and print') : __('Create here: pay later in Labels')) ?></label>
+                <label><input type="radio" name="journey" value="panel" <?= $journey === 'panel' ? 'checked' : '' ?>/>
+                    <?= $escaper->escapeHtml(__('Send to the Frenet panel: pay and print there')) ?></label>
+            </fieldset>
+            <div class="frenet-actionbar">
+                <a class="action-default" href="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index')) ?>"><?= $escaper->escapeHtml(__('Clear quotes')) ?></a>
+                <a class="action-default" href="<?= $escaper->escapeUrl($common->url('frenetshipping/shipment/index', ['ids' => implode(',', $vm->ids())])) ?>"><?= $escaper->escapeHtml(__('Calculate shipping again')) ?></a>
+                <button type="submit" class="action-primary" data-frenet-create <?= $okRows ? '' : 'disabled' ?>
+                        data-label="<?= $escaper->escapeHtmlAttr(__('Create shipment (%1) · %2')) ?>"
+                        data-confirm-here="<?= $escaper->escapeHtmlAttr(__('Frenet charges %2 from your wallet for %1 label(s). Create now?')) ?>"
+                        data-confirm-later="<?= $escaper->escapeHtmlAttr(__('Create %1 shipment(s) of %2 in total, to pay later in Labels?')) ?>"
+                        data-confirm-panel="<?= $escaper->escapeHtmlAttr(__('Send %1 shipment(s) of %2 in total to the Frenet panel, to pay and print there?')) ?>"
+                        data-wallet-payment="<?= $common->config()->walletPayment() ? '1' : '0' ?>">
+                    <span><?= $escaper->escapeHtml(__('Create shipment (%1) · %2', $summary['count'], $common->money($summary['total']))) ?></span>
+                </button>
+            </div>
+        </div>
+    </form>
+<?php endif; ?>
+</div>
+<script type="text/x-magento-init">{"*": {"Frenet_Shipping/js/labels/page": {}}}</script>
