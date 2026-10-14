@@ -37,6 +37,11 @@ class Config implements ConfigInterface
      */
     public const DEFAULT_MAX_UNIT_QUANTITY = 5000;
 
+    /**
+     * @var string
+     */
+    public const DEFAULT_DEBUG_FILENAME = 'frenet_request_debug.log';
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager
@@ -204,7 +209,9 @@ class Config implements ConfigInterface
      */
     public function getDebugFilename($store = null): string
     {
-        return (string) $this->getCarrierConfig('debug_filename', $store);
+        $filename = trim((string) $this->getCarrierConfig('debug_filename', $store));
+
+        return preg_match('/^\w[\w.-]*\.log$/', $filename) === 1 ? $filename : self::DEFAULT_DEBUG_FILENAME;
     }
 
     /**

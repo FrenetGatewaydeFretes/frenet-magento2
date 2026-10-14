@@ -74,3 +74,4 @@
 "Unknown Module Version","Versão Desconhecida"
 "The shipping quote is not available.","A cotação de frete não está disponível."
 "Unable to quote the shipping right now. Please try again later.","Não foi possível cotar o frete agora. Tente novamente mais tarde."
+"A file name ending in .log, written to var/log.","Um nome de arquivo terminando em .log, gravado em var/log."

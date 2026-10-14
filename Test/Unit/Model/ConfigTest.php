@@ -98,6 +98,52 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Lists debug filenames that would leave var/log or produce a non-log file.
+     *
+     * @return array<string, array{mixed}>
+     */
+    public static function unsafeDebugFilenameProvider(): array
+    {
+        return [
+            'not saved' => [null],
+            'saved empty' => [''],
+            'parent directory' => ['../../pub/frenet.log'],
+            'absolute path' => ['/var/www/html/pub/frenet.log'],
+            'windows path' => ['..\\pub\\frenet.log'],
+            'php file' => ['frenet.php'],
+            'no extension' => ['frenet'],
+            'hidden dot file' => ['.log'],
+        ];
+    }
+
+    /**
+     * Confirms an unsafe debug filename falls back to the default log file inside var/log.
+     *
+     * @param mixed $value
+     *
+     * @return void
+     */
+    #[DataProvider('unsafeDebugFilenameProvider')]
+    public function testShouldFallBackToTheDefaultDebugFilename(mixed $value): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/debug_filename')->willReturn($value);
+
+        $this->assertSame(Config::DEFAULT_DEBUG_FILENAME, $this->subject->getDebugFilename());
+    }
+
+    /**
+     * Confirms a plain log file name is kept as configured.
+     *
+     * @return void
+     */
+    public function testShouldKeepAValidDebugFilename(): void
+    {
+        $this->scopeConfig->method('getValue')->willReturn('frenet-2026.log');
+
+        $this->assertSame('frenet-2026.log', $this->subject->getDebugFilename());
+    }
+
+    /**
      * Confirms configured positive limits are returned as they are.
      *
      * @return void
