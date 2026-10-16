@@ -18,12 +18,13 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
  * Class DataExtractor
  */
-class DimensionsExtractor implements ProductExtractorInterface
+class DimensionsExtractor implements ProductExtractorInterface, ResetAfterRequestInterface
 {
     /**
      * @var Product
@@ -49,6 +50,11 @@ class DimensionsExtractor implements ProductExtractorInterface
      * @var ConfigInterface
      */
     private $config;
+
+    /**
+     * @var array<string, mixed>
+     */
+    private array $rawValues = [];
 
     public function __construct(
         ProductResource $productResource,
@@ -159,13 +165,26 @@ class DimensionsExtractor implements ProductExtractorInterface
             return $this->product->getData($key);
         }
 
-        $value = $this->productResource->getAttributeRawValue(
-            $this->product->getId(),
-            $key,
-            $this->product->getStore()
-        );
+        $cacheKey = $this->product->getId() . '|' . $this->product->getStoreId() . '|' . $key;
 
-        return $value;
+        if (!array_key_exists($cacheKey, $this->rawValues)) {
+            $this->rawValues[$cacheKey] = $this->productResource->getAttributeRawValue(
+                $this->product->getId(),
+                $key,
+                $this->product->getStore()
+            );
+        }
+
+        return $this->rawValues[$cacheKey];
+    }
+
+    /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->rawValues = [];
     }
 
     /**

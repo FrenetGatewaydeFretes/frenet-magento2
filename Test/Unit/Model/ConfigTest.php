@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Test\Unit\Model;
 
 use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\Config\ApiHostnameValidator;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -49,7 +50,7 @@ class ConfigTest extends TestCase
         $storeManager = $this->createMock(StoreManagerInterface::class);
         $storeManager->method('getStore')->willReturn($this->createMock(StoreInterface::class));
 
-        $this->subject = new Config($this->scopeConfig, $storeManager);
+        $this->subject = new Config($this->scopeConfig, $storeManager, new ApiHostnameValidator());
     }
 
     /**
@@ -141,6 +142,61 @@ class ConfigTest extends TestCase
         $this->scopeConfig->method('getValue')->willReturn('frenet-2026.log');
 
         $this->assertSame('frenet-2026.log', $this->subject->getDebugFilename());
+    }
+
+    /**
+     * Confirms a frenet.com.br hostname override is returned normalized.
+     *
+     * @return void
+     */
+    public function testShouldReturnAFrenetApiHostname(): void
+    {
+        $this->scopeConfig->method('getValue')
+            ->with('carriers/frenetshipping/api_hostname')
+            ->willReturn(' API.Frenet.com.br ');
+
+        $this->assertSame('api.frenet.com.br', $this->subject->getApiHostname());
+    }
+
+    /**
+     * Confirms a hostname outside frenet.com.br, such as one injected through env.php, falls back to the default.
+     *
+     * @return void
+     */
+    public function testShouldIgnoreAnApiHostnameOutsideFrenet(): void
+    {
+        $this->scopeConfig->method('getValue')
+            ->with('carriers/frenetshipping/api_hostname')
+            ->willReturn('attacker.example');
+
+        $this->assertSame('', $this->subject->getApiHostname());
+    }
+
+    /**
+     * Confirms an unusable API timeout falls back to the 30 second default instead of waiting forever.
+     *
+     * @param mixed $value
+     *
+     * @return void
+     */
+    #[DataProvider('unusableLimitProvider')]
+    public function testShouldFallBackToTheDefaultApiTimeout(mixed $value): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
+
+        $this->assertSame(Config::DEFAULT_API_TIMEOUT, $this->subject->getApiTimeout());
+    }
+
+    /**
+     * Confirms a configured API timeout is returned in seconds.
+     *
+     * @return void
+     */
+    public function testShouldReturnTheConfiguredApiTimeout(): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn('7.5');
+
+        $this->assertSame(7.5, $this->subject->getApiTimeout());
     }
 
     /**

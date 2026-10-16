@@ -98,7 +98,7 @@ class ApiService implements ApiServiceInterface
     }
 
     /**
-     * Applies the optional API hostname/protocol overrides from the store configuration.
+     * Applies the optional API hostname/protocol overrides and the request timeout from the store configuration.
      *
      * @throws WrongDataTypeException
      */
@@ -114,6 +114,8 @@ class ApiService implements ApiServiceInterface
         if (in_array($protocol, [ApiProtocol::HTTP, ApiProtocol::HTTPS], true)) {
             $this->api->config()->service()->setProtocol($protocol);
         }
+
+        $this->api->config()->service()->setTimeout($this->config->getApiTimeout());
     }
 
     /**

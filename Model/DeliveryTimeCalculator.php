@@ -20,6 +20,7 @@ use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -28,8 +29,13 @@ use Magento\Store\Model\StoreManagerInterface;
  *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface
+class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface, ResetAfterRequestInterface
 {
+    /**
+     * @var array<string, int>
+     */
+    private array $leadTimes = [];
+
     public function __construct(
         private readonly ProductResource $productResource,
         private readonly StoreManagerInterface $storeManagement,
@@ -73,14 +79,30 @@ class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface
     {
         $leadTime = max((int) $product->getData('lead_time'), 0);
 
-        if (!$leadTime) {
-            $leadTime = $this->productResource->getAttributeRawValue(
+        if ($leadTime) {
+            return $leadTime;
+        }
+
+        $store = $this->storeManagement->getStore();
+        $cacheKey = $product->getId() . '|' . $store->getId();
+
+        if (!array_key_exists($cacheKey, $this->leadTimes)) {
+            $this->leadTimes[$cacheKey] = (int) $this->productResource->getAttributeRawValue(
                 $product->getId(),
                 'lead_time',
-                $this->storeManagement->getStore()
+                $store
             );
         }
 
-        return (int) $leadTime;
+        return $this->leadTimes[$cacheKey];
+    }
+
+    /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->leadTimes = [];
     }
 }
