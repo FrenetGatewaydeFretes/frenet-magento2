@@ -173,6 +173,33 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Confirms an unusable API timeout falls back to the 30 second default instead of waiting forever.
+     *
+     * @param mixed $value
+     *
+     * @return void
+     */
+    #[DataProvider('unusableLimitProvider')]
+    public function testShouldFallBackToTheDefaultApiTimeout(mixed $value): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
+
+        $this->assertSame(Config::DEFAULT_API_TIMEOUT, $this->subject->getApiTimeout());
+    }
+
+    /**
+     * Confirms a configured API timeout is returned in seconds.
+     *
+     * @return void
+     */
+    public function testShouldReturnTheConfiguredApiTimeout(): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn('7.5');
+
+        $this->assertSame(7.5, $this->subject->getApiTimeout());
+    }
+
+    /**
      * Confirms configured positive limits are returned as they are.
      *
      * @return void

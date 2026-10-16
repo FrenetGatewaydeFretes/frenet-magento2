@@ -43,6 +43,11 @@ class Config implements ConfigInterface
      */
     public const DEFAULT_DEBUG_FILENAME = 'frenet_request_debug.log';
 
+    /**
+     * @var float
+     */
+    public const DEFAULT_API_TIMEOUT = 30.0;
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager,
@@ -82,6 +87,16 @@ class Config implements ConfigInterface
     public function getApiProtocol($store = null): string
     {
         return strtolower(trim((string) $this->getCarrierConfig('api_protocol', $store)));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getApiTimeout($store = null): float
+    {
+        $timeout = (float) $this->getCarrierConfig('api_timeout', $store);
+
+        return $timeout > 0 ? $timeout : self::DEFAULT_API_TIMEOUT;
     }
 
     /**

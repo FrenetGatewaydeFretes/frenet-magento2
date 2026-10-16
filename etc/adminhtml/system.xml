@@ -110,6 +110,11 @@
                     <source_model>Frenet\Shipping\Model\Config\Source\ApiProtocol</source_model>
                     <comment><![CDATA[Protocol used to reach the Frenet API. Defaults to HTTPS; change only if instructed by Frenet support.]]></comment>
                 </field>
+                <field id="api_timeout" translate="label comment" type="text" sortOrder="470" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>API Timeout (seconds)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment><![CDATA[Max wait for the Frenet API before skipping the quote. Default: 30.]]></comment>
+                </field>
 
                 <!-- DEBUG -->
                 <field id="debug" translate="label" type="select" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="0">

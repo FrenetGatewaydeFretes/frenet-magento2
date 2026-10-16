@@ -76,3 +76,5 @@
 "Unable to quote the shipping right now. Please try again later.","Não foi possível cotar o frete agora. Tente novamente mais tarde."
 "A file name ending in .log, written to var/log.","Um nome de arquivo terminando em .log, gravado em var/log."
 "The API hostname must be a frenet.com.br address, such as api.frenet.com.br.","O hostname da API precisa ser um endereço frenet.com.br, como api.frenet.com.br."
+"API Timeout (seconds)","Tempo Limite da API (segundos)"
+"Max wait for the Frenet API before skipping the quote. Default: 30.","Tempo máximo de espera pela API da Frenet antes de ignorar a cotação. Padrão: 30."
