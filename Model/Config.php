@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Model\Carrier\Frenet;
+use Frenet\Shipping\Model\Config\ApiHostnameValidator;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterface;
@@ -44,7 +45,8 @@ class Config implements ConfigInterface
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly ApiHostnameValidator $apiHostnameValidator
     ) {
     }
 
@@ -69,7 +71,9 @@ class Config implements ConfigInterface
      */
     public function getApiHostname($store = null): string
     {
-        return trim((string) $this->getCarrierConfig('api_hostname', $store));
+        $hostname = strtolower(trim((string) $this->getCarrierConfig('api_hostname', $store)));
+
+        return $this->apiHostnameValidator->isAllowed($hostname) ? $hostname : '';
     }
 
     /**
