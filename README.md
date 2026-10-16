@@ -28,6 +28,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 | Módulo | Magento | PHP |
 |---|---|---|
 | `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
+| `2.4.8-p4` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 / 2.4.8-p4 | 8.2, 8.3, 8.4 |
 | `2.4.8-p3` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 | 8.2, 8.3, 8.4 |
 | `2.4.8-p2` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 | 8.2, 8.3, 8.4 |
 | `2.4.8-p1` | 2.4.8 / 2.4.8-p1 | 8.2, 8.3, 8.4 |
@@ -56,7 +57,7 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:2.4.8-p3
+composer require frenet/frenet-magento2:2.4.8-p4
 ```
 
 ## Configuração
@@ -90,6 +91,16 @@ Recursos opcionais, no mesmo painel:
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
 
 ## Changelog
+
+### 2.4.8-p4
+
+**Adicionado**
+
+- Compatibilidade com **Magento 2.4.8-p4** (PHP 8.2, 8.3 e 8.4) e **Composer 2.9**, validada contra as correções de segurança do boletim APSB26-05, incluindo o checkout de cliente logado.
+
+**Segurança**
+
+- O campo **API Hostname** só aceita endereços `frenet.com.br` (por exemplo, `api.frenet.com.br`), sem protocolo, porta ou caminho. Outros valores são recusados ao salvar e, se chegarem por `env.php` ou `config.php`, são ignorados em favor do endereço padrão da Frenet. Assim o token nunca é enviado a outro servidor.
 
 ### 2.4.8-p3
 
