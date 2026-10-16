@@ -15,10 +15,13 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
+use Magento\Catalog\Model\Product;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
+
 /**
  * Class CategoryExtractor
  */
-class CategoryExtractor
+class CategoryExtractor implements ResetAfterRequestInterface
 {
     /**
      * @var string
@@ -26,11 +29,43 @@ class CategoryExtractor
     const CATEGORY_SEPARATOR = '|';
 
     /**
-     * @param \Magento\Catalog\Model\Product $product
+     * @var array<string, string|null>
+     */
+    private array $categories = [];
+
+    /**
+     * @param Product $product
      *
      * @return string|null
      */
-    public function getProductCategories(\Magento\Catalog\Model\Product $product)
+    public function getProductCategories(Product $product)
+    {
+        $cacheKey = $product->getId() . '|' . $product->getStoreId();
+
+        if (!array_key_exists($cacheKey, $this->categories)) {
+            $this->categories[$cacheKey] = $this->loadProductCategories($product);
+        }
+
+        return $this->categories[$cacheKey];
+    }
+
+    /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->categories = [];
+    }
+
+    /**
+     * Loads the product category names joined by the separator, or null when it has none.
+     *
+     * @param Product $product
+     *
+     * @return string|null
+     */
+    private function loadProductCategories(Product $product)
     {
         try {
             /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
