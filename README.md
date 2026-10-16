@@ -97,6 +97,11 @@ Recursos opcionais, no mesmo painel:
 **Adicionado**
 
 - Compatibilidade com **Magento 2.4.8-p4** (PHP 8.2, 8.3 e 8.4) e **Composer 2.9**, validada contra as correções de segurança do boletim APSB26-05, incluindo o checkout de cliente logado.
+- Campo **API Timeout (seconds)**: tempo máximo de espera pela API da Frenet (padrão 30 segundos; a conexão desiste em até 10). Se a API demorar mais, a Frenet fica fora daquela cotação e o carrinho e o checkout seguem normalmente, em vez de travar.
+
+**Alterado**
+
+- Requer `frenet/frenet-php` **1.3.3**, que passa a aplicar os limites de tempo nas chamadas à API.
 
 **Segurança**
 
