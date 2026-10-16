@@ -102,6 +102,7 @@ Recursos opcionais, no mesmo painel:
 **Alterado**
 
 - Requer `frenet/frenet-php` **1.3.3**, que passa a aplicar os limites de tempo nas chamadas à API.
+- A cotação lê cada atributo de produto (peso, dimensões, prazo) e as categorias uma única vez por requisição. Em carrinhos grandes isso reduz bastante as consultas ao banco: com 20 itens, de cerca de 880 para cerca de 510, e o tempo de banco de cerca de 230 ms para cerca de 60 ms. O frete calculado não muda.
 
 **Segurança**
 
