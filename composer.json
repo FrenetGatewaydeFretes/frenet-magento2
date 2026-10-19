@@ -45,7 +45,8 @@
     },
     "require-dev": {
         "magento/magento-coding-standard": ">=4",
-        "phpmd/phpmd": "@stable"
+        "phpmd/phpmd": "@stable",
+        "phpunit/phpunit": "^10.5"
     },
     "license": "proprietary",
     "suggest": {},
@@ -68,17 +69,13 @@
         ],
         "coding-standard": [
             "@phpcs",
+            "@php-compatibility",
             "@phpmd"
         ],
-        "phpunit" : "vendor/bin/phpunit Test",
-        "phpmd": "vendor/bin/phpmd Service/,Model/,Setup/,Controller/,Block/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode",
-        "phpcs-configure": [
-            "vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard"
-        ],
-        "phpcs": [
-            "@phpcs-configure",
-            "vendor/bin/phpcs --standard=Magento2 --severity=8 --extensions=php Service Model Setup Controller Block ViewModel"
-        ]
+        "phpunit": "vendor/bin/phpunit",
+        "phpmd": "vendor/bin/phpmd Api/,Block/,Controller/,Model/,Service/,Setup/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode",
+        "phpcs": "vendor/bin/phpcs --standard=Magento2 --extensions=php,phtml Api Block Controller Model Service Setup Test ViewModel view registration.php",
+        "php-compatibility": "vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 8.2- --extensions=php Api Block Controller Model Service Setup Test ViewModel registration.php"
     },
     "config": {
         "allow-plugins": {
