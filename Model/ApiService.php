@@ -42,6 +42,10 @@ class ApiService implements ApiServiceInterface
      */
     private ?string $token = null;
 
+    /**
+     * @param DirectoryList $directoryList
+     * @param ConfigInterface $config
+     */
     public function __construct(
         private readonly DirectoryList $directoryList,
         private readonly ConfigInterface $config

@@ -12,28 +12,36 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use \Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 
+/**
+ * Former base class for debug logging; nothing in the module extends it any more.
+ *
+ * @deprecated 2.4.8-p4 Inject LoggerInterface directly.
+ * @SuppressWarnings(PHPMD.CamelCasePropertyName)
+ * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+ */
 abstract class FrenetMagentoAbstract
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $_logger;
 
     /**
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger
+        LoggerInterface $logger
     ) {
         $this->_logger = $logger;
     }
 
     /**
-     * Log debug data to file
+     * Writes the exported value of the data to the debug log.
      *
      * @param mixed $debugData
+     *
      * @return void
      */
     protected function _debug($debugData)
@@ -42,9 +50,10 @@ abstract class FrenetMagentoAbstract
     }
 
     /**
-     * Used to call debug method from not Payment Method context
+     * Logs debug data from outside the class hierarchy.
      *
      * @param mixed $debugData
+     *
      * @return void
      */
     public function debugData($debugData)

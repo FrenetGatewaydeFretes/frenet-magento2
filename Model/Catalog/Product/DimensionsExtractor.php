@@ -56,6 +56,11 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
      */
     private array $rawValues = [];
 
+    /**
+     * @param ProductResource $productResource
+     * @param AttributesMappingInterface $attributesMapping
+     * @param ConfigInterface $config
+     */
     public function __construct(
         ProductResource $productResource,
         AttributesMappingInterface $attributesMapping,
@@ -67,7 +72,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setProduct(Product $product): ProductExtractorInterface
     {
@@ -79,6 +84,8 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
+     * Uses the cart item as the first source of dimension values and its product as the fallback source.
+     *
      * @param QuoteItem $cartItem
      *
      * @return $this
@@ -91,7 +98,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getWeight()
     {
@@ -105,7 +112,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getHeight()
     {
@@ -119,7 +126,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getWidth()
     {
@@ -133,7 +140,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getLength()
     {
@@ -147,6 +154,8 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
+     * Reads an attribute from the cart item, then the product, then the stored raw value cached per product and store.
+     *
      * @param string $key
      *
      * @return mixed|null
@@ -188,6 +197,8 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
+     * Accepts only a saved product that is bound to a store, so raw attribute values can be loaded for it.
+     *
      * @param Product $product
      *
      * @return bool

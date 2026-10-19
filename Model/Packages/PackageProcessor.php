@@ -78,6 +78,15 @@ class PackageProcessor implements ResetAfterRequestInterface
      */
     private array $responses = [];
 
+    /**
+     * @param QuoteItemValidatorInterface  $quoteItemValidator
+     * @param ConfigInterface              $config
+     * @param ApiServiceInterface          $apiService
+     * @param RateRequestProviderInterface $rateRequestProvider
+     * @param CouponProcessor              $quoteCouponProcessor
+     * @param TotalsCollector              $totalsCollector
+     * @param CacheManager                 $cacheManager
+     */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         ConfigInterface $config,
@@ -97,6 +106,8 @@ class PackageProcessor implements ResetAfterRequestInterface
     }
 
     /**
+     * Builds the Frenet quote request from the package items and returns the services quoted for it.
+     *
      * @param Package $package
      *
      * @return Service[]
@@ -119,6 +130,8 @@ class PackageProcessor implements ResetAfterRequestInterface
     }
 
     /**
+     * Declares the package item total, plus quote additions and minus discounts, as the shipment invoice value.
+     *
      * @param Package $package
      *
      * @return $this
@@ -156,6 +169,8 @@ class PackageProcessor implements ResetAfterRequestInterface
     }
 
     /**
+     * Adds the item's SKU, quantity, weight, dimensions, categories and fragility to the quote request.
+     *
      * @param PackageItem $packageItem
      *
      * @return $this
@@ -177,6 +192,8 @@ class PackageProcessor implements ResetAfterRequestInterface
     }
 
     /**
+     * Returns the services for the current request, reusing an earlier answer from memory or the cache.
+     *
      * @return Service[]
      */
     private function callService(): array
@@ -253,6 +270,8 @@ class PackageProcessor implements ResetAfterRequestInterface
     }
 
     /**
+     * Starts a new Frenet quote request with the origin and destination postcodes and the cart coupon.
+     *
      * @return $this
      */
     private function initServiceQuote(): self

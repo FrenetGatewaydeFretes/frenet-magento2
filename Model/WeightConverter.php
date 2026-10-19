@@ -28,6 +28,9 @@ class WeightConverter implements WeightConverterInterface
      */
     private const CONFIG_PATH_WEIGHT_UNIT = 'general/locale/weight_unit';
 
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
     ) {

@@ -15,10 +15,13 @@
 namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Type\AbstractType;
 use Magento\Framework\DataObject;
 
 /**
- * Class GroupedBuilder
+ * Fills the grouped quantities of the buy request, defaulting to each associated product's quantity or one.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class GroupedBuilder implements BuilderInterface
@@ -37,6 +40,8 @@ class GroupedBuilder implements BuilderInterface
     }
 
     /**
+     * Requests every associated product with its default quantity, or one when it has none.
+     *
      * @param ProductInterface $product
      * @param DataObject       $request
      *
@@ -44,12 +49,12 @@ class GroupedBuilder implements BuilderInterface
      */
     private function buildDefaultOptions(ProductInterface $product, DataObject $request)
     {
-        /** @var \Magento\Catalog\Model\Product\Type\AbstractType $typeInstance */
+        /** @var AbstractType $typeInstance */
         $typeInstance = $product->getTypeInstance();
 
         $associatedProductsQty = [];
 
-        /** @var \Magento\Catalog\Model\Product $associatedProduct */
+        /** @var Product $associatedProduct */
         foreach ($typeInstance->getAssociatedProducts($product) as $associatedProduct) {
             $associatedProductsQty[$associatedProduct->getId()] = $associatedProduct->getQty() ?: 1;
         }

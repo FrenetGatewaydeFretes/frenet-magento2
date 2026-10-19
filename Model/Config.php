@@ -54,6 +54,12 @@ class Config implements ConfigInterface
      */
     public const MAX_API_TIMEOUT = 120.0;
 
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreManagerInterface $storeManager
+     * @param ApiHostnameValidator $apiHostnameValidator
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager,

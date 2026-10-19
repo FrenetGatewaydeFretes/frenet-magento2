@@ -15,18 +15,19 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class PackagesManager
+ * Fills packages with the cart items, opening a new package whenever the next batch would exceed the weight limit.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageManager
 {
     /**
-     * @var Package
+     * @var Package|null
      */
     private $currentPackage;
 

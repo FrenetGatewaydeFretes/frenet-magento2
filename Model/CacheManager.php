@@ -32,6 +32,11 @@ class CacheManager
      */
     private const KEY_PREFIX = 'FRENET_QUOTE_';
 
+    /**
+     * @param SerializerInterface $serializer
+     * @param StateInterface      $cacheState
+     * @param CacheInterface      $cache
+     */
     public function __construct(
         private readonly SerializerInterface $serializer,
         private readonly StateInterface $cacheState,

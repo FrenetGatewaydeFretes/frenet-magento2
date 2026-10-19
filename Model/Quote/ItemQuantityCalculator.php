@@ -20,7 +20,7 @@ use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class ItemQuantityCalculator
+ * Resolves the shippable quantity of a cart item per product type, capped at the configured maximum unit quantity.
  */
 class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
 {
@@ -38,11 +38,7 @@ class ItemQuantityCalculator implements ItemQuantityCalculatorInterface
     }
 
     /**
-     * Calculates the effective quantity of a quote item, capped at the configured maximum.
-     *
-     * @param QuoteItem $item
-     *
-     * @return float
+     * @inheritDoc
      */
     public function calculate(QuoteItem $item)
     {

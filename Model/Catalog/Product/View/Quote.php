@@ -27,12 +27,11 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class Quote
+ * Quotes Frenet shipping for a single product page request, returning the available services with delivery forecasts.
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
@@ -73,6 +72,16 @@ class Quote implements QuoteProductInterface
      */
     private $config;
 
+    /**
+     * @param ProductRepositoryInterface $productRepository
+     * @param RateRequestProviderInterface $rateRequestProvider
+     * @param Calculator $calculator
+     * @param RateRequestBuilder $rateRequestBuilder
+     * @param LoggerInterface $logger
+     * @param DeliveryTimeCalculatorInterface $deliveryTimeCalculator
+     * @param ConfigInterface $config
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         ProductRepositoryInterface $productRepository,
         RateRequestProviderInterface $rateRequestProvider,
@@ -125,7 +134,14 @@ class Quote implements QuoteProductInterface
     }
 
     /**
-     * @inheritDoc
+     * Builds the rate request for a quotable product, runs the calculator with it and clears the request afterwards.
+     *
+     * @param ProductInterface $product
+     * @param string $postcode
+     * @param int $qty
+     * @param mixed[] $options
+     *
+     * @return mixed[][]
      */
     private function quote(ProductInterface $product, string $postcode, int $qty = 1, $options = []): array
     {
@@ -166,9 +182,11 @@ class Quote implements QuoteProductInterface
     }
 
     /**
+     * Converts the returned services into result rows, skipping the ones flagged as errors.
+     *
      * @param ServiceInterface[] $services
      *
-     * @return array
+     * @return mixed[][]
      */
     private function prepareResult(array $services): array
     {
@@ -186,21 +204,23 @@ class Quote implements QuoteProductInterface
     }
 
     /**
+     * Builds the result row of a service, filling the forecast message with the calculated delivery time.
+     *
      * @param ServiceInterface $service
      *
-     * @return array
+     * @return mixed[]
      * @throws LocalizedException
      */
     private function prepareService(ServiceInterface $service): array
     {
-            $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
+        $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
 
-            $pattern = '/\{\{d\}\}/i';
-            $replacement = "".$deliveryTime;
-            $subject = $this->config->getShippingForecastMessage();
-            $forecast = preg_replace($pattern, $replacement, $subject);
+        $pattern = '/\{\{d\}\}/i';
+        $replacement = "" . $deliveryTime;
+        $subject = $this->config->getShippingForecastMessage();
+        $forecast = preg_replace($pattern, $replacement, $subject);
 
-            $serviceDescription = $service->getServiceDescription();
+        $serviceDescription = $service->getServiceDescription();
         if (is_array($serviceDescription)) {
             $serviceDescription = implode(" ", $serviceDescription);
         }

@@ -18,11 +18,13 @@ namespace Frenet\Shipping\Model\Quote\Calculators;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class PriceCalculatorInterface
+ * Prices a cart item for the declared shipment value, with one implementation per product type.
  */
 interface PriceCalculatorInterface
 {
     /**
+     * Returns the unit price of the item.
+     *
      * @param QuoteItem $item
      *
      * @return float
@@ -30,6 +32,8 @@ interface PriceCalculatorInterface
     public function getPrice(QuoteItem $item): float;
 
     /**
+     * Returns the final unit price of the item, derived from its row total and shippable quantity.
+     *
      * @param QuoteItem $item
      *
      * @return float

@@ -16,21 +16,30 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
+use Magento\Quote\Model\Quote\ItemFactory;
 
+/**
+ * Wraps a catalog product into a standalone quote item priced at its final price for the given quantity.
+ */
 class QuoteItemConvertor
 {
     /**
-     * @var \Magento\Quote\Model\Quote\ItemFactory
+     * @var ItemFactory
      */
     private $itemFactory;
 
+    /**
+     * @param ItemFactory $itemFactory
+     */
     public function __construct(
-        \Magento\Quote\Model\Quote\ItemFactory $itemFactory
+        ItemFactory $itemFactory
     ) {
         $this->itemFactory = $itemFactory;
     }
 
     /**
+     * Converts the product into a quote item that is not attached to any quote.
+     *
      * @param ProductInterface $product
      * @param int              $qty
      *
@@ -42,6 +51,8 @@ class QuoteItemConvertor
     }
 
     /**
+     * Creates the quote item with the product ID, store, quantity, final price and row total.
+     *
      * @param ProductInterface $product
      * @param int              $qty
      *

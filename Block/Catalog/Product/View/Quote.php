@@ -19,15 +19,15 @@ use Frenet\Shipping\ViewModel\Catalog\Product\View\Quote as ViewModel;
 use Magento\Catalog\Block\Product\View;
 
 /**
- * Class Quote
+ * Renders the product page shipping quote widget and points its JS component at the quote endpoint.
  *
  * @method ViewModel getViewModel()
- *
- * @package Frenet\Shipping\Block\Catalog\Product\View
  */
 class Quote extends View
 {
     /**
+     * Hands this block to the view model so it can read the product and base URL being rendered.
+     *
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
     protected function _construct()
@@ -37,7 +37,9 @@ class Quote extends View
     }
 
     /**
-     * @return array
+     * Returns the client-side validation rules applied to the quote form input.
+     *
+     * @return bool[]
      */
     public function getValidators()
     {
@@ -57,6 +59,8 @@ class Quote extends View
     }
 
     /**
+     * Renders nothing when the product page quote is disabled or not allowed for the product type.
+     *
      * @return string
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */

@@ -15,42 +15,46 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup\Patch\Data;
 
+use Exception;
 use Frenet\Shipping\Model\Catalog\ProductType;
-use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
+use Magento\Eav\Setup\EavSetup;
+use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Console\Cli;
+use Magento\Framework\Phrase;
+use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Psr\Log\LoggerInterface;
 
 /**
- * Class EavAttributeInstaller
+ * Creates catalog product EAV attributes from partial definitions merged over the module's shipping defaults.
  */
-class EavAttributeInstaller  implements DataPatchInterface
+class EavAttributeInstaller implements DataPatchInterface
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var \Magento\Eav\Setup\EavSetupFactory
+     * @var EavSetupFactory
      */
     private $setupFactory;
 
     /**
-     * EavAttributeInstaller constructor.
-     *
-     * @param \Magento\Eav\Setup\EavSetupFactory $setupFactory
-     * @param \Psr\Log\LoggerInterface           $logger
+     * @param EavSetupFactory $setupFactory
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        \Magento\Eav\Setup\EavSetupFactory $setupFactory,
-        \Psr\Log\LoggerInterface $logger
+        EavSetupFactory $setupFactory,
+        LoggerInterface $logger
     ) {
         $this->setupFactory = $setupFactory;
         $this->logger = $logger;
     }
 
-
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function apply()
     {
@@ -58,7 +62,7 @@ class EavAttributeInstaller  implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function getDependencies()
     {
@@ -66,7 +70,9 @@ class EavAttributeInstaller  implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * Returns the module version this patch was introduced in.
+     *
+     * @return string
      */
     public static function getVersion()
     {
@@ -74,7 +80,7 @@ class EavAttributeInstaller  implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getAliases()
     {
@@ -82,21 +88,23 @@ class EavAttributeInstaller  implements DataPatchInterface
     }
 
     /**
-     * @param string $code
-     * @param array  $config
+     * Adds the product attribute and logs instead of failing the setup when Magento rejects it.
+     *
+     * @param string  $code
+     * @param mixed[] $config
      *
      * @return bool
      */
     public function install($code, array $config = [])
     {
-        /** @var \Magento\Eav\Setup\EavSetup $setup */
+        /** @var EavSetup $setup */
         $setup = $this->setupFactory->create();
         $attribute = $this->prepareConfiguration($config);
         try {
             $setup->addAttribute($this->getEntityType(), $code, $attribute);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->critical($e);
 
             return false;
@@ -104,15 +112,21 @@ class EavAttributeInstaller  implements DataPatchInterface
     }
 
     /**
+     * Returns the EAV entity type the attributes are attached to.
+     *
      * @return string
      */
     protected function getEntityType()
     {
-        return \Magento\Catalog\Model\Product::ENTITY;
+        return Product::ENTITY;
     }
 
     /**
-     * @param array $config
+     * Fills the attribute definition with the defaults for a global, user-defined shipping attribute.
+     *
+     * @param mixed[] $config
+     *
+     * @return mixed[]
      */
     private function prepareConfiguration(array $config = [])
     {
@@ -125,7 +139,7 @@ class EavAttributeInstaller  implements DataPatchInterface
             'type'         => 'text',
             'group'        => $this->getAttributeGroup(),
             'backend'      => null,
-            'global'       => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+            'global'       => ScopedAttributeInterface::SCOPE_GLOBAL,
             'visible'      => true,
             'required'     => false,
             'user_defined' => true,
@@ -136,7 +150,9 @@ class EavAttributeInstaller  implements DataPatchInterface
     }
 
     /**
-     * @return \Magento\Framework\Phrase
+     * Returns the product attribute group the shipping attributes are placed in.
+     *
+     * @return Phrase
      */
     private function getAttributeGroup()
     {

@@ -17,12 +17,17 @@ namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 
+/**
+ * Contract for filling the product type options of the buy request used by the product page quote.
+ */
 interface BuilderInterface
 {
     /**
+     * Fills the buy request with the type options from the given ones, or with the product defaults.
+     *
      * @param ProductInterface $product
      * @param DataObject       $request
-     * @param array            $options
+     * @param mixed[]          $options
      *
      * @return void
      */

@@ -18,7 +18,8 @@ use Frenet\Shipping\Model\Quote\Calculators\PriceCalculatorFactory;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class ItemPriceCalculator
+ * Delegates item pricing to the calculator that matches the item's product type.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class ItemPriceCalculator
@@ -28,6 +29,9 @@ class ItemPriceCalculator
      */
     private $priceCalculatorFactory;
 
+    /**
+     * @param PriceCalculatorFactory $priceCalculatorFactory
+     */
     public function __construct(
         PriceCalculatorFactory $priceCalculatorFactory
     ) {
@@ -35,6 +39,8 @@ class ItemPriceCalculator
     }
 
     /**
+     * Returns the item's unit price from the calculator for its product type.
+     *
      * @param QuoteItem $item
      *
      * @return float
@@ -45,6 +51,8 @@ class ItemPriceCalculator
     }
 
     /**
+     * Returns the item's final unit price from the calculator for its product type.
+     *
      * @param QuoteItem $item
      *
      * @return float

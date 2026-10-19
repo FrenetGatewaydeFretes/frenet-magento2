@@ -15,11 +15,18 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface;
+use Frenet\ObjectType\Entity\Shipping\InfoInterface;
+use Frenet\Shipping\Model\Carrier\Frenet as FrenetCarrier;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Api\Data\ShipmentTrackInterface;
 use Magento\Sales\Api\ShipmentTrackRepositoryInterface;
+use Magento\Sales\Model\Order\Shipment\Track;
 
 /**
- * Class ServiceFinder
+ * Finds the Frenet shipping service behind a tracking number by matching it against the order's shipping description.
  */
 class ServiceFinder implements ServiceFinderInterface
 {
@@ -38,6 +45,11 @@ class ServiceFinder implements ServiceFinderInterface
      */
     private $criteriaBuilder;
 
+    /**
+     * @param ApiServiceInterface              $apiService
+     * @param ShipmentTrackRepositoryInterface $trackRepository
+     * @param SearchCriteriaBuilder            $criteriaBuilder
+     */
     public function __construct(
         ApiServiceInterface $apiService,
         ShipmentTrackRepositoryInterface $trackRepository,
@@ -49,7 +61,7 @@ class ServiceFinder implements ServiceFinderInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function findByTrackingNumber($trackingNumber)
     {
@@ -59,7 +71,7 @@ class ServiceFinder implements ServiceFinderInterface
             return null;
         }
 
-        /** @var \Frenet\ObjectType\Entity\Shipping\InfoInterface $info */
+        /** @var InfoInterface $info */
         $info = $this->apiService->shipping()->info()->execute();
         $services = (array) $info->getAvailableShippingServices();
 
@@ -75,14 +87,16 @@ class ServiceFinder implements ServiceFinderInterface
     }
 
     /**
-     * @param \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface[] $services
-     * @param string                                                     $name
+     * Returns the service whose description equals the trimmed name, or false when none does.
      *
-     * @return bool|\Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface
+     * @param ServiceInterface[] $services
+     * @param string             $name
+     *
+     * @return bool|ServiceInterface
      */
     private function machServiceByName(array $services, $name)
     {
-        /** @var \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface $service */
+        /** @var ServiceInterface $service */
         foreach ($services as $service) {
             if (trim($name) == $service->getServiceDescription()) {
                 return $service;
@@ -93,14 +107,16 @@ class ServiceFinder implements ServiceFinderInterface
     }
 
     /**
+     * Splits the order's shipping description into candidate service names, starting from the last piece.
+     *
      * @param string $trackingNumber
      *
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return string[]|null
+     * @throws LocalizedException
      */
     private function getShipmentPossibleNames($trackingNumber)
     {
-        /** @var \Magento\Sales\Model\Order\Shipment\Track $track */
+        /** @var Track $track */
         $track = $this->getShipmentTrack($trackingNumber);
 
         if (empty($track)) {
@@ -108,7 +124,7 @@ class ServiceFinder implements ServiceFinderInterface
         }
 
         $shippingDescription = $track->getShipment()->getOrder()->getShippingDescription();
-        $parts = explode(\Frenet\Shipping\Model\Carrier\Frenet::STR_SEPARATOR, $shippingDescription);
+        $parts = explode(FrenetCarrier::STR_SEPARATOR, $shippingDescription);
 
         /**
          * Reversing the array makes it more performatic because it begins searching by the last piece.
@@ -117,13 +133,15 @@ class ServiceFinder implements ServiceFinderInterface
     }
 
     /**
+     * Loads the first shipment track registered with the tracking number.
+     *
      * @param string $trackingNumber
      *
-     * @return \Magento\Sales\Api\Data\ShipmentTrackInterface
+     * @return ShipmentTrackInterface|null
      */
     private function getShipmentTrack($trackingNumber)
     {
-        /** @var \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria */
+        /** @var SearchCriteriaInterface $searchCriteria */
         $searchCriteria = $this->criteriaBuilder
             ->addFilter('track_number', $trackingNumber)
             ->create();

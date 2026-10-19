@@ -18,7 +18,8 @@ use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class DefaultPriceCalculator
+ * Prices an item from its own row total, falling back to the product final price while the total is still empty.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class DefaultPriceCalculator implements PriceCalculatorInterface
@@ -28,6 +29,9 @@ class DefaultPriceCalculator implements PriceCalculatorInterface
      */
     private $itemQtyCalculator;
 
+    /**
+     * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
+     */
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator
     ) {

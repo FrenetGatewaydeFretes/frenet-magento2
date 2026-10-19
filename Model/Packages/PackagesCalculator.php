@@ -25,6 +25,14 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
  */
 class PackagesCalculator
 {
+    /**
+     * @param MultiQuoteValidatorInterface $multiQuoteValidator
+     * @param PackageProcessor             $packageProcessor
+     * @param PackageManager               $packageManager
+     * @param PackageLimit                 $packageLimit
+     * @param PackageMatching              $packageMatching
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly MultiQuoteValidatorInterface $multiQuoteValidator,
         private readonly PackageProcessor $packageProcessor,

@@ -18,7 +18,7 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 use Frenet\Shipping\Model\ConfigInterface;
 
 /**
- * Class AttributesMapping
+ * Resolves the product attribute codes used for weight, dimensions, lead time and fragility, with module defaults.
  */
 class AttributesMapping implements AttributesMappingInterface
 {
@@ -27,6 +27,9 @@ class AttributesMapping implements AttributesMappingInterface
      */
     private $config;
 
+    /**
+     * @param ConfigInterface $config
+     */
     public function __construct(
         ConfigInterface $config
     ) {
@@ -34,7 +37,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getWeightAttributeCode()
     {
@@ -42,7 +45,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getHeightAttributeCode()
     {
@@ -50,7 +53,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getLengthAttributeCode()
     {
@@ -58,7 +61,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getWidthAttributeCode()
     {
@@ -66,7 +69,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getLeadTimeAttributeCode()
     {
@@ -74,7 +77,7 @@ class AttributesMapping implements AttributesMappingInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getFragileAttributeCode()
     {

@@ -22,13 +22,16 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
  */
 class Calculator implements CalculatorInterface
 {
+    /**
+     * @param Packages\PackagesCalculator $packagesCalculator
+     */
     public function __construct(
         private readonly Packages\PackagesCalculator $packagesCalculator
     ) {
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getQuote(): array
     {
@@ -42,6 +45,8 @@ class Calculator implements CalculatorInterface
     }
 
     /**
+     * Turns the pipe separators in the service description into line breaks for display.
+     *
      * @param Service $service
      *
      * @return Service

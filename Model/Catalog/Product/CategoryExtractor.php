@@ -29,7 +29,7 @@ class CategoryExtractor implements ResetAfterRequestInterface
     /**
      * @var string
      */
-    const CATEGORY_SEPARATOR = '|';
+    public const CATEGORY_SEPARATOR = '|';
 
     /**
      * @var array<string, string|null>
@@ -37,6 +37,8 @@ class CategoryExtractor implements ResetAfterRequestInterface
     private array $categories = [];
 
     /**
+     * Returns the product category names joined by the separator, cached per product and store for the request.
+     *
      * @param Product $product
      *
      * @return string|null

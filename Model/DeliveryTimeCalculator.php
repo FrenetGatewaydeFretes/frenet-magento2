@@ -35,6 +35,11 @@ class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface, ResetAf
      */
     private array $leadTimes = [];
 
+    /**
+     * @param ProductResource              $productResource
+     * @param ConfigInterface              $config
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly ProductResource $productResource,
         private readonly ConfigInterface $config,

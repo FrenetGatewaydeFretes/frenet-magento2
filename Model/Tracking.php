@@ -15,8 +15,11 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Command\Tracking\TrackingInfoInterface as TrackingInfoCommand;
+use Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface;
+
 /**
- * Class Tracking
+ * Fetches the tracking events of a shipment from the Frenet tracking API.
  */
 class Tracking implements TrackingInterface
 {
@@ -26,8 +29,6 @@ class Tracking implements TrackingInterface
     private $apiService;
 
     /**
-     * Tracking constructor.
-     *
      * @param ApiService $apiService
      */
     public function __construct(
@@ -37,18 +38,18 @@ class Tracking implements TrackingInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function track($number, $shippingServiceCode)
     {
-        /** @var \Frenet\Command\Tracking\TrackingInfoInterface $tracking */
+        /** @var TrackingInfoCommand $tracking */
         $tracking = $this->apiService
             ->tracking()
             ->trackingInfo()
             ->setShippingServiceCode($shippingServiceCode)
             ->setTrackingNumber($number);
 
-        /** @var \Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface $info */
+        /** @var TrackingInfoInterface $info */
         $info = $tracking->execute();
 
         return $info;
