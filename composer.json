@@ -45,7 +45,9 @@
     },
     "require-dev": {
         "magento/magento-coding-standard": ">=4",
+        "bitexpert/phpstan-magento": "^0.44",
         "phpmd/phpmd": "@stable",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.5"
     },
     "license": "proprietary",
@@ -70,9 +72,11 @@
         "coding-standard": [
             "@phpcs",
             "@php-compatibility",
-            "@phpmd"
+            "@phpmd",
+            "@phpstan"
         ],
         "phpunit": "vendor/bin/phpunit",
+        "phpstan": "vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
         "phpmd": "vendor/bin/phpmd Api/,Block/,Controller/,Model/,Service/,Setup/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode",
         "phpcs": "vendor/bin/phpcs --standard=Magento2 --extensions=php,phtml Api Block Controller Model Service Setup Test ViewModel view registration.php",
         "php-compatibility": "vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 8.2- --extensions=php Api Block Controller Model Service Setup Test ViewModel registration.php"

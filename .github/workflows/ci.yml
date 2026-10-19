@@ -80,5 +80,5 @@ jobs:
         with:
           dependency-versions: highest
 
-      - name: PHP_CodeSniffer, PHPCompatibility and PHPMD
+      - name: PHP_CodeSniffer, PHPCompatibility, PHPMD and PHPStan
         run: composer coding-standard
