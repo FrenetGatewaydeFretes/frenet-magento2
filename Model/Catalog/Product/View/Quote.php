@@ -135,9 +135,12 @@ class Quote implements QuoteProductInterface
 
         $rateRequest = $this->rateRequestBuilder->build($product, $postcode, $qty, $options);
         $this->rateRequestProvider->setRateRequest($rateRequest);
-        $services = $this->calculator->getQuote();
 
-        return $this->prepareResult($services);
+        try {
+            return $this->prepareResult($this->calculator->getQuote());
+        } finally {
+            $this->rateRequestProvider->clear();
+        }
     }
 
     /**

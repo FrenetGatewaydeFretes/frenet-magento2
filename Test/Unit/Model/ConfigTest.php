@@ -15,6 +15,7 @@ namespace Frenet\Shipping\Test\Unit\Model;
 
 use Frenet\Shipping\Model\Config;
 use Frenet\Shipping\Model\Config\ApiHostnameValidator;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -35,22 +36,83 @@ class ConfigTest extends TestCase
     private MockObject $scopeConfig;
 
     /**
+     * @var StoreManagerInterface&MockObject
+     */
+    private MockObject $storeManager;
+
+    /**
+     * @var RateRequestProviderInterface&MockObject
+     */
+    private MockObject $rateRequestProvider;
+
+    /**
      * @var Config
      */
     private Config $subject;
 
     /**
-     * Builds the config reader over a mocked scope config and store manager.
+     * Builds the config reader over a mocked scope config, store manager and rate request provider.
      *
      * @return void
      */
     protected function setUp(): void
     {
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
-        $storeManager = $this->createMock(StoreManagerInterface::class);
-        $storeManager->method('getStore')->willReturn($this->createMock(StoreInterface::class));
+        $this->storeManager = $this->createMock(StoreManagerInterface::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
 
-        $this->subject = new Config($this->scopeConfig, $storeManager, new ApiHostnameValidator());
+        $this->subject = new Config(
+            $this->scopeConfig,
+            $this->storeManager,
+            new ApiHostnameValidator(),
+            $this->rateRequestProvider
+        );
+    }
+
+    /**
+     * Confirms a read without an explicit store uses the store being quoted, such as an admin order's store.
+     *
+     * @return void
+     */
+    public function testShouldReadTheQuotedStoreWhenNoStoreIsGiven(): void
+    {
+        $quotedStore = $this->createMock(StoreInterface::class);
+        $this->rateRequestProvider->method('getStoreId')->willReturn(3);
+        $this->storeManager->expects($this->once())->method('getStore')->with(3)->willReturn($quotedStore);
+        $this->scopeConfig->expects($this->once())
+            ->method('getValue')
+            ->with('carriers/frenetshipping/token', 'store', $this->identicalTo($quotedStore))
+            ->willReturn('website-token');
+
+        $this->assertSame('website-token', $this->subject->getToken());
+    }
+
+    /**
+     * Confirms an explicit store wins over the store being quoted.
+     *
+     * @return void
+     */
+    public function testShouldReadTheGivenStoreWhenOneIsPassed(): void
+    {
+        $this->rateRequestProvider->method('getStoreId')->willReturn(3);
+        $this->storeManager->expects($this->once())->method('getStore')->with(5)
+            ->willReturn($this->createMock(StoreInterface::class));
+
+        $this->subject->getToken(5);
+    }
+
+    /**
+     * Confirms the current store is used when nothing is being quoted.
+     *
+     * @return void
+     */
+    public function testShouldReadTheCurrentStoreWhenNothingIsQuoted(): void
+    {
+        $this->rateRequestProvider->method('getStoreId')->willReturn(null);
+        $this->storeManager->expects($this->once())->method('getStore')->with(null)
+            ->willReturn($this->createMock(StoreInterface::class));
+
+        $this->subject->getToken();
     }
 
     /**

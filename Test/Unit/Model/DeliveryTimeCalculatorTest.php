@@ -22,7 +22,6 @@ use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item;
 use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -52,11 +51,6 @@ class DeliveryTimeCalculatorTest extends TestCase
     {
         $this->productResource = $this->createMock(ProductResource::class);
 
-        $store = $this->createMock(Store::class);
-        $store->method('getId')->willReturn(1);
-        $storeManager = $this->createMock(StoreManagerInterface::class);
-        $storeManager->method('getStore')->willReturn($store);
-
         $config = $this->createMock(ConfigInterface::class);
         $config->method('getAdditionalLeadTime')->willReturn(1);
 
@@ -66,7 +60,7 @@ class DeliveryTimeCalculatorTest extends TestCase
         $provider = $this->createMock(RateRequestProviderInterface::class);
         $provider->method('getRateRequest')->willReturn($rateRequest);
 
-        $this->subject = new DeliveryTimeCalculator($this->productResource, $storeManager, $config, $provider);
+        $this->subject = new DeliveryTimeCalculator($this->productResource, $config, $provider);
     }
 
     /**
@@ -84,6 +78,21 @@ class DeliveryTimeCalculatorTest extends TestCase
         foreach ([1, 3, 6] as $forecast) {
             $this->assertSame($forecast + 5 + 1, $this->subject->calculate($this->service($forecast)));
         }
+    }
+
+    /**
+     * Confirms the missing lead time is read in the store the product is quoted for, not the current store.
+     *
+     * @return void
+     */
+    public function testShouldReadTheLeadTimeInTheProductStoreWhenItIsMissing(): void
+    {
+        $this->productResource->expects($this->once())
+            ->method('getAttributeRawValue')
+            ->with(7, 'lead_time', $this->callback(fn (Store $store) => $store->getId() === 4))
+            ->willReturn('0');
+
+        $this->subject->calculate($this->service(1));
     }
 
     /**
@@ -110,8 +119,13 @@ class DeliveryTimeCalculatorTest extends TestCase
      */
     private function product(int $id, int $leadTime): MockObject
     {
+        $store = $this->createMock(Store::class);
+        $store->method('getId')->willReturn(4);
+
         $product = $this->createMock(Product::class);
         $product->method('getId')->willReturn($id);
+        $product->method('getStoreId')->willReturn(4);
+        $product->method('getStore')->willReturn($store);
         $product->method('getData')->willReturnCallback(fn ($key = null) => $key === 'lead_time' ? $leadTime : null);
 
         return $product;

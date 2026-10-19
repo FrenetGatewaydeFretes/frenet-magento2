@@ -21,7 +21,6 @@ use Frenet\Shipping\Model\Catalog\Product\CategoryExtractor;
 use Frenet\Shipping\Model\Quote\ItemPriceCalculator;
 use Frenet\Shipping\Model\WeightConverterInterface;
 use Magento\Catalog\Model\ResourceModel\ProductFactory;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
@@ -41,11 +40,6 @@ class PackageItem
      * @var float
      */
     private $qty;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManagement;
 
     /**
      * @var ProductFactory
@@ -76,7 +70,6 @@ class PackageItem
      * PackageItem constructor.
      *
      * @param QuoteItem                    $cartItem
-     * @param StoreManagerInterface        $storeManagement
      * @param ProductFactory               $productResourceFactory
      * @param WeightConverterInterface     $weightConverter
      * @param CategoryExtractor            $categoryExtractor
@@ -85,7 +78,6 @@ class PackageItem
      */
     public function __construct(
         QuoteItem $cartItem,
-        StoreManagerInterface $storeManagement,
         ProductFactory $productResourceFactory,
         WeightConverterInterface $weightConverter,
         CategoryExtractor $categoryExtractor,
@@ -93,7 +85,6 @@ class PackageItem
         ItemPriceCalculator $itemPriceCalculator
     ) {
         $this->cartItem = $cartItem;
-        $this->storeManagement = $storeManagement;
         $this->productResourceFactory = $productResourceFactory;
         $this->weightConverter = $weightConverter;
         $this->categoryExtractor = $categoryExtractor;
@@ -268,7 +259,7 @@ class PackageItem
             $value = (bool) $resource->getAttributeRawValue(
                 $product->getId(),
                 AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE,
-                $this->storeManagement->getStore()
+                $product->getStore()
             );
 
             return (bool) $value;

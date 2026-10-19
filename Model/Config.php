@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Model\Carrier\Frenet;
 use Frenet\Shipping\Model\Config\ApiHostnameValidator;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterface;
@@ -56,7 +57,8 @@ class Config implements ConfigInterface
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager,
-        private readonly ApiHostnameValidator $apiHostnameValidator
+        private readonly ApiHostnameValidator $apiHostnameValidator,
+        private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
     }
 
@@ -300,7 +302,7 @@ class Config implements ConfigInterface
     }
 
     /**
-     * Resolves the store to use, falling back to the default store view.
+     * Resolves the given store, else the store being quoted, else the current one, falling back to the default view.
      *
      * @param string|int|StoreInterface|null $store
      *
@@ -308,6 +310,8 @@ class Config implements ConfigInterface
      */
     private function getStore($store = null)
     {
+        $store ??= $this->rateRequestProvider->getStoreId();
+
         try {
             return $this->storeManager->getStore($store);
         } catch (NoSuchEntityException $exception) {

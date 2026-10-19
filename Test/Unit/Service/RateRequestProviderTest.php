@@ -92,4 +92,38 @@ class RateRequestProviderTest extends TestCase
 
         $this->subject->getRateRequest();
     }
+
+    /**
+     * Confirms no store is reported while no rate request is being quoted.
+     *
+     * @return void
+     */
+    public function testShouldReportNoStoreWhenNoRateRequestIsSet(): void
+    {
+        $this->assertNull($this->subject->getStoreId());
+    }
+
+    /**
+     * Confirms the store of the quoted rate request is reported as an integer.
+     *
+     * @return void
+     */
+    public function testShouldReportTheQuotedStoreWhenTheRateRequestCarriesOne(): void
+    {
+        $this->subject->setRateRequest(new RateRequest(['store_id' => '3']));
+
+        $this->assertSame(3, $this->subject->getStoreId());
+    }
+
+    /**
+     * Confirms a rate request without a store, such as the product page quote, reports none.
+     *
+     * @return void
+     */
+    public function testShouldReportNoStoreWhenTheRateRequestHasNone(): void
+    {
+        $this->subject->setRateRequest(new RateRequest());
+
+        $this->assertNull($this->subject->getStoreId());
+    }
 }

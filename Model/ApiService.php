@@ -28,7 +28,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\FileSystemException;
 
 /**
- * Boots the frenet-php API client once per request and applies the store's connection/debug settings to it.
+ * Boots the frenet-php API client once per token and applies the quoted store's connection/debug settings to it.
  */
 class ApiService implements ApiServiceInterface
 {
@@ -38,9 +38,9 @@ class ApiService implements ApiServiceInterface
     private ?ApiInterface $api = null;
 
     /**
-     * @var bool
+     * @var string|null
      */
-    private bool $isInitialized = false;
+    private ?string $token = null;
 
     public function __construct(
         private readonly DirectoryList $directoryList,
@@ -76,7 +76,7 @@ class ApiService implements ApiServiceInterface
     }
 
     /**
-     * Initializes the API Service.
+     * Initializes the API client, again whenever the quoted store uses a different token.
      *
      * @throws DependencyException
      * @throws NotFoundException
@@ -86,15 +86,17 @@ class ApiService implements ApiServiceInterface
      */
     private function init(): void
     {
-        if ($this->isInitialized) {
+        $token = $this->config->getToken();
+
+        if ($this->api !== null && $token === $this->token) {
             return;
         }
 
-        $this->api = ApiFactory::create($this->config->getToken());
+        $this->api = ApiFactory::create($token);
+        $this->token = $token;
 
         $this->initConnection();
         $this->initLogs();
-        $this->isInitialized = true;
     }
 
     /**

@@ -17,16 +17,18 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface as QuoteServiceInte
 use Frenet\Shipping\Model\Carrier\Frenet;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\DeliveryTimeCalculatorInterface;
+use Frenet\Shipping\Service\RateRequestProvider;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateResult\Method;
 use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
 use Magento\Shipping\Model\Rate\Result as RateResult;
 use Magento\Shipping\Model\Rate\ResultFactory as RateResultFactory;
-use Magento\Store\Api\Data\StoreInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 
 /**
@@ -41,11 +43,6 @@ class FrenetTest extends TestCase
     private MockObject $config;
 
     /**
-     * @var StoreManagerInterface&MockObject
-     */
-    private MockObject $storeManager;
-
-    /**
      * @var Frenet
      */
     private Frenet $subject;
@@ -58,13 +55,9 @@ class FrenetTest extends TestCase
     protected function setUp(): void
     {
         $this->config = $this->createMock(ConfigInterface::class);
-        $this->storeManager = $this->createMock(StoreManagerInterface::class);
 
-        // The carrier extends AbstractCarrierOnline (24 framework dependencies); build it without the
-        // constructor and inject only the collaborators these gate methods actually touch.
         $this->subject = (new ReflectionClass(Frenet::class))->newInstanceWithoutConstructor();
         $this->setDependency('config', $this->config);
-        $this->setDependency('storeManagement', $this->storeManager);
     }
 
     /**
@@ -121,9 +114,32 @@ class FrenetTest extends TestCase
         $this->config->method('isActive')->willReturn(true);
         $this->config->method('getOriginPostcode')->willReturn('80010-030');
         $this->config->method('getToken')->willReturn('a-frenet-token');
-        $this->storeManager->method('getStore')->willReturn($this->createMock(StoreInterface::class));
 
         $this->assertTrue($this->subject->canCollectRates());
+    }
+
+    /**
+     * Confirms the availability check already reads the quoted store, and the request is dropped when it fails.
+     *
+     * @return void
+     */
+    public function testShouldCheckAvailabilityForTheQuotedStoreWhenCollectingRates(): void
+    {
+        $provider = new RateRequestProvider();
+        $this->setDependency('rateRequestProvider', $provider);
+        $this->setDependency('_scopeConfig', $this->createMock(ScopeConfigInterface::class));
+        $this->setDependency('_logger', $this->createMock(LoggerInterface::class));
+
+        $storeSeen = null;
+        $this->config->method('isActive')->willReturnCallback(function () use ($provider, &$storeSeen) {
+            $storeSeen = $provider->getStoreId();
+            return false;
+        });
+
+        $this->subject->collectRates(new RateRequest(['store_id' => 3]));
+
+        $this->assertSame(3, $storeSeen);
+        $this->assertNull($provider->getStoreId());
     }
 
     /**

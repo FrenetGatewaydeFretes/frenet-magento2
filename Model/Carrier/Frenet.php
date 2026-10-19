@@ -34,7 +34,6 @@ use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Xml\Security;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateResult\Error as RateResultError;
@@ -51,7 +50,6 @@ use Magento\Shipping\Model\Tracking\Result\ErrorFactory as TrackingResultErrorFa
 use Magento\Shipping\Model\Tracking\Result\Status;
 use Magento\Shipping\Model\Tracking\Result\StatusFactory;
 use Magento\Shipping\Model\Tracking\ResultFactory as TrackingResultFactory;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -149,7 +147,10 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     public function collectRates(RateRequest $request)
     {
         try {
+            $this->rateRequestProvider->setRateRequest($request);
+
             if (!$this->canCollectRates()) {
+                $this->rateRequestProvider->clear();
                 $this->_logger->debug(
                     'Frenet carrier unavailable: inactive, or missing origin postcode / API token.'
                 );
@@ -157,8 +158,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
                 return $this->getErrorMessage();
             }
 
-            /** This service will be used all the way long. */
-            $this->rateRequestProvider->setRateRequest($request);
             $results = $this->calculator->getQuote();
 
             /** @var array $results */
@@ -194,11 +193,8 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             return false;
         }
 
-        /** @var StoreInterface|null $store */
-        $store = $this->getStore();
-
         /** Validate origin postcode */
-        if (!$this->config->getOriginPostcode($store)) {
+        if (!$this->config->getOriginPostcode()) {
             return false;
         }
 
@@ -414,20 +410,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
         }
 
         return $this;
-    }
-
-    /**
-     * Resolves the current store, or null when it cannot be determined.
-     *
-     * @return StoreInterface|null
-     */
-    private function getStore(): ?StoreInterface
-    {
-        try {
-            return $this->storeManagement->getStore();
-        } catch (NoSuchEntityException $e) {
-            return null;
-        }
     }
 
     /**

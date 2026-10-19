@@ -22,7 +22,6 @@ use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
-use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Sums the carrier forecast, the slowest item's lead time and the store's extra days into one delivery estimate.
@@ -38,7 +37,6 @@ class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface, ResetAf
 
     public function __construct(
         private readonly ProductResource $productResource,
-        private readonly StoreManagerInterface $storeManagement,
         private readonly ConfigInterface $config,
         private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
@@ -83,14 +81,13 @@ class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface, ResetAf
             return $leadTime;
         }
 
-        $store = $this->storeManagement->getStore();
-        $cacheKey = $product->getId() . '|' . $store->getId();
+        $cacheKey = $product->getId() . '|' . $product->getStoreId();
 
         if (!array_key_exists($cacheKey, $this->leadTimes)) {
             $this->leadTimes[$cacheKey] = (int) $this->productResource->getAttributeRawValue(
                 $product->getId(),
                 'lead_time',
-                $store
+                $product->getStore()
             );
         }
 
