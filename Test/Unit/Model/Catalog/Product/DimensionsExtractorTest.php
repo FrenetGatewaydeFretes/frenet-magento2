@@ -21,6 +21,7 @@ use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Magento\Store\Model\Store;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -125,6 +126,56 @@ class DimensionsExtractorTest extends TestCase
             $this->assertSame(9.0, $this->subject->setProductByCartItem($otherStore)->getWeight(), "round $round");
             $this->assertSame(30.0, $this->subject->setProductByCartItem($first)->getHeight(), "round $round");
         }
+    }
+
+    /**
+     * Lists stored values that mean "no measurement" and must fall back to the configured defaults.
+     *
+     * @return array<string, array{mixed}>
+     */
+    public static function missingMeasurementProvider(): array
+    {
+        return [
+            'zero saved as decimal' => ['0.000000'],
+            'zero integer' => ['0'],
+            'negative' => ['-1'],
+            'empty' => [''],
+            'not saved' => [false],
+        ];
+    }
+
+    /**
+     * Confirms a zero, negative or missing measurement uses the default instead of being sent to the API as is.
+     *
+     * @param mixed $stored
+     *
+     * @return void
+     */
+    #[DataProvider('missingMeasurementProvider')]
+    public function testShouldUseTheDefaultsWhenTheMeasurementIsZeroOrMissing(mixed $stored): void
+    {
+        $this->productResource->method('getAttributeRawValue')->willReturn($stored);
+
+        $this->subject->setProductByCartItem($this->cartItem($this->product(7, 1)));
+
+        $this->assertSame(1.0, $this->subject->getWeight());
+        $this->assertSame(2.0, $this->subject->getHeight());
+        $this->assertSame(11.0, $this->subject->getWidth());
+        $this->assertSame(16.0, $this->subject->getLength());
+    }
+
+    /**
+     * Confirms a zero weight stored on the cart item also falls back to the default.
+     *
+     * @return void
+     */
+    public function testShouldUseTheDefaultWeightWhenTheCartItemWeightIsZero(): void
+    {
+        $this->productResource->method('getAttributeRawValue')->willReturn('0.000000');
+
+        $this->subject->setProductByCartItem($this->cartItem($this->product(7, 1), ['weight' => '0.0000']));
+
+        $this->assertSame(1.0, $this->subject->getWeight());
     }
 
     /**

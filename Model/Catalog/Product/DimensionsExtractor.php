@@ -97,7 +97,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     {
         $value = $this->extractData($this->attributesMapping->getWeightAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultWeight();
         }
 
@@ -111,7 +111,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     {
         $value = $this->extractData($this->attributesMapping->getHeightAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultHeight();
         }
 
@@ -125,7 +125,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     {
         $value = $this->extractData($this->attributesMapping->getWidthAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultWidth();
         }
 
@@ -139,7 +139,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     {
         $value = $this->extractData($this->attributesMapping->getLengthAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultLength();
         }
 
