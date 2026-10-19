@@ -36,7 +36,7 @@ class ApiHostname extends Value
      * @param ApiHostnameValidator  $validator
      * @param AbstractResource|null $resource
      * @param AbstractDb|null       $resourceCollection
-     * @param array                 $data
+     * @param mixed[]               $data
      */
     public function __construct(
         Context $context,
