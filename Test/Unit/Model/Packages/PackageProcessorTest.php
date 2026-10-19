@@ -15,6 +15,8 @@ namespace Frenet\Shipping\Test\Unit\Model\Packages;
 
 use Frenet\Command\Shipping\Quote as ShippingQuoteCommand;
 use Frenet\Command\ShippingInterface;
+use Frenet\Framework\Data\SerializerInterface;
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
 use Frenet\Shipping\Model\ApiServiceInterface;
 use Frenet\Shipping\Model\ConfigInterface;
@@ -33,7 +35,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that PackageProcessor prices a package from the package's own quote, never the checkout session.
+ * Tests that PackageProcessor prices a package from its own quote and asks the API once per distinct package.
  */
 #[AllowMockObjectsWithoutExpectations]
 class PackageProcessorTest extends TestCase
@@ -134,6 +136,142 @@ class PackageProcessorTest extends TestCase
         $this->totalsCollector->expects($this->never())->method('calculateQuoteDiscounts');
 
         $this->subject->process($this->package($cartItem, 10.0));
+    }
+
+    /**
+     * Identical packages, such as the equal boxes of a split cart, must reach the Frenet API only once.
+     *
+     * @return void
+     */
+    public function testShouldCallTheApiOnceForIdenticalPackages(): void
+    {
+        $first = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->once());
+        $second = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->never());
+        $this->givenQuoteCommands($first, $second);
+
+        $firstResult = $this->subject->process($this->simplePackage());
+        $secondResult = $this->subject->process($this->simplePackage());
+
+        $this->assertEquals($firstResult, $secondResult);
+        $this->assertNotSame($firstResult[0], $secondResult[0]);
+    }
+
+    /**
+     * Packages with different content are each sent to the API.
+     *
+     * @return void
+     */
+    public function testShouldCallTheApiForEachDifferentPackage(): void
+    {
+        $first = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->once());
+        $second = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 1]]], $this->once());
+        $this->givenQuoteCommands($first, $second);
+
+        $this->subject->process($this->simplePackage());
+        $this->subject->process($this->simplePackage());
+    }
+
+    /**
+     * Summing one package's price into a returned service must not change what another identical package receives.
+     *
+     * @return void
+     */
+    public function testShouldNotLetAChangedResultLeakIntoAnIdenticalPackage(): void
+    {
+        $payload = ['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]];
+        $this->givenQuoteCommands(
+            $this->quoteCommand($payload, $this->once()),
+            $this->quoteCommand($payload, $this->never())
+        );
+
+        $firstResult = $this->subject->process($this->simplePackage());
+        $firstResult[0]->setData(Service::FIELD_SHIPPING_PRICE, 999.0);
+        $secondResult = $this->subject->process($this->simplePackage());
+
+        $this->assertEqualsWithDelta(148.67, $secondResult[0]->getShippingPrice(), 0.001);
+    }
+
+    /**
+     * Resetting the state between requests sends an identical package to the API again.
+     *
+     * @return void
+     */
+    public function testShouldCallTheApiAgainAfterTheStateIsReset(): void
+    {
+        $payload = ['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]];
+        $this->givenQuoteCommands(
+            $this->quoteCommand($payload, $this->once()),
+            $this->quoteCommand($payload, $this->once())
+        );
+
+        $this->subject->process($this->simplePackage());
+        $this->subject->_resetState();
+        $this->subject->process($this->simplePackage());
+    }
+
+    /**
+     * Builds a one-item package whose cart item has no quote, so only the API call is exercised.
+     *
+     * @return Package
+     */
+    private function simplePackage(): Package
+    {
+        $cartItem = $this->createMock(QuoteItem::class);
+        $cartItem->method('getQuote')->willReturn(null);
+
+        $packageItem = $this->createMock(PackageItem::class);
+        $packageItem->method('getCartItem')->willReturn($cartItem);
+
+        $package = $this->createMock(Package::class);
+        $package->method('getItems')->willReturn([$packageItem]);
+        $package->method('getTotalPrice')->willReturn(10.0);
+
+        return $package;
+    }
+
+    /**
+     * Builds a shipping quote command carrying the given payload and expected to reach the API as stated.
+     *
+     * @param array  $payload
+     * @param object $executions
+     *
+     * @return ShippingQuoteCommand&MockObject
+     */
+    private function quoteCommand(array $payload, object $executions): MockObject
+    {
+        $service = new Service($this->createMock(SerializerInterface::class), [
+            'ServiceCode' => '03298',
+            'Carrier' => 'Correios',
+            'ShippingPrice' => '148.67',
+            'Error' => false,
+        ]);
+
+        $command = $this->createMock(ShippingQuoteCommand::class);
+        $command->method('setSellerPostcode')->willReturnSelf();
+        $command->method('setRecipientPostcode')->willReturnSelf();
+        $command->method('setRecipientCountry')->willReturnSelf();
+        $command->method('setShipmentInvoiceValue')->willReturnSelf();
+        $command->method('addShippingItem')->willReturnSelf();
+        $command->method('getData')->willReturn($payload);
+        $command->expects($executions)->method('execute')->willReturn(
+            $this->createConfiguredMock(ShippingQuoteResult::class, ['getShippingServices' => [$service]])
+        );
+
+        return $command;
+    }
+
+    /**
+     * Makes the API hand out the given quote commands, one per processed package.
+     *
+     * @param ShippingQuoteCommand ...$commands
+     *
+     * @return void
+     */
+    private function givenQuoteCommands(ShippingQuoteCommand ...$commands): void
+    {
+        $shipping = $this->createMock(ShippingInterface::class);
+        $shipping->method('quote')->willReturnOnConsecutiveCalls(...$commands);
+        $this->apiService->method('shipping')->willReturn($shipping);
     }
 
     /**

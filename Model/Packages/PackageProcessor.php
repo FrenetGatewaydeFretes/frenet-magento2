@@ -20,13 +20,14 @@ use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Model\TotalsCollector;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
  * Class PackageProcessor
  */
-class PackageProcessor
+class PackageProcessor implements ResetAfterRequestInterface
 {
     /**
      * @var ApiServiceInterface
@@ -62,6 +63,11 @@ class PackageProcessor
      * @var TotalsCollector
      */
     private $totalsCollector;
+
+    /**
+     * @var array<string, Service[]>
+     */
+    private array $responses = [];
 
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
@@ -164,11 +170,24 @@ class PackageProcessor
      */
     private function callService(): array
     {
-        /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
-        $result = $this->serviceQuote->execute();
-        $services = $result->getShippingServices();
+        $requestKey = hash('sha256', (string) json_encode($this->serviceQuote->getData()));
 
-        return $services ?: [];
+        if (!array_key_exists($requestKey, $this->responses)) {
+            /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
+            $result = $this->serviceQuote->execute();
+            $this->responses[$requestKey] = $result->getShippingServices() ?: [];
+        }
+
+        return array_map(fn (Service $service) => clone $service, $this->responses[$requestKey]);
+    }
+
+    /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->responses = [];
     }
 
     /**
