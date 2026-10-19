@@ -77,7 +77,8 @@ Recursos opcionais, no mesmo painel:
 - **Product Quote**: habilita a cotação de frete diretamente na página de produto, antes do cliente adicionar ao carrinho.
 - **Show Shipping Forecast** / **Shipping Forecast Message**: exibe uma mensagem de prazo estimado de entrega.
 - **Debug**: grava as requisições/respostas da API da Frenet em `var/log/<Debug Filename>`, útil para diagnosticar problemas de cotação.
-- **API Hostname** / **API Protocol**: sobrescrevem o endpoint da API da Frenet (protocolo padrão HTTPS). Só altere se o suporte da Frenet orientar.
+- **API Hostname** / **API Protocol**: sobrescrevem o endpoint da API da Frenet (protocolo padrão HTTPS). O hostname só aceita endereços `frenet.com.br`, como `api.frenet.com.br`. Só altere se o suporte da Frenet orientar.
+- **API Timeout (seconds)**: tempo máximo de espera pela API da Frenet (padrão 30, máximo 120). Se a API demorar mais, a Frenet fica fora daquela cotação e o carrinho e o checkout seguem normalmente.
 
 ## Como funciona
 
@@ -97,12 +98,13 @@ Recursos opcionais, no mesmo painel:
 **Adicionado**
 
 - Compatibilidade com **Magento 2.4.8-p4** (PHP 8.2, 8.3 e 8.4) e **Composer 2.9**, validada contra as correções de segurança do boletim APSB26-05, incluindo o checkout de cliente logado.
-- Campo **API Timeout (seconds)**: tempo máximo de espera pela API da Frenet (padrão 30 segundos; a conexão desiste em até 10). Se a API demorar mais, a Frenet fica fora daquela cotação e o carrinho e o checkout seguem normalmente, em vez de travar.
+- Campo **API Timeout (seconds)**: tempo máximo de espera pela API da Frenet (padrão 30 segundos, máximo 120; a conexão desiste em até 10). Se a API demorar mais, a Frenet fica fora daquela cotação e o carrinho e o checkout seguem normalmente, em vez de travar.
 
 **Corrigido**
 
 - Com **Multi Quote** habilitado, carrinhos acima do peso máximo do pacote voltam a receber os fretes Frenet. Desde a 2.4.9 eles ficavam sem nenhuma opção. Os Correios são somados por pacote, e as demais transportadoras vêm da cotação do carrinho inteiro.
 - Produtos com peso ou medida salvos como **0** passam a usar os valores padrão (**Default Measurements**), em vez de enviar 0 à Frenet, que deixava o carrinho sem cotação.
+- O comentário do campo **API Protocol** volta a aparecer traduzido no admin em português.
 
 **Alterado**
 
