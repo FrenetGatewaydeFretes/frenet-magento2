@@ -22,7 +22,7 @@ use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class DataExtractor
+ * Reads weight and dimensions via the attribute mapping, using the defaults when a value is missing or not positive.
  */
 class DimensionsExtractor implements ProductExtractorInterface, ResetAfterRequestInterface
 {

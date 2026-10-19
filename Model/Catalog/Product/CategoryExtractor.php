@@ -19,7 +19,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 
 /**
- * Class CategoryExtractor
+ * Joins a product's category names for the Frenet quote, loading them once per product and store within a request.
  */
 class CategoryExtractor implements ResetAfterRequestInterface
 {

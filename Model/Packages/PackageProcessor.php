@@ -28,7 +28,7 @@ use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Class PackageProcessor
+ * Quotes one package against the Frenet API, reusing the response for identical packages within a request.
  */
 class PackageProcessor implements ResetAfterRequestInterface
 {
