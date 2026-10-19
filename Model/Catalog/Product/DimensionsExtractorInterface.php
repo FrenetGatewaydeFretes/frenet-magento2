@@ -15,11 +15,22 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
+
 /**
  * Contract for reading the package weight and dimensions sent to the Frenet quote, defaults included.
  */
 interface DimensionsExtractorInterface
 {
+    /**
+     * Uses the cart item as the first source of dimension values and its product as the fallback source.
+     *
+     * @param QuoteItem $cartItem
+     *
+     * @return $this
+     */
+    public function setProductByCartItem(QuoteItem $cartItem);
+
     /**
      * Returns the weight, falling back to the configured default when the value is missing or not positive.
      *

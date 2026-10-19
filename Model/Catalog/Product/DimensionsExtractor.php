@@ -84,11 +84,7 @@ class DimensionsExtractor implements ProductExtractorInterface, ResetAfterReques
     }
 
     /**
-     * Uses the cart item as the first source of dimension values and its product as the fallback source.
-     *
-     * @param QuoteItem $cartItem
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function setProductByCartItem(QuoteItem $cartItem)
     {
