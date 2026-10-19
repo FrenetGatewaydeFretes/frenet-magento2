@@ -99,10 +99,16 @@ Recursos opcionais, no mesmo painel:
 - Compatibilidade com **Magento 2.4.8-p4** (PHP 8.2, 8.3 e 8.4) e **Composer 2.9**, validada contra as correções de segurança do boletim APSB26-05, incluindo o checkout de cliente logado.
 - Campo **API Timeout (seconds)**: tempo máximo de espera pela API da Frenet (padrão 30 segundos; a conexão desiste em até 10). Se a API demorar mais, a Frenet fica fora daquela cotação e o carrinho e o checkout seguem normalmente, em vez de travar.
 
+**Corrigido**
+
+- Com **Multi Quote** habilitado, carrinhos acima do peso máximo do pacote voltam a receber os fretes Frenet. Desde a 2.4.9 eles ficavam sem nenhuma opção. Os Correios são somados por pacote, e as demais transportadoras vêm da cotação do carrinho inteiro.
+- Produtos com peso ou medida salvos como **0** passam a usar os valores padrão (**Default Measurements**), em vez de enviar 0 à Frenet, que deixava o carrinho sem cotação.
+
 **Alterado**
 
 - Requer `frenet/frenet-php` **1.3.3**, que passa a aplicar os limites de tempo nas chamadas à API.
 - A cotação lê cada atributo de produto (peso, dimensões, prazo) e as categorias uma única vez por requisição. Em carrinhos grandes isso reduz bastante as consultas ao banco: com 20 itens, de cerca de 880 para cerca de 510, e o tempo de banco de cerca de 230 ms para cerca de 60 ms. O frete calculado não muda.
+- Com **Multi Quote**, pacotes idênticos são cotados uma única vez por requisição. Por exemplo, a cotação de 40 unidades de um item pesado na página do produto cai de 11 para 2 chamadas à API, e de cerca de 7 s para cerca de 1,5 s.
 
 **Segurança**
 
