@@ -48,6 +48,11 @@ class Config implements ConfigInterface
      */
     public const DEFAULT_API_TIMEOUT = 30.0;
 
+    /**
+     * @var float
+     */
+    public const MAX_API_TIMEOUT = 120.0;
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager,
@@ -96,7 +101,7 @@ class Config implements ConfigInterface
     {
         $timeout = (float) $this->getCarrierConfig('api_timeout', $store);
 
-        return $timeout > 0 ? $timeout : self::DEFAULT_API_TIMEOUT;
+        return $timeout > 0 ? min($timeout, self::MAX_API_TIMEOUT) : self::DEFAULT_API_TIMEOUT;
     }
 
     /**

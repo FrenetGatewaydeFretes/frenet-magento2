@@ -57,7 +57,7 @@ interface ConfigInterface
     public function getApiProtocol($store = null): string;
 
     /**
-     * Returns the time limit, in seconds, for a request to the Frenet API.
+     * Returns the time limit, in seconds, for a request to the Frenet API, capped at 120.
      *
      * @param string|int|StoreInterface|null $store
      *

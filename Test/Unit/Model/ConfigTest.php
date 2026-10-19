@@ -200,6 +200,34 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Lists API timeouts above the 120 second cap, including one that overflows to infinity.
+     *
+     * @return array<string, array{string}>
+     */
+    public static function oversizedApiTimeoutProvider(): array
+    {
+        return [
+            'above the cap' => ['500'],
+            'overflows to infinity' => ['1e400'],
+        ];
+    }
+
+    /**
+     * Confirms an API timeout above the cap is limited to 120 seconds instead of waiting without limit.
+     *
+     * @param string $value
+     *
+     * @return void
+     */
+    #[DataProvider('oversizedApiTimeoutProvider')]
+    public function testShouldCapTheApiTimeoutWhenItExceedsTheMaximum(string $value): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
+
+        $this->assertSame(Config::MAX_API_TIMEOUT, $this->subject->getApiTimeout());
+    }
+
+    /**
      * Confirms configured positive limits are returned as they are.
      *
      * @return void

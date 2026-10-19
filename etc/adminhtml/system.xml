@@ -112,8 +112,8 @@
                 </field>
                 <field id="api_timeout" translate="label comment" type="text" sortOrder="470" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>API Timeout (seconds)</label>
-                    <validate>validate-number validate-greater-than-zero</validate>
-                    <comment><![CDATA[Max wait for the Frenet API before skipping the quote. Default: 30.]]></comment>
+                    <validate>validate-number validate-greater-than-zero validate-number-range number-range-0-120</validate>
+                    <comment><![CDATA[Max wait for the Frenet API before skipping the quote. Default: 30. Maximum: 120.]]></comment>
                 </field>
 
                 <!-- DEBUG -->
