@@ -18,14 +18,16 @@ namespace Frenet\Shipping\Model\Quote;
 use Magento\Quote\Model\Quote\Item\AbstractItem;
 
 /**
- * Class QuoteItemValidatorInterface
+ * Decides which cart items are sent to the Frenet API as shipping items.
  */
 interface QuoteItemValidatorInterface
 {
     /**
+     * Checks whether the cart item should be quoted as a shipping item.
+     *
      * @param AbstractItem $item
      *
-     * @return boolean
+     * @return bool
      */
     public function validate(AbstractItem $item);
 }

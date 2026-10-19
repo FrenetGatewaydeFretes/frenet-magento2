@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Test\Unit\Model;
 
 use Frenet\Shipping\Model\Config;
+use Frenet\Shipping\Model\Config\ApiHostnameValidator;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -34,28 +36,90 @@ class ConfigTest extends TestCase
     private MockObject $scopeConfig;
 
     /**
+     * @var StoreManagerInterface&MockObject
+     */
+    private MockObject $storeManager;
+
+    /**
+     * @var RateRequestProviderInterface&MockObject
+     */
+    private MockObject $rateRequestProvider;
+
+    /**
      * @var Config
      */
     private Config $subject;
 
     /**
-     * Builds the config reader over a mocked scope config and store manager.
+     * Builds the config reader over a mocked scope config, store manager and rate request provider.
      *
      * @return void
      */
     protected function setUp(): void
     {
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
-        $storeManager = $this->createMock(StoreManagerInterface::class);
-        $storeManager->method('getStore')->willReturn($this->createMock(StoreInterface::class));
+        $this->storeManager = $this->createMock(StoreManagerInterface::class);
+        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
 
-        $this->subject = new Config($this->scopeConfig, $storeManager);
+        $this->subject = new Config(
+            $this->scopeConfig,
+            $this->storeManager,
+            new ApiHostnameValidator(),
+            $this->rateRequestProvider
+        );
+    }
+
+    /**
+     * Confirms a read without an explicit store uses the store being quoted, such as an admin order's store.
+     *
+     * @return void
+     */
+    public function testShouldReadTheQuotedStoreWhenNoStoreIsGiven(): void
+    {
+        $quotedStore = $this->createMock(StoreInterface::class);
+        $quotedStore->method('getId')->willReturn(3);
+        $this->rateRequestProvider->method('getStoreId')->willReturn(3);
+        $this->storeManager->expects($this->once())->method('getStore')->with(3)->willReturn($quotedStore);
+        $this->scopeConfig->expects($this->once())
+            ->method('getValue')
+            ->with('carriers/frenetshipping/token', 'store', 3)
+            ->willReturn('website-token');
+
+        $this->assertSame('website-token', $this->subject->getToken());
+    }
+
+    /**
+     * Confirms an explicit store wins over the store being quoted.
+     *
+     * @return void
+     */
+    public function testShouldReadTheGivenStoreWhenOneIsPassed(): void
+    {
+        $this->rateRequestProvider->method('getStoreId')->willReturn(3);
+        $this->storeManager->expects($this->once())->method('getStore')->with(5)
+            ->willReturn($this->createMock(StoreInterface::class));
+
+        $this->subject->getToken(5);
+    }
+
+    /**
+     * Confirms the current store is used when nothing is being quoted.
+     *
+     * @return void
+     */
+    public function testShouldReadTheCurrentStoreWhenNothingIsQuoted(): void
+    {
+        $this->rateRequestProvider->method('getStoreId')->willReturn(null);
+        $this->storeManager->expects($this->once())->method('getStore')->with(null)
+            ->willReturn($this->createMock(StoreInterface::class));
+
+        $this->subject->getToken();
     }
 
     /**
      * Lists stored values that do not express a usable limit.
      *
-     * @return array<string, array{mixed}>
+     * @return array<string, array{string|null}>
      */
     public static function unusableLimitProvider(): array
     {
@@ -70,12 +134,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unusable package weight falls back to the 30 kg default instead of discarding every item.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultPackageMaxWeight(mixed $value): void
+    public function testShouldFallBackToTheDefaultPackageMaxWeightWhenTheStoredValueIsUnusable(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/package_max_weight')->willReturn($value);
 
@@ -85,12 +149,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unusable unit quantity falls back to the 5000 default instead of zeroing every item.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultMaxUnitQuantity(mixed $value): void
+    public function testShouldFallBackToTheDefaultMaxUnitQuantityWhenTheStoredValueIsUnusable(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/max_unit_quantity')->willReturn($value);
 
@@ -100,7 +164,7 @@ class ConfigTest extends TestCase
     /**
      * Lists debug filenames that would leave var/log or produce a non-log file.
      *
-     * @return array<string, array{mixed}>
+     * @return array<string, array{string|null}>
      */
     public static function unsafeDebugFilenameProvider(): array
     {
@@ -119,12 +183,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unsafe debug filename falls back to the default log file inside var/log.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unsafeDebugFilenameProvider')]
-    public function testShouldFallBackToTheDefaultDebugFilename(mixed $value): void
+    public function testShouldFallBackToTheDefaultDebugFilenameWhenTheStoredNameIsUnsafe(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/debug_filename')->willReturn($value);
 
@@ -136,7 +200,7 @@ class ConfigTest extends TestCase
      *
      * @return void
      */
-    public function testShouldKeepAValidDebugFilename(): void
+    public function testShouldKeepTheDebugFilenameWhenItIsAPlainLogFile(): void
     {
         $this->scopeConfig->method('getValue')->willReturn('frenet-2026.log');
 
@@ -144,11 +208,94 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Confirms a frenet.com.br hostname override is returned normalized.
+     *
+     * @return void
+     */
+    public function testShouldReturnTheApiHostnameNormalizedWhenItIsAFrenetAddress(): void
+    {
+        $this->scopeConfig->method('getValue')
+            ->with('carriers/frenetshipping/api_hostname')
+            ->willReturn(' API.Frenet.com.br ');
+
+        $this->assertSame('api.frenet.com.br', $this->subject->getApiHostname());
+    }
+
+    /**
+     * Confirms a hostname outside frenet.com.br, such as one injected through env.php, falls back to the default.
+     *
+     * @return void
+     */
+    public function testShouldIgnoreTheApiHostnameWhenItIsOutsideFrenet(): void
+    {
+        $this->scopeConfig->method('getValue')
+            ->with('carriers/frenetshipping/api_hostname')
+            ->willReturn('attacker.example');
+
+        $this->assertSame('', $this->subject->getApiHostname());
+    }
+
+    /**
+     * Confirms an unusable API timeout falls back to the 30 second default instead of waiting forever.
+     *
+     * @param string|null $value
+     *
+     * @return void
+     */
+    #[DataProvider('unusableLimitProvider')]
+    public function testShouldFallBackToTheDefaultApiTimeoutWhenTheStoredValueIsUnusable(?string $value): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
+
+        $this->assertSame(Config::DEFAULT_API_TIMEOUT, $this->subject->getApiTimeout());
+    }
+
+    /**
+     * Confirms a configured API timeout is returned in seconds.
+     *
+     * @return void
+     */
+    public function testShouldReturnTheApiTimeoutWhenItIsWithinTheLimit(): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn('7.5');
+
+        $this->assertSame(7.5, $this->subject->getApiTimeout());
+    }
+
+    /**
+     * Lists API timeouts above the 120 second cap, including one that overflows to infinity.
+     *
+     * @return array<string, array{string}>
+     */
+    public static function oversizedApiTimeoutProvider(): array
+    {
+        return [
+            'above the cap' => ['500'],
+            'overflows to infinity' => ['1e400'],
+        ];
+    }
+
+    /**
+     * Confirms an API timeout above the cap is limited to 120 seconds instead of waiting without limit.
+     *
+     * @param string $value
+     *
+     * @return void
+     */
+    #[DataProvider('oversizedApiTimeoutProvider')]
+    public function testShouldCapTheApiTimeoutWhenItExceedsTheMaximum(string $value): void
+    {
+        $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
+
+        $this->assertSame(Config::MAX_API_TIMEOUT, $this->subject->getApiTimeout());
+    }
+
+    /**
      * Confirms configured positive limits are returned as they are.
      *
      * @return void
      */
-    public function testShouldReturnTheConfiguredLimits(): void
+    public function testShouldReturnTheConfiguredLimitsWhenTheyArePositive(): void
     {
         $this->scopeConfig->method('getValue')->willReturnCallback(fn (string $path) => match ($path) {
             'carriers/frenetshipping/package_max_weight' => '12.5',

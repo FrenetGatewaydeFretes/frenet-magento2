@@ -15,15 +15,13 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Setup\Patch\Data;
 
-use Frenet\Shipping\Model\Catalog\ProductType; 
 use Frenet\Shipping\Model\Cache\Type\Frenet;
-use Magento\Framework\Console\Cli;
-use Magento\Framework\Locale\Bundle\DataBundle;
-use Magento\Framework\Locale\ResolverInterface;
-use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
 
+/**
+ * Creates the product shipping attributes and enables the Frenet cache type when the module is installed.
+ */
 class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
 {
     /**
@@ -42,11 +40,9 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
     private $attributeInstaller;
 
     /**
-     * Constructor
-     *
-     * @param Frenet $cacheType
-     * @param AttributeContainer                       $attributeContainer
-     * @param EavAttributeInstaller                    $attributeInstaller
+     * @param Frenet                $cacheType
+     * @param AttributeContainer    $attributeContainer
+     * @param EavAttributeInstaller $attributeInstaller
      */
     public function __construct(
         Frenet $cacheType,
@@ -59,7 +55,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function apply()
     {
@@ -67,11 +63,11 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
          * Run for new installation only.
          */
         $this->configureNewInstallation();
-        return Cli::RETURN_SUCCESS;
+        return $this;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function getDependencies()
     {
@@ -79,7 +75,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function getVersion()
     {
@@ -87,7 +83,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getAliases()
     {
@@ -96,12 +92,14 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
 
     /**
      * Creates the new attributes during the module installation.
+     *
+     * @return void
      */
     private function configureNewInstallation()
     {
         /**
-         * @var string $code
-         * @var array  $data
+         * @var string  $code
+         * @var mixed[] $data
          */
         foreach ($this->attributeContainer->getAttributeProperties() as $code => $data) {
             $this->attributeInstaller->install($code, (array) $data);

@@ -57,6 +57,15 @@ interface ConfigInterface
     public function getApiProtocol($store = null): string;
 
     /**
+     * Returns the time limit, in seconds, for a request to the Frenet API, capped at 120.
+     *
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return float
+     */
+    public function getApiTimeout($store = null): float;
+
+    /**
      * Returns the product attribute code mapped to weight.
      *
      * @param string|int|StoreInterface|null $store

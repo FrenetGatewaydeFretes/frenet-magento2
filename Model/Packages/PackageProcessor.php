@@ -13,20 +13,26 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\Command\CommandInterface;
+use Frenet\Command\Shipping\QuoteInterface;
+use Frenet\DataObjectInterface;
+use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiServiceInterface;
+use Frenet\Shipping\Model\CacheManager;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\TotalsCollector;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Class PackageProcessor
+ * Quotes one package against the Frenet API, reusing the answer for an identical request from memory or the cache.
  */
-class PackageProcessor
+class PackageProcessor implements ResetAfterRequestInterface
 {
     /**
      * @var ApiServiceInterface
@@ -34,7 +40,7 @@ class PackageProcessor
     private $apiService;
 
     /**
-     * @var \Frenet\Command\Shipping\QuoteInterface
+     * @var QuoteInterface
      */
     private $serviceQuote;
 
@@ -63,13 +69,33 @@ class PackageProcessor
      */
     private $totalsCollector;
 
+    /**
+     * @var CacheManager
+     */
+    private $cacheManager;
+
+    /**
+     * @var array<string, Service[]>
+     */
+    private array $responses = [];
+
+    /**
+     * @param QuoteItemValidatorInterface  $quoteItemValidator
+     * @param ConfigInterface              $config
+     * @param ApiServiceInterface          $apiService
+     * @param RateRequestProviderInterface $rateRequestProvider
+     * @param CouponProcessor              $quoteCouponProcessor
+     * @param TotalsCollector              $totalsCollector
+     * @param CacheManager                 $cacheManager
+     */
     public function __construct(
         QuoteItemValidatorInterface $quoteItemValidator,
         ConfigInterface $config,
         ApiServiceInterface $apiService,
         RateRequestProviderInterface $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor,
-        TotalsCollector $totalsCollector
+        TotalsCollector $totalsCollector,
+        CacheManager $cacheManager
     ) {
         $this->apiService = $apiService;
         $this->quoteItemValidator = $quoteItemValidator;
@@ -77,9 +103,12 @@ class PackageProcessor
         $this->rateRequestProvider = $rateRequestProvider;
         $this->quoteCouponProcessor = $quoteCouponProcessor;
         $this->totalsCollector = $totalsCollector;
+        $this->cacheManager = $cacheManager;
     }
 
     /**
+     * Builds the Frenet quote request from the package items and returns the services quoted for it.
+     *
      * @param Package $package
      *
      * @return Service[]
@@ -102,6 +131,8 @@ class PackageProcessor
     }
 
     /**
+     * Declares the package item total, plus quote additions and minus discounts, as the shipment invoice value.
+     *
      * @param Package $package
      *
      * @return $this
@@ -139,6 +170,8 @@ class PackageProcessor
     }
 
     /**
+     * Adds the item's SKU, quantity, weight, dimensions, categories and fragility to the quote request.
+     *
      * @param PackageItem $packageItem
      *
      * @return $this
@@ -147,7 +180,7 @@ class PackageProcessor
     {
         $this->serviceQuote->addShippingItem(
             $packageItem->getSku(),
-            $packageItem->getQty(),
+            (int) $packageItem->getQty(),
             $packageItem->getWeight(),
             $packageItem->getLength(),
             $packageItem->getHeight(),
@@ -160,18 +193,88 @@ class PackageProcessor
     }
 
     /**
+     * Returns the services for the current request, reusing an earlier answer from memory or the cache.
+     *
      * @return Service[]
      */
     private function callService(): array
     {
-        /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
-        $result = $this->serviceQuote->execute();
-        $services = $result->getShippingServices();
+        $requestKey = $this->getRequestKey();
 
-        return $services ?: [];
+        if ($requestKey === null) {
+            return $this->executeQuote();
+        }
+
+        if (!array_key_exists($requestKey, $this->responses)) {
+            $this->responses[$requestKey] = $this->cacheManager->load($requestKey)
+                ?? $this->executeAndStore($requestKey);
+        }
+
+        return array_map(fn (Service $service) => clone $service, $this->responses[$requestKey]);
     }
 
     /**
+     * Hashes the account, the API host and the full payload of the quote, or returns null when it is unreadable.
+     *
+     * @return string|null
+     */
+    private function getRequestKey(): ?string
+    {
+        if (!$this->serviceQuote instanceof DataObjectInterface) {
+            return null;
+        }
+
+        $request = json_encode([
+            $this->config->getToken(),
+            $this->config->getApiHostname(),
+            $this->serviceQuote->getData(),
+        ]);
+
+        return $request === false ? null : hash('sha256', $request);
+    }
+
+    /**
+     * Sends the quote to the Frenet API and keeps a non-empty answer in the cache.
+     *
+     * @param string $requestKey
+     *
+     * @return Service[]
+     */
+    private function executeAndStore(string $requestKey): array
+    {
+        $services = $this->executeQuote();
+        $this->cacheManager->save($requestKey, $services);
+
+        return $services;
+    }
+
+    /**
+     * Sends the quote to the Frenet API.
+     *
+     * @return Service[]
+     */
+    private function executeQuote(): array
+    {
+        /** @var QuoteInterface&CommandInterface $command */
+        $command = $this->serviceQuote;
+        /** @var ShippingQuoteResult $result */
+        $result = $command->execute();
+
+        return $result->getShippingServices() ?: [];
+    }
+
+    /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->responses = [];
+    }
+
+    /**
+     * Starts a new Frenet quote request with the origin and destination postcodes and the cart coupon.
+     *
      * @return $this
      */
     private function initServiceQuote(): self
@@ -179,7 +282,6 @@ class PackageProcessor
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
 
-        /** @var \Frenet\Command\Shipping\QuoteInterface $quote */
         $this->serviceQuote = $this->apiService->shipping()->quote();
         $this->serviceQuote->setSellerPostcode($this->config->getOriginPostcode())
             ->setRecipientPostcode($rateRequest->getDestPostcode())

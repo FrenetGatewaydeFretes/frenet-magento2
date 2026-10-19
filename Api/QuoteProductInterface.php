@@ -14,25 +14,33 @@
 
 namespace Frenet\Shipping\Api;
 
+/**
+ * Service contract for quoting Frenet shipping rates for a single product before it is added to the cart.
+ */
 interface QuoteProductInterface
 {
     /**
-     * @param int    $id
-     * @param string $postcode
-     * @param int    $qty
-     * @param array  $options
+     * Quotes the shipping rates of the product with the given ID to the postcode, ready for the storefront.
      *
-     * @return array
+     * @param int     $id
+     * @param string  $postcode
+     * @param int     $qty
+     * @param mixed[] $options
+     *
+     * @return mixed[]
+     * @SuppressWarnings(PHPMD.ShortVariable)
      */
     public function quoteByProductId(int $id, string $postcode, int $qty = 1, array $options = []) : array;
 
     /**
-     * @param string $sku
-     * @param string $postcode
-     * @param int    $qty
-     * @param array  $options
+     * Quotes the shipping rates of the product with the given SKU to the postcode, ready for the storefront.
      *
-     * @return array
+     * @param string  $sku
+     * @param string  $postcode
+     * @param int     $qty
+     * @param mixed[] $options
+     *
+     * @return mixed[]
      */
     public function quoteByProductSku(string $sku, string $postcode, int $qty = 1, array $options = []) : array;
 }

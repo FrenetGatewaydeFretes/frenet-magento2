@@ -14,13 +14,14 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculator;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class PackageItemDistributor
+ * Turns the valid rate request items into item and quantity pairs for the package manager to pack.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageItemDistributor
@@ -58,7 +59,7 @@ class PackageItemDistributor
     /**
      * Returns the quote items grouped with their quantity, ready to be packed.
      *
-     * @return array
+     * @return array{item: QuoteItem, qty: float}[]
      */
     public function distribute(): array
     {

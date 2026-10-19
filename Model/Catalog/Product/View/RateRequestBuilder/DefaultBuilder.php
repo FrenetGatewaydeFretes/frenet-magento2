@@ -18,7 +18,7 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DataObject;
 
 /**
- * Class DefaultBuilder
+ * Leaves the buy request with only its quantity, for product types that need no extra options.
  */
 class DefaultBuilder implements BuilderInterface
 {

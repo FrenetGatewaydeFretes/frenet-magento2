@@ -16,12 +16,19 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Cache\CacheKeyGenerator;
 
 use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
+use Frenet\Shipping\Model\CacheManager;
 use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
+/**
+ * Added the items to the former cart-level cache key, kept so existing DI configuration still compiles.
+ *
+ * @deprecated 2.4.8-p4 Frenet answers are cached by the hash of each API request in CacheManager.
+ * @see CacheManager
+ */
 class QuoteItemGenerator implements CacheKeyGeneratorInterface
 {
     /**
@@ -44,6 +51,12 @@ class QuoteItemGenerator implements CacheKeyGeneratorInterface
      */
     private $itemQtyCalculator;
 
+    /**
+     * @param SerializerInterface             $serializer
+     * @param RateRequestProviderInterface    $requestProvider
+     * @param QuoteItemValidatorInterface     $quoteItemValidator
+     * @param ItemQuantityCalculatorInterface $itemQtyCalculator
+     */
     public function __construct(
         SerializerInterface $serializer,
         RateRequestProviderInterface $requestProvider,

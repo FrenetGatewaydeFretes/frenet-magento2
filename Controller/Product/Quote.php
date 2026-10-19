@@ -29,9 +29,7 @@ use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
- * Class Quote
- *
- * @package Frenet\Shipping\Controller\Catalog\Product
+ * Storefront AJAX endpoint that validates the product page quote request and answers with the rates as JSON.
  */
 class Quote extends Action implements HttpPostActionInterface
 {

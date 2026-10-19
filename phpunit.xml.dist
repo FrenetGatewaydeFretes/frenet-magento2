@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="Test/Unit/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true">
+    <testsuites>
+        <testsuite name="Frenet_Shipping unit tests">
+            <directory>Test/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">Api</directory>
+            <directory suffix=".php">Block</directory>
+            <directory suffix=".php">Controller</directory>
+            <directory suffix=".php">Model</directory>
+            <directory suffix=".php">Service</directory>
+            <directory suffix=".php">Setup</directory>
+            <directory suffix=".php">ViewModel</directory>
+        </include>
+    </source>
+</phpunit>
