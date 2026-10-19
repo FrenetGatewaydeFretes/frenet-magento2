@@ -34,6 +34,7 @@ use Psr\Log\LoggerInterface;
  * Quotes Frenet shipping for a single product page request, returning the available services with delivery forecasts.
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class Quote implements QuoteProductInterface
 {

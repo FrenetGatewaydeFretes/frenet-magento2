@@ -96,16 +96,16 @@ class RateRequestBuilder
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
         $request = $this->prepareProductRequest($product, $qty, $options);
-        $rs = $quote->addProduct($product, $request);
+        $addResult = $quote->addProduct($product, $request);
         $this->fixQuoteItems($quote);
         $allitems = $quote->getAllItems();
 
         if (count($allitems) == 0) {
             $request = $this->prepareProductOptionRequest($product, $qty, $options);
-            $rs = $quote->addProduct($product, $request);
-            if (is_string($rs)) {
+            $addResult = $quote->addProduct($product, $request);
+            if (is_string($addResult)) {
                 throw new LocalizedException(
-                    __($rs)
+                    __($addResult)
                 );
             }
 

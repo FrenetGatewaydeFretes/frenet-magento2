@@ -189,11 +189,11 @@ class Package
         $convertedUnitWeight = $this->weightConverter->convertToKg($unitWeight);
 
         $unitWeightScaled = (int) round($unitWeight * self::WEIGHT_SCALE);
-        $convertedUnitWeightScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
+        $convertedScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
         $fullCapacityScaled = (int) round($this->packageLimit->getMaxWeight() * self::WEIGHT_SCALE);
         $remainingScaled = max(0, (int) round($this->getRemainingWeight() * self::WEIGHT_SCALE));
 
-        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedUnitWeightScaled);
+        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedScaled);
 
         if ($unitsPerFullPackage < 1) {
             return [];
@@ -202,7 +202,7 @@ class Package
         $requestedQtyInt = (int) $requestedQty;
         $firstBatch = min(
             $requestedQtyInt,
-            $this->unitsFitting($remainingScaled, $unitWeightScaled, $convertedUnitWeightScaled)
+            $this->unitsFitting($remainingScaled, $unitWeightScaled, $convertedScaled)
         );
         $remaining = $requestedQtyInt - $firstBatch;
 
@@ -238,17 +238,17 @@ class Package
      *
      * @param int $capacityScaled
      * @param int $rawUnitWeightScaled
-     * @param int $convertedUnitWeightScaled
+     * @param int $convertedScaled
      *
      * @return int
      */
-    private function unitsFitting(int $capacityScaled, int $rawUnitWeightScaled, int $convertedUnitWeightScaled): int
+    private function unitsFitting(int $capacityScaled, int $rawUnitWeightScaled, int $convertedScaled): int
     {
         if ($rawUnitWeightScaled > $capacityScaled) {
             return 0;
         }
 
-        return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedUnitWeightScaled, 1)) + 1;
+        return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedScaled, 1)) + 1;
     }
 
     /**

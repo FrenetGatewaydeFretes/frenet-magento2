@@ -28,6 +28,7 @@ interface QuoteProductInterface
      * @param mixed[] $options
      *
      * @return mixed[]
+     * @SuppressWarnings(PHPMD.ShortVariable)
      */
     public function quoteByProductId(int $id, string $postcode, int $qty = 1, array $options = []) : array;
 
