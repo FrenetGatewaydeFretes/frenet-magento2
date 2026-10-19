@@ -175,7 +175,7 @@ class PackagesCalculatorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldHandTheMultiQuoteMatcherTheFullCallAndEachPackageSeparately(): void
+    public function testShouldHandTheMatcherTheFullCallAndEachPackageWhenMultiQuoteIsOn(): void
     {
         $this->givenAMultiQuoteSplit();
         $full = [$this->service('JTE_INT', 190.56, 4, 'J&T Express')];
@@ -197,7 +197,7 @@ class PackagesCalculatorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldPriceASplitMultiQuoteCartWithCorreiosPerPackageAndOthersFromTheFullCall(): void
+    public function testShouldSumCorreiosPerPackageAndUseTheFullCallForOthersWhenMultiQuoteSplitsTheCart(): void
     {
         $serviceFactory = $this->createMock(ServiceFactory::class);
         $serviceFactory->method('create')->willReturnCallback(fn () => new Service($this->serializer));

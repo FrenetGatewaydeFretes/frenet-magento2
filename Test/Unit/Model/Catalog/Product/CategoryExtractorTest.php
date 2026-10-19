@@ -33,7 +33,7 @@ class CategoryExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldLoadTheCategoriesOncePerProduct(): void
+    public function testShouldLoadTheCategoriesOnceWhenTheSameProductIsAskedAgain(): void
     {
         $product = $this->product(7, 1, ['Gear', 'Bags'], $this->once());
         $subject = new CategoryExtractor();
@@ -48,7 +48,7 @@ class CategoryExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldKeepCategoriesApartPerProduct(): void
+    public function testShouldKeepCategoriesApartWhenProductsDiffer(): void
     {
         $empty = $this->product(7, 1, [], $this->once());
         $other = $this->product(8, 1, ['Men'], $this->once());
@@ -65,7 +65,7 @@ class CategoryExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldLoadAgainAfterTheStateIsReset(): void
+    public function testShouldLoadAgainWhenTheStateIsReset(): void
     {
         $product = $this->product(7, 1, ['Gear'], $this->exactly(2));
         $subject = new CategoryExtractor();

@@ -66,7 +66,7 @@ class ApiHostnameValidatorTest extends TestCase
      * @return void
      */
     #[DataProvider('allowedHostnameProvider')]
-    public function testShouldAllowFrenetHostnames(string $hostname): void
+    public function testShouldAllowTheHostnameWhenItIsAFrenetAddress(string $hostname): void
     {
         $this->assertTrue((new ApiHostnameValidator())->isAllowed($hostname));
     }
@@ -79,7 +79,7 @@ class ApiHostnameValidatorTest extends TestCase
      * @return void
      */
     #[DataProvider('refusedHostnameProvider')]
-    public function testShouldRefuseOtherHostnames(string $hostname): void
+    public function testShouldRefuseTheHostnameWhenItIsNotABareFrenetAddress(string $hostname): void
     {
         $this->assertFalse((new ApiHostnameValidator())->isAllowed($hostname));
     }

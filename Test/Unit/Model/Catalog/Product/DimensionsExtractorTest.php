@@ -70,7 +70,7 @@ class DimensionsExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReadAStoredAttributeOncePerProduct(): void
+    public function testShouldReadAStoredAttributeOnceWhenItIsAskedAgain(): void
     {
         $this->productResource->expects($this->once())
             ->method('getAttributeRawValue')
@@ -89,7 +89,7 @@ class DimensionsExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldRememberAMissingValueAndKeepUsingTheDefault(): void
+    public function testShouldKeepUsingTheDefaultWhenAMissingValueIsAskedAgain(): void
     {
         $this->productResource->expects($this->once())->method('getAttributeRawValue')->willReturn(false);
 
@@ -105,7 +105,7 @@ class DimensionsExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldKeepValuesApartPerProductStoreAndAttribute(): void
+    public function testShouldKeepValuesApartWhenProductStoreOrAttributeDiffer(): void
     {
         $this->productResource->expects($this->exactly(4))
             ->method('getAttributeRawValue')
@@ -183,7 +183,7 @@ class DimensionsExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldPreferTheCartItemValueWithoutQuerying(): void
+    public function testShouldSkipTheQueryWhenTheCartItemCarriesTheValue(): void
     {
         $this->productResource->expects($this->never())->method('getAttributeRawValue');
 
@@ -197,7 +197,7 @@ class DimensionsExtractorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReadAgainAfterTheStateIsReset(): void
+    public function testShouldReadAgainWhenTheStateIsReset(): void
     {
         $this->productResource->expects($this->exactly(2))->method('getAttributeRawValue')->willReturn('2.5');
 

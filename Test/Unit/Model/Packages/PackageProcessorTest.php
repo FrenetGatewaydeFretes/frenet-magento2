@@ -106,7 +106,7 @@ class PackageProcessorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldPriceTheShipmentFromThePackageItemsQuoteInsteadOfTheCheckoutSession(): void
+    public function testShouldPriceTheShipmentFromTheItemsQuoteWhenThePackageCarriesOne(): void
     {
         $quote = $this->createMock(CartQuote::class);
         $cartItem = $this->createMock(QuoteItem::class);
@@ -129,7 +129,7 @@ class PackageProcessorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldNeverCallTheTotalsCollectorWithoutAQuote(): void
+    public function testShouldNeverCallTheTotalsCollectorWhenThePackageHasNoQuote(): void
     {
         $cartItem = $this->createMock(QuoteItem::class);
         $cartItem->method('getQuote')->willReturn(null);
@@ -145,7 +145,7 @@ class PackageProcessorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldCallTheApiOnceForIdenticalPackages(): void
+    public function testShouldCallTheApiOnceWhenPackagesAreIdentical(): void
     {
         $first = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->once());
         $second = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->never());
@@ -163,7 +163,7 @@ class PackageProcessorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldCallTheApiForEachDifferentPackage(): void
+    public function testShouldCallTheApiForEachPackageWhenTheyDiffer(): void
     {
         $first = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->once());
         $second = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 1]]], $this->once());
@@ -178,7 +178,7 @@ class PackageProcessorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldNotLetAChangedResultLeakIntoAnIdenticalPackage(): void
+    public function testShouldKeepAnIdenticalPackageIntactWhenAnEarlierResultIsChanged(): void
     {
         $payload = ['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]];
         $this->givenQuoteCommands(
@@ -198,7 +198,7 @@ class PackageProcessorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldCallTheApiAgainAfterTheStateIsReset(): void
+    public function testShouldCallTheApiAgainWhenTheStateIsReset(): void
     {
         $payload = ['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]];
         $this->givenQuoteCommands(

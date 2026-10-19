@@ -74,7 +74,7 @@ class DeliveryTimeCalculatorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReadAMissingLeadTimeOnceAcrossServices(): void
+    public function testShouldReadTheLeadTimeOnceWhenSeveralServicesNeedIt(): void
     {
         $this->productResource->expects($this->once())
             ->method('getAttributeRawValue')
@@ -91,7 +91,7 @@ class DeliveryTimeCalculatorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReadAgainAfterTheStateIsReset(): void
+    public function testShouldReadAgainWhenTheStateIsReset(): void
     {
         $this->productResource->expects($this->exactly(2))->method('getAttributeRawValue')->willReturn('0');
 

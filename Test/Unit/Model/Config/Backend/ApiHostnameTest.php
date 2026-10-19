@@ -59,7 +59,7 @@ class ApiHostnameTest extends TestCase
      *
      * @return void
      */
-    public function testShouldSaveAnEmptyHostname(): void
+    public function testShouldSaveWhenTheHostnameIsEmpty(): void
     {
         $this->subject->setValue('  ');
         $this->subject->beforeSave();
@@ -72,7 +72,7 @@ class ApiHostnameTest extends TestCase
      *
      * @return void
      */
-    public function testShouldSaveANormalizedFrenetHostname(): void
+    public function testShouldSaveItNormalizedWhenTheHostnameIsAFrenetAddress(): void
     {
         $this->subject->setValue(' Sandbox.API.frenet.com.br ');
         $this->subject->beforeSave();
@@ -85,7 +85,7 @@ class ApiHostnameTest extends TestCase
      *
      * @return void
      */
-    public function testShouldRefuseAHostnameOutsideFrenet(): void
+    public function testShouldRefuseTheSaveWhenTheHostnameIsOutsideFrenet(): void
     {
         $this->subject->setValue('api.example.com');
 

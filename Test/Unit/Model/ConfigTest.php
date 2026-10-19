@@ -76,7 +76,7 @@ class ConfigTest extends TestCase
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultPackageMaxWeight(mixed $value): void
+    public function testShouldFallBackToTheDefaultPackageMaxWeightWhenTheStoredValueIsUnusable(mixed $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/package_max_weight')->willReturn($value);
 
@@ -91,7 +91,7 @@ class ConfigTest extends TestCase
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultMaxUnitQuantity(mixed $value): void
+    public function testShouldFallBackToTheDefaultMaxUnitQuantityWhenTheStoredValueIsUnusable(mixed $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/max_unit_quantity')->willReturn($value);
 
@@ -125,7 +125,7 @@ class ConfigTest extends TestCase
      * @return void
      */
     #[DataProvider('unsafeDebugFilenameProvider')]
-    public function testShouldFallBackToTheDefaultDebugFilename(mixed $value): void
+    public function testShouldFallBackToTheDefaultDebugFilenameWhenTheStoredNameIsUnsafe(mixed $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/debug_filename')->willReturn($value);
 
@@ -137,7 +137,7 @@ class ConfigTest extends TestCase
      *
      * @return void
      */
-    public function testShouldKeepAValidDebugFilename(): void
+    public function testShouldKeepTheDebugFilenameWhenItIsAPlainLogFile(): void
     {
         $this->scopeConfig->method('getValue')->willReturn('frenet-2026.log');
 
@@ -149,7 +149,7 @@ class ConfigTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReturnAFrenetApiHostname(): void
+    public function testShouldReturnTheApiHostnameNormalizedWhenItIsAFrenetAddress(): void
     {
         $this->scopeConfig->method('getValue')
             ->with('carriers/frenetshipping/api_hostname')
@@ -163,7 +163,7 @@ class ConfigTest extends TestCase
      *
      * @return void
      */
-    public function testShouldIgnoreAnApiHostnameOutsideFrenet(): void
+    public function testShouldIgnoreTheApiHostnameWhenItIsOutsideFrenet(): void
     {
         $this->scopeConfig->method('getValue')
             ->with('carriers/frenetshipping/api_hostname')
@@ -180,7 +180,7 @@ class ConfigTest extends TestCase
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultApiTimeout(mixed $value): void
+    public function testShouldFallBackToTheDefaultApiTimeoutWhenTheStoredValueIsUnusable(mixed $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
 
@@ -192,7 +192,7 @@ class ConfigTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReturnTheConfiguredApiTimeout(): void
+    public function testShouldReturnTheApiTimeoutWhenItIsWithinTheLimit(): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn('7.5');
 
@@ -232,7 +232,7 @@ class ConfigTest extends TestCase
      *
      * @return void
      */
-    public function testShouldReturnTheConfiguredLimits(): void
+    public function testShouldReturnTheConfiguredLimitsWhenTheyArePositive(): void
     {
         $this->scopeConfig->method('getValue')->willReturnCallback(fn (string $path) => match ($path) {
             'carriers/frenetshipping/package_max_weight' => '12.5',
