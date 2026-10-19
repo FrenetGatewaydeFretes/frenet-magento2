@@ -188,10 +188,9 @@ class PackageItem
         $this->initProduct();
 
         if ((true === $useParentItemIfAvailable) && $this->cartItem->getParentItem()) {
-            return $this->getProduct($this->cartItem->getParentItem());
+            return $this->cartItem->getParentItem()->getProduct();
         }
 
-        /** @var Product $product */
         return $this->cartItem->getProduct();
     }
 
