@@ -13,12 +13,14 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\DataObjectInterface;
+use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiServiceInterface;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
+use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\TotalsCollector;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
@@ -36,7 +38,7 @@ class PackageProcessor implements ResetAfterRequestInterface
     private $apiService;
 
     /**
-     * @var \Frenet\Command\Shipping\QuoteInterface
+     * @var QuoteInterface
      */
     private $serviceQuote;
 
@@ -207,7 +209,7 @@ class PackageProcessor implements ResetAfterRequestInterface
      */
     private function executeQuote(): array
     {
-        /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
+        /** @var ShippingQuoteResult $result */
         $result = $this->serviceQuote->execute();
 
         return $result->getShippingServices() ?: [];
@@ -230,7 +232,6 @@ class PackageProcessor implements ResetAfterRequestInterface
         /** @var RateRequest $rateRequest */
         $rateRequest = $this->rateRequestProvider->getRateRequest();
 
-        /** @var \Frenet\Command\Shipping\QuoteInterface $quote */
         $this->serviceQuote = $this->apiService->shipping()->quote();
         $this->serviceQuote->setSellerPostcode($this->config->getOriginPostcode())
             ->setRecipientPostcode($rateRequest->getDestPostcode())
