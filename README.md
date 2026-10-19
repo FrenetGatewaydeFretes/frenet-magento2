@@ -107,6 +107,7 @@ Recursos opcionais, no mesmo painel:
 - O comentário do campo **API Protocol** volta a aparecer traduzido no admin em português.
 - A cotação usa a configuração da loja do pedido (token, CEP de origem, medidas padrão e prazo de cada produto). Antes usava a loja aberta no momento, o que dava errado em pedidos criados pelo admin e em lojas com mais de um website.
 - O cache de cotações passa a considerar tudo o que é enviado à Frenet: valor da nota, peso, medidas, cupom e a conta da loja. Antes, uma mudança de preço ou de peso, ou um website com outra conta Frenet, podia receber uma cotação antiga do cache.
+- Itens filhos (por exemplo, a variação escolhida de um produto configurável) passam a enviar à Frenet as categorias do produto pai, onde o catálogo as cadastra.
 
 **Alterado**
 
