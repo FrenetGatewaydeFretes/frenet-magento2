@@ -15,7 +15,10 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Catalog\Product;
 
+use Exception;
+use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Category\Collection;
 use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 
 /**
@@ -38,7 +41,7 @@ class CategoryExtractor implements ResetAfterRequestInterface
      *
      * @return string|null
      */
-    public function getProductCategories(Product $product)
+    public function getProductCategories(Product $product): ?string
     {
         $cacheKey = $product->getId() . '|' . $product->getStoreId();
 
@@ -65,19 +68,19 @@ class CategoryExtractor implements ResetAfterRequestInterface
      *
      * @return string|null
      */
-    private function loadProductCategories(Product $product)
+    private function loadProductCategories(Product $product): ?string
     {
         try {
-            /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
+            /** @var Collection $collection */
             $collection = $product->getCategoryCollection();
             $collection->addAttributeToSelect('name');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
 
         $categories = [];
 
-        /** @var \Magento\Catalog\Model\Category $category */
+        /** @var Category $category */
         foreach ($collection as $category) {
             $categories[] = $category->getName();
         }
