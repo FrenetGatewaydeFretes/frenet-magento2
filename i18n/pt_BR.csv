@@ -53,7 +53,7 @@
 "API Hostname","Hostname da API"
 "Overrides the Frenet API hostname. Leave empty to use the default (api.frenet.com.br). Only frenet.com.br hostnames are accepted. Change only if instructed by Frenet support.","Substitui o hostname da API da Frenet. Deixe em branco para usar o padrão (api.frenet.com.br). Somente hostnames frenet.com.br são aceitos. Altere somente se orientado pelo suporte da Frenet."
 "API Protocol","Protocolo da API"
-"Protocol used to reach the Frenet API. Leave on ""Default"" unless instructed by Frenet support.","Protocolo usado para acessar a API da Frenet. Mantenha em ""Padrão"", a menos que orientado pelo suporte da Frenet."
+"Protocol used to reach the Frenet API. Defaults to HTTPS; change only if instructed by Frenet support.","Protocolo usado para acessar a API da Frenet. O padrão é HTTPS; altere somente se orientado pelo suporte da Frenet."
 "Default","Padrão"
 "You will need an API token to use Frenet services. Please visit <a href='http://painel.frenet.com.br/' target='_blank'>our official website</a> and create your account.","Você precisará de um token de API para utilizar os serviços da Frenet. Por favor, visite <a href='http://painel.frenet.com.br/' target='_blank'>nosso site oficial</a> e crie sua conta."
 "Postcode","CEP"
