@@ -21,6 +21,7 @@ use Frenet\Framework\Data\SerializerInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\ApiServiceInterface;
+use Frenet\Shipping\Model\CacheManager;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\Package;
 use Frenet\Shipping\Model\Packages\PackageItem;
@@ -73,6 +74,11 @@ class PackageProcessorTest extends TestCase
     private MockObject $totalsCollector;
 
     /**
+     * @var CacheManager&MockObject
+     */
+    private MockObject $cacheManager;
+
+    /**
      * @var PackageProcessor
      */
     private PackageProcessor $subject;
@@ -87,6 +93,7 @@ class PackageProcessorTest extends TestCase
         $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
         $this->couponProcessor = $this->createMock(CouponProcessor::class);
         $this->totalsCollector = $this->createMock(TotalsCollector::class);
+        $this->cacheManager = $this->createMock(CacheManager::class);
 
         $rateRequest = $this->createMock(RateRequest::class);
         $this->rateRequestProvider->method('getRateRequest')->willReturn($rateRequest);
@@ -97,7 +104,8 @@ class PackageProcessorTest extends TestCase
             $this->apiService,
             $this->rateRequestProvider,
             $this->couponProcessor,
-            $this->totalsCollector
+            $this->totalsCollector,
+            $this->cacheManager
         );
     }
 
@@ -212,6 +220,57 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
+     * A request already answered in the cache is served from it without calling the API.
+     *
+     * @return void
+     */
+    public function testShouldSkipTheApiWhenTheCacheHoldsTheAnswer(): void
+    {
+        $cached = $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->never());
+        $this->givenQuoteCommands($cached);
+        $this->cacheManager->method('load')->willReturn([$this->correiosService()]);
+
+        $result = $this->subject->process($this->simplePackage());
+
+        $this->assertSame('03298', $result[0]->getServiceCode());
+    }
+
+    /**
+     * A new request is sent to the API and its answer is kept in the cache under the request key.
+     *
+     * @return void
+     */
+    public function testShouldStoreTheAnswerWhenTheApiReplies(): void
+    {
+        $this->givenQuoteCommands(
+            $this->quoteCommand(['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]], $this->once())
+        );
+        $this->cacheManager->expects($this->once())
+            ->method('save')
+            ->with($this->matchesRegularExpression('/^[0-9a-f]{64}$/'), $this->countOf(1));
+
+        $this->subject->process($this->simplePackage());
+    }
+
+    /**
+     * The same package quoted with another store's token is a different request, so the API is asked again.
+     *
+     * @return void
+     */
+    public function testShouldAskTheApiAgainWhenTheSamePackageUsesAnotherToken(): void
+    {
+        $payload = ['ShippingItemArray' => [['SKU' => 'sku-1', 'Quantity' => 4]]];
+        $this->givenQuoteCommands(
+            $this->quoteCommand($payload, $this->once()),
+            $this->quoteCommand($payload, $this->once())
+        );
+        $this->config->method('getToken')->willReturnOnConsecutiveCalls('website-a-token', 'website-b-token');
+
+        $this->subject->process($this->simplePackage());
+        $this->subject->process($this->simplePackage());
+    }
+
+    /**
      * A payload that cannot be encoded, such as a SKU with invalid UTF-8, is sent to the API for every package.
      *
      * @return void
@@ -271,12 +330,7 @@ class PackageProcessorTest extends TestCase
      */
     private function quoteCommand(array $payload, object $executions): MockObject
     {
-        $service = new Service($this->createMock(SerializerInterface::class), [
-            'ServiceCode' => '03298',
-            'Carrier' => 'Correios',
-            'ShippingPrice' => '148.67',
-            'Error' => false,
-        ]);
+        $service = $this->correiosService();
 
         $command = $this->createMock(ShippingQuoteCommand::class);
         $command->method('setSellerPostcode')->willReturnSelf();
@@ -312,6 +366,21 @@ class PackageProcessorTest extends TestCase
         );
 
         return $command;
+    }
+
+    /**
+     * Builds the Correios PAC service the stubbed API answers with.
+     *
+     * @return Service
+     */
+    private function correiosService(): Service
+    {
+        return new Service($this->createMock(SerializerInterface::class), [
+            'ServiceCode' => '03298',
+            'Carrier' => 'Correios',
+            'ShippingPrice' => '148.67',
+            'Error' => false,
+        ]);
     }
 
     /**

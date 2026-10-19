@@ -18,6 +18,11 @@ namespace Frenet\Shipping\Model\Cache\CacheKeyGenerator;
 use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 
+/**
+ * Added the coupon to the former cart-level cache key, kept so existing DI configuration still compiles.
+ *
+ * @deprecated 2.4.8-p4 Frenet answers are cached by the hash of each API request in CacheManager.
+ */
 class CouponGenerator implements CacheKeyGeneratorInterface
 {
     /**

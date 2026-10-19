@@ -16,42 +16,15 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
-use Frenet\Shipping\Service\RateRequestProviderInterface;
 
 /**
- * Class Calculator
+ * Quotes the cart through the package calculator and turns the service descriptions into display text.
  */
 class Calculator implements CalculatorInterface
 {
-    /**
-     * @var CacheManager
-     */
-    private $cacheManager;
-
-    /**
-     * @var Packages\PackagesCalculator
-     */
-    private $packagesCalculator;
-
-    /**
-     * @var RateRequestProviderInterface
-     */
-    private $rateRequestProvider;
-
-    /**
-     * Calculator constructor.
-     *
-     * @param CacheManager                $cacheManager
-     * @param Packages\PackagesCalculator $packagesCalculator
-     */
     public function __construct(
-        CacheManager $cacheManager,
-        Packages\PackagesCalculator $packagesCalculator,
-        RateRequestProviderInterface $rateRequestProvider
+        private readonly Packages\PackagesCalculator $packagesCalculator
     ) {
-        $this->cacheManager = $cacheManager;
-        $this->packagesCalculator = $packagesCalculator;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
@@ -59,24 +32,13 @@ class Calculator implements CalculatorInterface
      */
     public function getQuote(): array
     {
-        $result = $this->cacheManager->load();
-        if ($result) {
-            return $result;
-        }
-
-        /** @var Service[] $services */
         $services = $this->packagesCalculator->calculate();
 
         foreach ($services as $service) {
             $this->processService($service);
         }
 
-        if ($services) {
-            $this->cacheManager->save($services);
-            return $services;
-        }
-
-        return [];
+        return $services;
     }
 
     /**

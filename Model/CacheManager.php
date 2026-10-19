@@ -17,142 +17,84 @@ namespace Frenet\Shipping\Model;
 
 use Frenet\Framework\Data\Serializer;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
-use Frenet\Shipping\Model\Cache\CacheKeyGeneratorInterface;
 use Frenet\Shipping\Model\Cache\Type\Frenet as FrenetCacheType;
 use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 
 /**
- * Class CacheManager
- * @SuppressWarnings(PHPMD.LongVariable)
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * Keeps each Frenet API answer under the hash of its request, so only an identical request reuses it.
  */
 class CacheManager
 {
     /**
-     * @var StateInterface
+     * @var string
      */
-    private $cacheState;
-
-    /**
-     * @var CacheInterface
-     */
-    private $cache;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * @var CacheKeyGeneratorInterface
-     */
-    private $cacheKeyGenerator;
+    private const KEY_PREFIX = 'FRENET_QUOTE_';
 
     public function __construct(
-        SerializerInterface $serializer,
-        StateInterface $cacheState,
-        CacheInterface $cache,
-        CacheKeyGeneratorInterface $cacheKeyGenerator
+        private readonly SerializerInterface $serializer,
+        private readonly StateInterface $cacheState,
+        private readonly CacheInterface $cache
     ) {
-        $this->serializer = $serializer;
-        $this->cacheState = $cacheState;
-        $this->cache = $cache;
-        $this->cacheKeyGenerator = $cacheKeyGenerator;
     }
 
     /**
-     * @return array|bool|string
+     * Returns the services stored for the request, or null when the cache is off or holds nothing for it.
+     *
+     * @param string $requestKey
+     *
+     * @return Service[]|null
      */
-    public function load()
+    public function load(string $requestKey): ?array
     {
         if (!$this->isCacheEnabled()) {
-            return false;
+            return null;
         }
 
-        $data = $this->cache->load($this->cacheKeyGenerator->generate());
+        $data = $this->cache->load(self::KEY_PREFIX . $requestKey);
 
-        if ($data) {
-            $data = $this->prepareAfterLoading($data);
+        if (!$data) {
+            return null;
         }
 
-        return $data;
+        $services = [];
+
+        foreach ((array) $this->serializer->unserialize($data) as $serviceData) {
+            $services[] = (new Service(new Serializer()))->setData((array) $serviceData);
+        }
+
+        return $services ?: null;
     }
 
     /**
-     * @param array $services
+     * Stores a non-empty API answer for the request while the Frenet cache type is enabled.
+     *
+     * @param string    $requestKey
+     * @param Service[] $services
      *
      * @return bool
      */
-    public function save(array $services)
+    public function save(string $requestKey, array $services): bool
     {
-        if (!$this->isCacheEnabled()) {
+        if (!$services || !$this->isCacheEnabled()) {
             return false;
         }
-
-        $identifier = $this->cacheKeyGenerator->generate();
-        $lifetime = null;
-        $tags = [FrenetCacheType::CACHE_TAG];
 
         return $this->cache->save(
-            $this->prepareBeforeSaving($services),
-            $identifier,
-            $tags,
-            $lifetime
+            (string) $this->serializer->serialize(array_map(fn (Service $service) => $service->getData(), $services)),
+            self::KEY_PREFIX . $requestKey,
+            [FrenetCacheType::CACHE_TAG]
         );
     }
 
     /**
-     * @param $data
+     * Checks whether the Frenet API result cache type is enabled.
      *
-     * @return array
-     */
-    private function prepareAfterLoading($data) : array
-    {
-        $newData  = [];
-        $services = $this->serializer->unserialize($data);
-
-        /** @var array $service */
-        foreach ($services as $service) {
-            $newData[] = $this->createServiceInstance()->setData($service);
-        }
-
-        return $newData;
-    }
-
-    /**
-     * @param array $services
-     *
-     * @return bool|string
-     */
-    private function prepareBeforeSaving(array $services)
-    {
-        $newData = [];
-
-        /** @var \Frenet\ObjectType\Entity\Shipping\QuoteInterface $service */
-        foreach ($services as $service) {
-            $newData[] = $service->getData();
-        }
-
-        return $this->serializer->serialize($newData);
-    }
-
-    /**
      * @return bool
      */
-    private function isCacheEnabled()
+    private function isCacheEnabled(): bool
     {
         return (bool) $this->cacheState->isEnabled(FrenetCacheType::TYPE_IDENTIFIER);
-    }
-
-    /**
-     * @return Service
-     */
-    private function createServiceInstance()
-    {
-        return new Service(
-            new Serializer()
-        );
     }
 }

@@ -18,6 +18,7 @@ use Frenet\DataObjectInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\ApiServiceInterface;
+use Frenet\Shipping\Model\CacheManager;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Quote\CouponProcessor;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
@@ -28,7 +29,7 @@ use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
 /**
- * Quotes one package against the Frenet API, reusing the response for identical packages within a request.
+ * Quotes one package against the Frenet API, reusing the answer for an identical request from memory or the cache.
  */
 class PackageProcessor implements ResetAfterRequestInterface
 {
@@ -68,6 +69,11 @@ class PackageProcessor implements ResetAfterRequestInterface
     private $totalsCollector;
 
     /**
+     * @var CacheManager
+     */
+    private $cacheManager;
+
+    /**
      * @var array<string, Service[]>
      */
     private array $responses = [];
@@ -78,7 +84,8 @@ class PackageProcessor implements ResetAfterRequestInterface
         ApiServiceInterface $apiService,
         RateRequestProviderInterface $rateRequestProvider,
         CouponProcessor $quoteCouponProcessor,
-        TotalsCollector $totalsCollector
+        TotalsCollector $totalsCollector,
+        CacheManager $cacheManager
     ) {
         $this->apiService = $apiService;
         $this->quoteItemValidator = $quoteItemValidator;
@@ -86,6 +93,7 @@ class PackageProcessor implements ResetAfterRequestInterface
         $this->rateRequestProvider = $rateRequestProvider;
         $this->quoteCouponProcessor = $quoteCouponProcessor;
         $this->totalsCollector = $totalsCollector;
+        $this->cacheManager = $cacheManager;
     }
 
     /**
@@ -180,14 +188,15 @@ class PackageProcessor implements ResetAfterRequestInterface
         }
 
         if (!array_key_exists($requestKey, $this->responses)) {
-            $this->responses[$requestKey] = $this->executeQuote();
+            $this->responses[$requestKey] = $this->cacheManager->load($requestKey)
+                ?? $this->executeAndStore($requestKey);
         }
 
         return array_map(fn (Service $service) => clone $service, $this->responses[$requestKey]);
     }
 
     /**
-     * Hashes the full quote payload so identical packages share one response, or returns null when it is unreadable.
+     * Hashes the account, the API host and the full payload of the quote, or returns null when it is unreadable.
      *
      * @return string|null
      */
@@ -197,9 +206,28 @@ class PackageProcessor implements ResetAfterRequestInterface
             return null;
         }
 
-        $payload = json_encode($this->serviceQuote->getData());
+        $request = json_encode([
+            $this->config->getToken(),
+            $this->config->getApiHostname(),
+            $this->serviceQuote->getData(),
+        ]);
 
-        return $payload === false ? null : hash('sha256', $payload);
+        return $request === false ? null : hash('sha256', $request);
+    }
+
+    /**
+     * Sends the quote to the Frenet API and keeps a non-empty answer in the cache.
+     *
+     * @param string $requestKey
+     *
+     * @return Service[]
+     */
+    private function executeAndStore(string $requestKey): array
+    {
+        $services = $this->executeQuote();
+        $this->cacheManager->save($requestKey, $services);
+
+        return $services;
     }
 
     /**
