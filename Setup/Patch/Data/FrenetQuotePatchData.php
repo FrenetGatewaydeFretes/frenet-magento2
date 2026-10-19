@@ -16,7 +16,6 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Setup\Patch\Data;
 
 use Frenet\Shipping\Model\Cache\Type\Frenet;
-use Magento\Framework\Console\Cli;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
 
@@ -64,7 +63,7 @@ class FrenetQuotePatchData implements DataPatchInterface, PatchVersionInterface
          * Run for new installation only.
          */
         $this->configureNewInstallation();
-        return Cli::RETURN_SUCCESS;
+        return $this;
     }
 
     /**

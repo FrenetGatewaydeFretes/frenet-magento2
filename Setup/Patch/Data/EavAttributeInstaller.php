@@ -21,7 +21,6 @@ use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;
-use Magento\Framework\Console\Cli;
 use Magento\Framework\Phrase;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Psr\Log\LoggerInterface;
@@ -58,7 +57,7 @@ class EavAttributeInstaller implements DataPatchInterface
      */
     public function apply()
     {
-        return Cli::RETURN_SUCCESS;
+        return $this;
     }
 
     /**

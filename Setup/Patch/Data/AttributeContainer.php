@@ -18,7 +18,6 @@ namespace Frenet\Shipping\Setup\Patch\Data;
 use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
 use Magento\Catalog\Model\Product\Attribute\Backend\Boolean as BooleanBackend;
 use Magento\Catalog\Model\Product\Attribute\Source\Boolean as BooleanSource;
-use Magento\Framework\Console\Cli;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
 /**
@@ -82,7 +81,7 @@ class AttributeContainer implements DataPatchInterface
      */
     public function apply()
     {
-        return Cli::RETURN_SUCCESS;
+        return $this;
     }
 
     /**
