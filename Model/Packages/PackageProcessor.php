@@ -13,6 +13,7 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\DataObjectInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Frenet\Shipping\Model\ApiServiceInterface;
@@ -170,15 +171,46 @@ class PackageProcessor implements ResetAfterRequestInterface
      */
     private function callService(): array
     {
-        $requestKey = hash('sha256', (string) json_encode($this->serviceQuote->getData()));
+        $requestKey = $this->getRequestKey();
+
+        if ($requestKey === null) {
+            return $this->executeQuote();
+        }
 
         if (!array_key_exists($requestKey, $this->responses)) {
-            /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
-            $result = $this->serviceQuote->execute();
-            $this->responses[$requestKey] = $result->getShippingServices() ?: [];
+            $this->responses[$requestKey] = $this->executeQuote();
         }
 
         return array_map(fn (Service $service) => clone $service, $this->responses[$requestKey]);
+    }
+
+    /**
+     * Hashes the full quote payload so identical packages share one response, or returns null when it is unreadable.
+     *
+     * @return string|null
+     */
+    private function getRequestKey(): ?string
+    {
+        if (!$this->serviceQuote instanceof DataObjectInterface) {
+            return null;
+        }
+
+        $payload = json_encode($this->serviceQuote->getData());
+
+        return $payload === false ? null : hash('sha256', $payload);
+    }
+
+    /**
+     * Sends the quote to the Frenet API.
+     *
+     * @return Service[]
+     */
+    private function executeQuote(): array
+    {
+        /** @var \Frenet\ObjectType\Entity\Shipping\Quote $result */
+        $result = $this->serviceQuote->execute();
+
+        return $result->getShippingServices() ?: [];
     }
 
     /**

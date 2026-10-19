@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Test\Unit\Model\Packages;
 
+use Frenet\Command\CommandInterface;
 use Frenet\Command\Shipping\Quote as ShippingQuoteCommand;
+use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\Command\ShippingInterface;
 use Frenet\Framework\Data\SerializerInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
@@ -210,6 +212,36 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
+     * A payload that cannot be encoded, such as a SKU with invalid UTF-8, is sent to the API for every package.
+     *
+     * @return void
+     */
+    public function testShouldCallTheApiForEachPackageWhenThePayloadCannotBeEncoded(): void
+    {
+        $payload = ['ShippingItemArray' => [['SKU' => "sku-\xB1", 'Quantity' => 4]]];
+        $this->givenQuoteCommands(
+            $this->quoteCommand($payload, $this->once()),
+            $this->quoteCommand($payload, $this->once())
+        );
+
+        $this->subject->process($this->simplePackage());
+        $this->subject->process($this->simplePackage());
+    }
+
+    /**
+     * A quote command that does not expose its payload is sent to the API for every package.
+     *
+     * @return void
+     */
+    public function testShouldCallTheApiForEachPackageWhenTheCommandHidesItsPayload(): void
+    {
+        $this->givenQuoteCommands($this->opaqueQuoteCommand($this->once()), $this->opaqueQuoteCommand($this->once()));
+
+        $this->subject->process($this->simplePackage());
+        $this->subject->process($this->simplePackage());
+    }
+
+    /**
      * Builds a one-item package whose cart item has no quote, so only the API call is exercised.
      *
      * @return Package
@@ -261,13 +293,35 @@ class PackageProcessorTest extends TestCase
     }
 
     /**
+     * Builds a shipping quote command without a readable payload, expected to reach the API as stated.
+     *
+     * @param object $executions
+     *
+     * @return QuoteInterface&CommandInterface&MockObject
+     */
+    private function opaqueQuoteCommand(object $executions): MockObject
+    {
+        $command = $this->createMockForIntersectionOfInterfaces([QuoteInterface::class, CommandInterface::class]);
+        $command->method('setSellerPostcode')->willReturnSelf();
+        $command->method('setRecipientPostcode')->willReturnSelf();
+        $command->method('setRecipientCountry')->willReturnSelf();
+        $command->method('setShipmentInvoiceValue')->willReturnSelf();
+        $command->method('addShippingItem')->willReturnSelf();
+        $command->expects($executions)->method('execute')->willReturn(
+            $this->createConfiguredMock(ShippingQuoteResult::class, ['getShippingServices' => []])
+        );
+
+        return $command;
+    }
+
+    /**
      * Makes the API hand out the given quote commands, one per processed package.
      *
-     * @param ShippingQuoteCommand ...$commands
+     * @param QuoteInterface ...$commands
      *
      * @return void
      */
-    private function givenQuoteCommands(ShippingQuoteCommand ...$commands): void
+    private function givenQuoteCommands(QuoteInterface ...$commands): void
     {
         $shipping = $this->createMock(ShippingInterface::class);
         $shipping->method('quote')->willReturnOnConsecutiveCalls(...$commands);
