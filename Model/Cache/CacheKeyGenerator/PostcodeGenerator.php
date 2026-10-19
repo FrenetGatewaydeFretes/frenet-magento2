@@ -20,7 +20,6 @@ use Frenet\Shipping\Model\CacheManager;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
-use Magento\Framework\Serialize\SerializerInterface;
 
 /**
  * Added both postcodes to the former cart-level cache key, kept so existing DI configuration still compiles.
@@ -41,28 +40,20 @@ class PostcodeGenerator implements CacheKeyGeneratorInterface
     private $config;
 
     /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
      * @var PostcodeNormalizer
      */
     private $postcodeNormalizer;
 
     /**
      * @param PostcodeNormalizer           $postcodeNormalizer
-     * @param SerializerInterface          $serializer
      * @param RateRequestProviderInterface $requestProvider
      * @param ConfigInterface              $config
      */
     public function __construct(
         PostcodeNormalizer $postcodeNormalizer,
-        SerializerInterface $serializer,
         RateRequestProviderInterface $requestProvider,
         ConfigInterface $config
     ) {
-        $this->serializer = $serializer;
         $this->requestProvider = $requestProvider;
         $this->config = $config;
         $this->postcodeNormalizer = $postcodeNormalizer;

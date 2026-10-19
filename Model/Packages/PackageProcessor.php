@@ -13,6 +13,7 @@
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Frenet\Command\CommandInterface;
 use Frenet\Command\Shipping\QuoteInterface;
 use Frenet\DataObjectInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote as ShippingQuoteResult;
@@ -179,7 +180,7 @@ class PackageProcessor implements ResetAfterRequestInterface
     {
         $this->serviceQuote->addShippingItem(
             $packageItem->getSku(),
-            $packageItem->getQty(),
+            (int) $packageItem->getQty(),
             $packageItem->getWeight(),
             $packageItem->getLength(),
             $packageItem->getHeight(),
@@ -254,8 +255,10 @@ class PackageProcessor implements ResetAfterRequestInterface
      */
     private function executeQuote(): array
     {
+        /** @var QuoteInterface&CommandInterface $command */
+        $command = $this->serviceQuote;
         /** @var ShippingQuoteResult $result */
-        $result = $this->serviceQuote->execute();
+        $result = $command->execute();
 
         return $result->getShippingServices() ?: [];
     }

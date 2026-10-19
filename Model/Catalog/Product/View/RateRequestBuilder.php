@@ -17,13 +17,14 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder\BuilderInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Option as ProductOption;
 use Magento\Framework\DataObject;
 use Magento\Framework\DataObjectFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Model\Quote as CartQuote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
-use Magento\Quote\Model\Quote as CartQuote;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Magento\Quote\Model\QuoteFactory;
 
@@ -93,6 +94,10 @@ class RateRequestBuilder
      */
     public function build(ProductInterface $product, string $postcode, int $qty = 1, array $options = []): RateRequest
     {
+        if (!$product instanceof Product) {
+            throw new LocalizedException(__('The shipping quote is not available.'));
+        }
+
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
         $request = $this->prepareProductRequest($product, $qty, $options);
@@ -169,14 +174,14 @@ class RateRequestBuilder
     /**
      * Builds a retry buy request with only the given custom options that exist on the product.
      *
-     * @param ProductInterface $product
-     * @param int              $qty
-     * @param mixed[]          $options
+     * @param Product $product
+     * @param int     $qty
+     * @param mixed[] $options
      *
      * @return DataObject
      */
     private function prepareProductOptionRequest(
-        ProductInterface $product,
+        Product $product,
         int $qty = 1,
         array $options = []
     ): DataObject {

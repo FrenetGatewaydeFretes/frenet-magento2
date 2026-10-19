@@ -54,7 +54,7 @@ class Package
      * Adds a quantity of an item to the package.
      *
      * @param QuoteItem  $item
-     * @param int        $qty
+     * @param float|int  $qty
      * @param float|null $unitWeight
      *
      * @return bool
@@ -115,7 +115,7 @@ class Package
      * Checks whether a quantity of an item still fits within the package weight limit.
      *
      * @param QuoteItem  $item
-     * @param int        $qty
+     * @param float|int  $qty
      * @param float|null $unitWeight
      *
      * @return bool

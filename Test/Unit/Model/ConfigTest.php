@@ -77,11 +77,12 @@ class ConfigTest extends TestCase
     public function testShouldReadTheQuotedStoreWhenNoStoreIsGiven(): void
     {
         $quotedStore = $this->createMock(StoreInterface::class);
+        $quotedStore->method('getId')->willReturn(3);
         $this->rateRequestProvider->method('getStoreId')->willReturn(3);
         $this->storeManager->expects($this->once())->method('getStore')->with(3)->willReturn($quotedStore);
         $this->scopeConfig->expects($this->once())
             ->method('getValue')
-            ->with('carriers/frenetshipping/token', 'store', $this->identicalTo($quotedStore))
+            ->with('carriers/frenetshipping/token', 'store', 3)
             ->willReturn('website-token');
 
         $this->assertSame('website-token', $this->subject->getToken());

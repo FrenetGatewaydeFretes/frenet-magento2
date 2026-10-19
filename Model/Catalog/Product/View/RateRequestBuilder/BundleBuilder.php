@@ -15,11 +15,11 @@
 namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 
 use Magento\Bundle\Model\Option;
+use Magento\Bundle\Model\Product\Type as BundleType;
 use Magento\Bundle\Model\ResourceModel\Option\Collection as OptionCollection;
-use Magento\Bundle\Model\ResourceModel\Selection\Collection as SelectionCollection;
 use Magento\Bundle\Model\Selection;
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Catalog\Model\Product\Type\AbstractType;
+use Magento\Catalog\Model\Product;
 use Magento\Framework\DataObject;
 
 /**
@@ -43,20 +43,22 @@ class BundleBuilder implements BuilderInterface
             return;
         }
 
-        $this->buildDefaultOptions($product, $request);
+        if ($product instanceof Product) {
+            $this->buildDefaultOptions($product, $request);
+        }
     }
 
     /**
      * Selects the default, or else the first, selection of every required bundle option.
      *
-     * @param ProductInterface $product
+     * @param Product          $product
      * @param DataObject       $request
      *
      * @return void
      */
-    private function buildDefaultOptions(ProductInterface $product, DataObject $request)
+    private function buildDefaultOptions(Product $product, DataObject $request)
     {
-        /** @var AbstractType $typeInstance */
+        /** @var BundleType $typeInstance */
         $typeInstance = $product->getTypeInstance();
 
         $bundleOptions = [];
@@ -76,7 +78,6 @@ class BundleBuilder implements BuilderInterface
             $selection = $option->getDefaultSelection();
 
             if (!$selection) {
-                /** @var SelectionCollection $selections */
                 $selection = $typeInstance->getSelectionsCollection(
                     $option->getId(),
                     $product

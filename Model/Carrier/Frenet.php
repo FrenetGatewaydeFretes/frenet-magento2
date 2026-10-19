@@ -248,7 +248,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * Processing additional validation (quote data) to check if carrier applicable.
      *
-     * @param RateRequest $request
+     * @param DataObject $request
      *
      * @return $this|bool|DataObject
      */
@@ -336,7 +336,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             $status->setCarrierTitle($this->getConfigData('title'));
             $status->setTracking($trackingNumber);
             $status->setPopup(1);
-            $status->setTrackSummary($this->prepareTrackingInformation($status, $trackingNumber, $serviceCode));
+            $this->prepareTrackingInformation($status, $trackingNumber, $serviceCode);
             $result->append($status);
         }
 
@@ -403,7 +403,6 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
      */
     private function prepareResult(array $services = []) : self
     {
-        /** @var RateResult $result */
         $this->result = $this->_rateFactory->create();
 
         /** @var QuoteServiceInterface $service */
@@ -413,10 +412,7 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
             }
 
             $deliveryTime = $this->deliveryTimeCalculator->calculate($service);
-            $serviceDescription = $service->getServiceDescription();
-            if (is_array($serviceDescription)) {
-                $serviceDescription = implode(" ", $service->getServiceDescription());
-            }
+            $serviceDescription = implode(' ', (array) $service->getServiceDescription());
             $serviceMessage = "" . $service->getMessage();
 
             $title = $this->appendInformation(
@@ -495,9 +491,9 @@ class Frenet extends AbstractCarrierOnline implements CarrierInterface
     /**
      * Appends the delivery forecast, when it is enabled, and any restriction message returned by the API.
      *
-     * @param string $text
-     * @param int    $deliveryTime
-     * @param string $message
+     * @param string|Phrase $text
+     * @param int           $deliveryTime
+     * @param string        $message
      *
      * @return string
      */

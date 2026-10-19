@@ -15,11 +15,16 @@
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 use Magento\Quote\Model\Quote\ItemFactory;
 
 /**
  * Wraps a catalog product into a standalone quote item priced at its final price for the given quantity.
+ *
+ * @deprecated 2.4.8-p4 Nothing in the module uses it; the product page quote builds a real quote instead.
+ * @see RateRequestBuilder
  */
 class QuoteItemConvertor
 {
@@ -44,21 +49,26 @@ class QuoteItemConvertor
      * @param int              $qty
      *
      * @return QuoteItem
+     * @throws LocalizedException
      */
     public function convert(ProductInterface $product, int $qty = 1) : QuoteItem
     {
+        if (!$product instanceof Product) {
+            throw new LocalizedException(__('The shipping quote is not available.'));
+        }
+
         return $this->createCartItem($product, $qty);
     }
 
     /**
      * Creates the quote item with the product ID, store, quantity, final price and row total.
      *
-     * @param ProductInterface $product
-     * @param int              $qty
+     * @param Product $product
+     * @param int     $qty
      *
      * @return QuoteItem
      */
-    private function createCartItem(ProductInterface $product, int $qty) : QuoteItem
+    private function createCartItem(Product $product, int $qty) : QuoteItem
     {
         $item = $this->itemFactory->create();
 

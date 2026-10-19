@@ -15,8 +15,6 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
@@ -42,16 +40,6 @@ class PackageManager
     private $packageFactory;
 
     /**
-     * @var QuoteItemValidatorInterface
-     */
-    private $quoteItemValidator;
-
-    /**
-     * @var ItemQuantityCalculatorInterface
-     */
-    private $itemQuantityCalculator;
-
-    /**
      * @var PackageLimit
      */
     private $packageLimit;
@@ -62,21 +50,15 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
-     * @param QuoteItemValidatorInterface     $quoteItemValidator
-     * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
-     * @param PackageFactory                  $packageFactory
-     * @param PackageLimit                    $packageLimit
-     * @param PackageItemDistributor          $packageItemDistributor
+     * @param PackageFactory         $packageFactory
+     * @param PackageLimit           $packageLimit
+     * @param PackageItemDistributor $packageItemDistributor
      */
     public function __construct(
-        QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculatorInterface $itemQuantityCalculator,
         PackageFactory $packageFactory,
         PackageLimit $packageLimit,
         PackageItemDistributor $packageItemDistributor
     ) {
-        $this->quoteItemValidator = $quoteItemValidator;
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->packageFactory = $packageFactory;
         $this->packageLimit = $packageLimit;
         $this->packageItemDistributor = $packageItemDistributor;

@@ -304,7 +304,7 @@ class Config implements ConfigInterface
     public function get($section, $group, $field, $store = null, $scopeType = ScopeInterface::SCOPE_STORE)
     {
         $path = implode('/', [$section, $group, $field]);
-        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store));
+        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store)?->getId());
     }
 
     /**

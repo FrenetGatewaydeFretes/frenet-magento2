@@ -151,5 +151,7 @@ class ServiceFinder implements ServiceFinderInterface
         foreach ($list->getItems() as $item) {
             return $item;
         }
+
+        return null;
     }
 }

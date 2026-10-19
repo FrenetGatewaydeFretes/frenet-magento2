@@ -66,7 +66,13 @@ class CacheManager
         $services = [];
 
         foreach ((array) $this->serializer->unserialize($data) as $serviceData) {
-            $services[] = (new Service(new Serializer()))->setData((array) $serviceData);
+            $service = new Service(new Serializer());
+
+            foreach ((array) $serviceData as $key => $value) {
+                $service->setData((string) $key, $value);
+            }
+
+            $services[] = $service;
         }
 
         return $services ?: null;

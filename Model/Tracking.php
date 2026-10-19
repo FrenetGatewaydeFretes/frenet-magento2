@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Command\CommandInterface;
 use Frenet\Command\Tracking\TrackingInfoInterface as TrackingInfoCommand;
 use Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface;
 
@@ -42,7 +43,7 @@ class Tracking implements TrackingInterface
      */
     public function track($number, $shippingServiceCode)
     {
-        /** @var TrackingInfoCommand $tracking */
+        /** @var TrackingInfoCommand&CommandInterface $tracking */
         $tracking = $this->apiService
             ->tracking()
             ->trackingInfo()
