@@ -106,7 +106,7 @@ Recursos opcionais, no mesmo painel:
 
 **Alterado**
 
-- Requer `frenet/frenet-php` **1.3.3**, que passa a aplicar os limites de tempo nas chamadas à API.
+- Requer `frenet/frenet-php` **1.3.4**. A 1.3.3 passou a aplicar os limites de tempo nas chamadas à API, e a 1.3.4 grava cada chamada uma única vez no log de debug (antes as linhas se multiplicavam a cada chamada).
 - A cotação lê cada atributo de produto (peso, dimensões, prazo) e as categorias uma única vez por requisição. Em carrinhos grandes isso reduz bastante as consultas ao banco: com 20 itens, de cerca de 880 para cerca de 510, e o tempo de banco de cerca de 230 ms para cerca de 60 ms. O frete calculado não muda.
 - Com **Multi Quote**, pacotes idênticos são cotados uma única vez por requisição. Por exemplo, a cotação de 40 unidades de um item pesado na página do produto cai de 11 para 2 chamadas à API, e de cerca de 7 s para cerca de 1,5 s.
 
