@@ -264,8 +264,8 @@ class PackageProcessorTest extends TestCase
     /**
      * Builds a shipping quote command carrying the given payload and expected to reach the API as stated.
      *
-     * @param array  $payload
-     * @param object $executions
+     * @param mixed[] $payload
+     * @param object  $executions
      *
      * @return ShippingQuoteCommand&MockObject
      */

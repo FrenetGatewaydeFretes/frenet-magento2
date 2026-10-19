@@ -78,10 +78,10 @@ class CategoryExtractorTest extends TestCase
     /**
      * Builds a product whose category collection yields the given names and is expected to load as stated.
      *
-     * @param int    $id
-     * @param int    $storeId
-     * @param array  $names
-     * @param object $loads
+     * @param int      $id
+     * @param int      $storeId
+     * @param string[] $names
+     * @param object   $loads
      *
      * @return Product&MockObject
      */

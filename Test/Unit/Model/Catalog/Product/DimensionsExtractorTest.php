@@ -131,7 +131,7 @@ class DimensionsExtractorTest extends TestCase
     /**
      * Lists stored values that mean "no measurement" and must fall back to the configured defaults.
      *
-     * @return array<string, array{mixed}>
+     * @return array<string, array{string|false}>
      */
     public static function missingMeasurementProvider(): array
     {
@@ -147,12 +147,12 @@ class DimensionsExtractorTest extends TestCase
     /**
      * Confirms a zero, negative or missing measurement uses the default instead of being sent to the API as is.
      *
-     * @param mixed $stored
+     * @param string|false $stored
      *
      * @return void
      */
     #[DataProvider('missingMeasurementProvider')]
-    public function testShouldUseTheDefaultsWhenTheMeasurementIsZeroOrMissing(mixed $stored): void
+    public function testShouldUseTheDefaultsWhenTheMeasurementIsZeroOrMissing(string|false $stored): void
     {
         $this->productResource->method('getAttributeRawValue')->willReturn($stored);
 
@@ -232,8 +232,8 @@ class DimensionsExtractorTest extends TestCase
     /**
      * Builds a cart item mock for the product, carrying the given item data.
      *
-     * @param Product $product
-     * @param array   $data
+     * @param Product  $product
+     * @param string[] $data
      *
      * @return QuoteItem&MockObject
      */

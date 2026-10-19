@@ -56,7 +56,7 @@ class ConfigTest extends TestCase
     /**
      * Lists stored values that do not express a usable limit.
      *
-     * @return array<string, array{mixed}>
+     * @return array<string, array{string|null}>
      */
     public static function unusableLimitProvider(): array
     {
@@ -71,12 +71,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unusable package weight falls back to the 30 kg default instead of discarding every item.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultPackageMaxWeightWhenTheStoredValueIsUnusable(mixed $value): void
+    public function testShouldFallBackToTheDefaultPackageMaxWeightWhenTheStoredValueIsUnusable(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/package_max_weight')->willReturn($value);
 
@@ -86,12 +86,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unusable unit quantity falls back to the 5000 default instead of zeroing every item.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultMaxUnitQuantityWhenTheStoredValueIsUnusable(mixed $value): void
+    public function testShouldFallBackToTheDefaultMaxUnitQuantityWhenTheStoredValueIsUnusable(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/max_unit_quantity')->willReturn($value);
 
@@ -101,7 +101,7 @@ class ConfigTest extends TestCase
     /**
      * Lists debug filenames that would leave var/log or produce a non-log file.
      *
-     * @return array<string, array{mixed}>
+     * @return array<string, array{string|null}>
      */
     public static function unsafeDebugFilenameProvider(): array
     {
@@ -120,12 +120,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unsafe debug filename falls back to the default log file inside var/log.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unsafeDebugFilenameProvider')]
-    public function testShouldFallBackToTheDefaultDebugFilenameWhenTheStoredNameIsUnsafe(mixed $value): void
+    public function testShouldFallBackToTheDefaultDebugFilenameWhenTheStoredNameIsUnsafe(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/debug_filename')->willReturn($value);
 
@@ -175,12 +175,12 @@ class ConfigTest extends TestCase
     /**
      * Confirms an unusable API timeout falls back to the 30 second default instead of waiting forever.
      *
-     * @param mixed $value
+     * @param string|null $value
      *
      * @return void
      */
     #[DataProvider('unusableLimitProvider')]
-    public function testShouldFallBackToTheDefaultApiTimeoutWhenTheStoredValueIsUnusable(mixed $value): void
+    public function testShouldFallBackToTheDefaultApiTimeoutWhenTheStoredValueIsUnusable(?string $value): void
     {
         $this->scopeConfig->method('getValue')->with('carriers/frenetshipping/api_timeout')->willReturn($value);
 
