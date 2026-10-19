@@ -105,6 +105,8 @@ Recursos opcionais, no mesmo painel:
 - Com **Multi Quote** habilitado, carrinhos acima do peso máximo do pacote voltam a receber os fretes Frenet. Desde a 2.4.9 eles ficavam sem nenhuma opção. Os Correios são somados por pacote, e as demais transportadoras vêm da cotação do carrinho inteiro.
 - Produtos com peso ou medida salvos como **0** passam a usar os valores padrão (**Default Measurements**), em vez de enviar 0 à Frenet, que deixava o carrinho sem cotação.
 - O comentário do campo **API Protocol** volta a aparecer traduzido no admin em português.
+- A cotação usa a configuração da loja do pedido (token, CEP de origem, medidas padrão e prazo de cada produto). Antes usava a loja aberta no momento, o que dava errado em pedidos criados pelo admin e em lojas com mais de um website.
+- O cache de cotações passa a considerar tudo o que é enviado à Frenet: valor da nota, peso, medidas, cupom e a conta da loja. Antes, uma mudança de preço ou de peso, ou um website com outra conta Frenet, podia receber uma cotação antiga do cache.
 
 **Alterado**
 
