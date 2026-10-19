@@ -55,7 +55,8 @@ class Quote extends View
     protected function _beforeToHtml()
     {
         $this->jsLayout['components']['frenet-quote']['config']['url'] = $this->getViewModel()->getUrl();
-        parent::_beforeToHtml();
+
+        return parent::_beforeToHtml();
     }
 
     /**
