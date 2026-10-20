@@ -238,6 +238,24 @@ interface ConfigInterface
     public function getProductQuoteProductTypes($store = null): array;
 
     /**
+     * Returns how many product page quotes a single visitor may request per minute, where 0 means no limit.
+     *
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return int
+     */
+    public function getProductQuoteVisitorLimit($store = null): int;
+
+    /**
+     * Returns how many product page quotes all visitors of a website may request per minute, where 0 means no limit.
+     *
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return int
+     */
+    public function getProductQuoteStoreLimit($store = null): int;
+
+    /**
      * Returns the shipping origin postcode.
      *
      * @param string|int|StoreInterface|null $store

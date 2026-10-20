@@ -27,5 +27,21 @@
                 <field id="enabled">1</field>
             </depends>
         </field>
+        <field id="visitor_limit" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+            <label>Quote Limit per Visitor (per minute)</label>
+            <validate>validate-digits</validate>
+            <comment><![CDATA[Maximum product page quotes a single visitor can request per minute. Protects your Frenet API quota from abuse. Default: 60. Use 0 for no limit.]]></comment>
+            <depends>
+                <field id="enabled">1</field>
+            </depends>
+        </field>
+        <field id="store_limit" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+            <label>Quote Limit per Store (per minute)</label>
+            <validate>validate-digits</validate>
+            <comment><![CDATA[Maximum product page quotes all visitors of this website can request per minute together. Stops floods that come from many addresses. Cart and checkout quotes are never limited. Default: 1000. Use 0 for no limit.]]></comment>
+            <depends>
+                <field id="enabled">1</field>
+            </depends>
+        </field>
     </group>
 </include>
