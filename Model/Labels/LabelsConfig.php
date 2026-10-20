@@ -15,6 +15,8 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 /**
  * Settings of the labels feature (carriers/frenetshipping/labels/*). The customer token defaults to the token
  * of the Frenet shipping method, so most stores only paste the partner token.
+ *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class LabelsConfig
 {

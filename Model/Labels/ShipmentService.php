@@ -13,6 +13,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Frenet shipments of orders, in two journeys:
@@ -22,6 +23,9 @@ use Psr\Log\LoggerInterface;
  * Learned live on 2026-09-30: the checkout answer is not reliable (it charged and did not say status 1), so the
  * real status always comes from GET /shipments/{id}; DELETE on a paid shipment answers OK and changes nothing, so
  * paid ones are cancelled with POST /{id}/cancel, which may answer an error and still schedule the cancellation.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class ShipmentService
 {
@@ -64,16 +68,20 @@ class ShipmentService
      * Creates the Frenet shipment of one order with the chosen service.
      *
      * @param int $orderId
-     * @param array $service code, carrier, carrier_code, name, price, days (from the comparison).
+     * @param mixed[] $service code, carrier, carrier_code, name, price, days (from the comparison).
      * @param string $journey LabelsConfig::JOURNEY_HERE or JOURNEY_PANEL.
      * @param bool $pay Pay at once with the wallet (journey "here" only).
-     * @return array Stored row.
+     * @return mixed[] Stored row.
      * @throws LocalizedException
+     *
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function create(int $orderId, array $service, string $journey, bool $pay): array
     {
         if (!$this->config->isAvailable()) {
-            throw new LabelException(__('Frenet labels are off. Turn them on and add the partner token in the settings.'));
+            throw new LabelException(
+                __('Frenet labels are off. Turn them on and add the partner token in the settings.')
+            );
         }
         if ($this->store->activeForOrder($orderId)) {
             throw new LabelException(__('This order already has a Frenet shipment. Cancel it first.'));
@@ -81,11 +89,17 @@ class ShipmentService
         /** @var Order $order */
         $order = $this->orderRepository->get($orderId);
         $panel = $journey === LabelsConfig::JOURNEY_PANEL;
-        $res = $this->client->whitelabel('POST', $panel ? '/orders' : '/shipments', [$this->payload->build($order, $service)]);
+        $res = $this->client->whitelabel(
+            'POST',
+            $panel ? '/orders' : '/shipments',
+            [$this->payload->build($order, $service)]
+        );
         $item = (array) (Client::field((array) (Client::field($res, 'items') ?? []), 0) ?? []);
         $errors = (array) (Client::field($item, 'errors') ?? []);
         if ($errors) {
-            throw new LabelException(__('%1', Client::cleanError((string) (Client::field((array) $errors[0], 'message') ?? ''))));
+            throw new LabelException(
+                __('%1', Client::cleanError((string) (Client::field((array) $errors[0], 'message') ?? '')))
+            );
         }
         $shipmentId = (string) (Client::field($item, 'shipmentId') ?? '');
         if ($shipmentId === '') {
@@ -116,6 +130,8 @@ class ShipmentService
      * @param string[] $shipmentIds
      * @return array{paid: string[], unpaid: string[], message: string}
      * @throws LabelException When Frenet does not answer at all.
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public function pay(array $shipmentIds): array
     {
@@ -131,7 +147,10 @@ class ShipmentService
             }
         } catch (LabelException $e) {
             // Unknown result (e.g. timeout): the real status below and the cron decide; never pay twice.
-            $message = (string) __('The payment did not answer (%1). The store checks again every minute; do not pay twice.', $e->getMessage());
+            $message = (string) __(
+                'The payment did not answer (%1). The store checks again every minute; do not pay twice.',
+                $e->getMessage()
+            );
         }
         $paid = [];
         $unpaid = [];
@@ -144,7 +163,9 @@ class ShipmentService
             if (in_array($status, self::PAID, true)) {
                 $paid[] = $id;
                 if ($row) {
-                    $this->comment($this->orderRepository->get((int) $row['order_id']), (string) __(
+                    /** @var Order $paidOrder */
+                    $paidOrder = $this->orderRepository->get((int) $row['order_id']);
+                    $this->comment($paidOrder, (string) __(
                         'Frenet label %1 paid (R$ %2).',
                         $id,
                         number_format((float) $row['price'], 2, ',', '.')
@@ -182,7 +203,7 @@ class ShipmentService
         }
         $label = (string) (Client::field($res, 'labelUrl') ?? '');
         $trackingUrl = (string) (Client::field($res, 'trackingUrl') ?? '');
-        $code = preg_match('#/([A-Za-z0-9]{8,})/?$#', $trackingUrl, $m) ? $m[1] : '';
+        $code = preg_match('#/([A-Za-z0-9]{8,})/?$#', $trackingUrl, $matches) ? $matches[1] : '';
         $data = [
             'label_url' => $label,
             'declaration_url' => (string) (Client::field($res, 'declarationUrl') ?? ''),
@@ -203,8 +224,11 @@ class ShipmentService
         if ($code !== '') {
             try {
                 $this->shipper->addTracking($order, $code);
-            } catch (\Throwable $e) {
-                $this->logger->error('Frenet labels: tracking ' . $code . ' on order ' . $order->getIncrementId() . ': ' . $e->getMessage());
+            } catch (Throwable $e) {
+                $this->logger->error(
+                    'Frenet labels: tracking ' . $code . ' on order ' . $order->getIncrementId() . ': '
+                    . $e->getMessage()
+                );
             }
         }
         return true;
@@ -219,17 +243,17 @@ class ShipmentService
     {
         $done = 0;
         foreach ($this->store->waitingForLabel(self::POLL_MAX) as $row) {
-            $id = (string) $row['shipment_id'];
+            $shipmentId = (string) $row['shipment_id'];
             if ((int) $row['status'] === self::STATUS_PENDING_PAYMENT) {
                 // A payment that did not answer: only continue when Frenet really charged it.
-                $status = $this->realStatus($id);
+                $status = $this->realStatus($shipmentId);
                 if ($status === null || !in_array($status, self::PAID, true)) {
-                    $this->store->save($id, ['poll_attempts' => (int) $row['poll_attempts'] + 1]);
+                    $this->store->save($shipmentId, ['poll_attempts' => (int) $row['poll_attempts'] + 1]);
                     continue;
                 }
-                $this->store->save($id, ['status' => $status]);
+                $this->store->save($shipmentId, ['status' => $status]);
             }
-            $done += (int) $this->fetchLabel($id);
+            $done += (int) $this->fetchLabel($shipmentId);
         }
         return $done;
     }
@@ -249,7 +273,9 @@ class ShipmentService
         $status = $this->realStatus($shipmentId);
         $row = $this->store->get($shipmentId);
         if ($status === null) {
-            throw new LabelException(__('Frenet did not answer the status of shipment %1. Nothing was changed; try again.', $shipmentId));
+            throw new LabelException(
+                __('Frenet did not answer the status of shipment %1. Nothing was changed; try again.', $shipmentId)
+            );
         }
         if (!in_array($status, LabelStore::GONE, true)) {
             $paid = !in_array($status, self::UNPAID, true);
@@ -262,17 +288,24 @@ class ShipmentService
             }
             $after = $this->realStatus($shipmentId);
             if ($after === null || !in_array($after, LabelStore::GONE, true)) {
-                throw new LabelException(__('Frenet did not cancel shipment %1. Cancel it in the Frenet panel.', $shipmentId));
+                throw new LabelException(
+                    __('Frenet did not cancel shipment %1. Cancel it in the Frenet panel.', $shipmentId)
+                );
             }
             $status = $after;
         }
         $this->wallet->clear();
         $note = in_array($status, [self::STATUS_CANCEL_SCHEDULED, self::STATUS_CANCELLED], true)
-            ? (string) __('Frenet label %1 cancelled. Frenet returns the amount to the wallet (usually overnight).', $shipmentId)
+            ? (string) __(
+                'Frenet label %1 cancelled. Frenet returns the amount to the wallet (usually overnight).',
+                $shipmentId
+            )
             : (string) __('Unpaid Frenet shipment %1 deleted.', $shipmentId);
         if ($row) {
             $this->store->save($shipmentId, ['status' => $status]);
-            $this->comment($this->orderRepository->get((int) $row['order_id']), $note);
+            /** @var Order $cancelledOrder */
+            $cancelledOrder = $this->orderRepository->get((int) $row['order_id']);
+            $this->comment($cancelledOrder, $note);
         }
         return $note;
     }
@@ -330,7 +363,7 @@ class ShipmentService
     /**
      * Adds an admin comment to the order and saves it.
      *
-     * @param Order|\Magento\Sales\Api\Data\OrderInterface $order
+     * @param Order $order
      * @param string $text
      * @return void
      */

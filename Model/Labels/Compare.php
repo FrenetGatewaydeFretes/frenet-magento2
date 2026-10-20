@@ -18,30 +18,37 @@ class Compare
     /**
      * Index of the cheapest service (ties: the faster one), or null.
      *
-     * @param array $services
+     * @param mixed[] $services
      * @return int|null
      */
     public static function bestPrice(array $services): ?int
     {
-        return self::best($services, static fn ($a, $b) => [$a['price'], $a['days']] <=> [$b['price'], $b['days']]);
+        return self::best(
+            $services,
+            static fn ($left, $right) => [$left['price'], $left['days']] <=> [$right['price'], $right['days']]
+        );
     }
 
     /**
      * Index of the fastest service (ties: the cheaper one), or null.
      *
-     * @param array $services
+     * @param mixed[] $services
      * @return int|null
      */
     public static function bestTime(array $services): ?int
     {
-        return self::best($services, static fn ($a, $b) => [$a['days'], $a['price']] <=> [$b['days'], $b['price']]);
+        return self::best(
+            $services,
+            static fn ($left, $right) => [$left['days'], $left['price']] <=> [$right['days'], $right['price']]
+        );
     }
 
     /**
-     * Service that comes selected: the customer's choice, or the best one when $autoBest (or when the customer's
-     * service is no longer offered).
+     * Service that comes selected: the customer's choice, or the best one when $autoBest.
      *
-     * @param array $services
+     * The best one is also selected when the customer's service is no longer offered.
+     *
+     * @param mixed[] $services
      * @param string $customerCode
      * @param string $mode "price" or "time"
      * @param bool $autoBest
@@ -60,11 +67,13 @@ class Compare
     }
 
     /**
-     * Header of the comparison: per carrier, in how many orders it is available and the totals of its cheapest and
-     * of its fastest service; plus the total of the cheapest option of every order ("best option").
+     * Header of the comparison: availability and totals per carrier, plus the total of the best option.
      *
-     * @param array $ordersServices One services list per order.
-     * @return array{carriers: array, best_total: float, orders: int}
+     * Per carrier: in how many orders it is available and the totals of its cheapest and of its fastest service;
+     * plus the total of the cheapest option of every order ("best option").
+     *
+     * @param mixed[] $ordersServices One services list per order.
+     * @return array{carriers: mixed[], best_total: float, orders: int}
      */
     public static function carriers(array $ordersServices): array
     {
@@ -80,7 +89,12 @@ class Compare
                 $byCarrier[$service['carrier'] ?: $service['carrier_code']][] = $service;
             }
             foreach ($byCarrier as $name => $list) {
-                $row = $carriers[$name] ?? ['carrier' => $name, 'available' => 0, 'best_price' => 0.0, 'best_time' => 0.0];
+                $row = $carriers[$name] ?? [
+                    'carrier' => $name,
+                    'available' => 0,
+                    'best_price' => 0.0,
+                    'best_time' => 0.0,
+                ];
                 $row['available']++;
                 $row['best_price'] += (float) $list[self::bestPrice($list)]['price'];
                 $row['best_time'] += (float) $list[self::bestTime($list)]['price'];
@@ -93,15 +107,23 @@ class Compare
             $row['all'] = $row['available'] === count($ordersServices);
         }
         unset($row);
-        uasort($carriers, static fn ($a, $b) => [$b['available'], $a['best_price']] <=> [$a['available'], $b['best_price']]);
-        return ['carriers' => array_values($carriers), 'best_total' => round($bestTotal, 2), 'orders' => count($ordersServices)];
+        uasort(
+            $carriers,
+            static fn ($left, $right) => [$right['available'], $left['best_price']]
+                <=> [$left['available'], $right['best_price']]
+        );
+        return [
+            'carriers' => array_values($carriers),
+            'best_total' => round($bestTotal, 2),
+            'orders' => count($ordersServices),
+        ];
     }
 
     /**
      * Totals of the chosen services: count and total per carrier, and the overall total.
      *
-     * @param array $chosen Services chosen (one per order).
-     * @return array{count: int, total: float, carriers: array}
+     * @param mixed[] $chosen Services chosen (one per order).
+     * @return array{count: int, total: float, carriers: mixed[]}
      */
     public static function summarize(array $chosen): array
     {
@@ -120,7 +142,7 @@ class Compare
     /**
      * Index of the minimum by $cmp.
      *
-     * @param array $services
+     * @param mixed[] $services
      * @param callable $cmp
      * @return int|null
      */

@@ -9,12 +9,15 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Labels;
 
+use Frenet\Shipping\Model\TrackingSync\InTransit;
 use Magento\Sales\Api\Data\ShipmentTrackCreationInterfaceFactory;
 use Magento\Sales\Api\ShipOrderInterface;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Shipment\TrackFactory;
 use Magento\Sales\Model\Order\Email\Sender\ShipmentSender;
-use Frenet\Shipping\Model\TrackingSync\InTransit;
+use Magento\Sales\Model\Order\Shipment;
+use Magento\Sales\Model\Order\Shipment\Track;
+use Magento\Sales\Model\Order\Shipment\TrackFactory;
+use Throwable;
 
 /**
  * Puts the Frenet tracking code on the order: ships it when it can still ship, otherwise adds the track to its
@@ -50,6 +53,8 @@ class Shipper
      * @param string $number
      * @param bool $notify E-mail the shipment to the customer.
      * @return bool
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function addTracking(Order $order, string $number, bool $notify = false): bool
     {
@@ -58,12 +63,15 @@ class Shipper
 
     /**
      * Ships the order with the code when it can still ship; otherwise adds the code to its last shipment.
+     *
      * Then moves the order to "Em transporte" when the automatic status is on.
      *
      * @param Order $order
      * @param string $number
      * @param bool $notify E-mail the shipment (or the new code) to the customer.
      * @return string self::SHIPPED, self::ADDED, self::EXISTS or self::NO_SHIPMENT
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function attach(Order $order, string $number, bool $notify = false): string
     {
@@ -83,10 +91,12 @@ class Shipper
             $this->inTransit->apply((int) $order->getEntityId(), $number);
             return self::SHIPPED;
         }
+        /** @var Shipment $shipment */
         $shipment = $order->getShipmentsCollection()->getLastItem();
         if (!$shipment || !$shipment->getId()) {
             return self::NO_SHIPMENT;
         }
+        /** @var Track $track */
         $track = $this->trackFactory->create()
             ->setCarrierCode('frenetshipping')
             ->setTitle($title)
@@ -95,7 +105,7 @@ class Shipper
         if ($notify) {
             try {
                 $this->trackSender->send($shipment);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 unset($e);
             }
         }

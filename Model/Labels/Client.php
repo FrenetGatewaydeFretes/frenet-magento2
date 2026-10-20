@@ -9,10 +9,12 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Labels;
 
+use Exception;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\ClientFactory;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use InvalidArgumentException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Psr\Log\LoggerInterface;
 
@@ -48,8 +50,15 @@ class Client
      * @param string $fromCep
      * @param string $toCep
      * @param float $value
-     * @param array $items ShippingItemArray rows.
-     * @return array<int, array{code: string, carrier: string, carrier_code: string, name: string, price: float, days: int}>
+     * @param mixed[] $items ShippingItemArray rows.
+     * @return array<int, array{
+     *     code: string,
+     *     carrier: string,
+     *     carrier_code: string,
+     *     name: string,
+     *     price: float,
+     *     days: int
+     * }>
      * @throws LabelException
      */
     public function quoteAll(string $fromCep, string $toCep, float $value, array $items): array
@@ -76,7 +85,7 @@ class Client
                 'days' => (int) ($service['DeliveryTime'] ?? 0),
             ];
         }
-        usort($out, static fn ($a, $b) => $a['price'] <=> $b['price']);
+        usort($out, static fn ($left, $right) => $left['price'] <=> $right['price']);
         return $out;
     }
 
@@ -84,12 +93,18 @@ class Client
      * GET /CEP/Address/{cep} (customer token only): street, district, city and state of a CEP.
      *
      * @param string $cep 8 digits.
-     * @return array
+     * @return mixed[]
      * @throws LabelException
      */
     public function address(string $cep): array
     {
-        return $this->request('GET', self::API_BASE . '/CEP/Address/' . rawurlencode($cep), null, false, self::TIMEOUT_QUOTE);
+        return $this->request(
+            'GET',
+            self::API_BASE . '/CEP/Address/' . rawurlencode($cep),
+            null,
+            false,
+            self::TIMEOUT_QUOTE
+        );
     }
 
     /**
@@ -97,7 +112,7 @@ class Client
      *
      * @param string $serviceCode
      * @param string $trackingNumber
-     * @return array
+     * @return mixed[]
      * @throws LabelException
      */
     public function tracking(string $serviceCode, string $trackingNumber): array
@@ -115,7 +130,7 @@ class Client
      * @param string $path Path after /v1, e.g. "/shipments".
      * @param mixed $body
      * @param string|null $printingFormat x-printing-format; the setting when null.
-     * @return array
+     * @return mixed[]
      * @throws LabelException
      */
     public function whitelabel(string $method, string $path, $body = null, ?string $printingFormat = null): array
@@ -133,7 +148,7 @@ class Client
     /**
      * Reads $key in camelCase or PascalCase (WhiteLabel answers camelCase, the docs show PascalCase).
      *
-     * @param array $data
+     * @param mixed[] $data
      * @param int|string $key
      * @return mixed
      */
@@ -168,13 +183,19 @@ class Client
     public static function cleanError(string $message): string
     {
         if (stripos($message, 'acesso negado para o parceiro') !== false) {
-            return (string) __('Frenet refused the partner token. Check the partner token in the labels settings. Nothing was charged.');
+            return (string) __(
+                'Frenet refused the partner token. Check the partner token in the labels settings. '
+                . 'Nothing was charged.'
+            );
         }
         if (stripos($message, 'acesso negado para o cliente') !== false) {
             return (string) __('Frenet refused the customer token. Check the Frenet token. Nothing was charged.');
         }
         if (stripos($message, 'nota fiscal') !== false) {
-            return (string) __('This service requires an invoice (NF-e). Paste the NF-e key of the order and try again. Nothing was charged.');
+            return (string) __(
+                'This service requires an invoice (NF-e). Paste the NF-e key of the order and try again. '
+                . 'Nothing was charged.'
+            );
         }
         $message = (string) preg_replace('/\s*-->.*$/s', '', $message);
         $message = (string) preg_replace('/(Detalhes )?identificador:\s*[0-9a-f-]{36}\s*/i', '', $message);
@@ -190,8 +211,11 @@ class Client
      * @param bool $partner
      * @param int $timeout
      * @param string $printingFormat
-     * @return array
+     * @return mixed[]
      * @throws LabelException
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function request(
         string $method,
@@ -226,7 +250,9 @@ class Client
             $response = $client->request($method, $url, $options);
         } catch (GuzzleException $e) {
             $this->logger->error('Frenet labels ' . $method . ' ' . $url . ': ' . $e->getMessage());
-            throw new LabelException(__('Frenet did not answer (%1).', $e->getMessage()), $e);
+            /** @var Exception&GuzzleException $cause */
+            $cause = $e;
+            throw new LabelException(__('Frenet did not answer (%1).', $e->getMessage()), $cause);
         }
         $status = $response->getStatusCode();
         $raw = (string) $response->getBody();
@@ -234,7 +260,7 @@ class Client
         if ($raw !== '') {
             try {
                 $data = (array) $this->json->unserialize($raw);
-            } catch (\InvalidArgumentException $e) {
+            } catch (InvalidArgumentException $e) {
                 $data = [];
             }
         }

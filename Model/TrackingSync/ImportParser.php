@@ -27,7 +27,10 @@ class ImportParser
             if ($line === '') {
                 continue;
             }
-            $parts = array_values(array_filter(array_map('trim', preg_split('/[;,\t ]+/', $line) ?: []), 'strlen'));
+            $parts = array_values(array_filter(
+                array_map('trim', preg_split('/[;,\t ]+/', $line) ?: []),
+                fn ($value): bool => (string) $value !== ''
+            ));
             if (count($parts) < 2) {
                 $invalid[] = $i + 1;
                 continue;
@@ -35,7 +38,10 @@ class ImportParser
             $order = ltrim($parts[0], '#');
             $code = strtoupper($parts[1]);
             // Real tracking codes always have digits; a header like "pedido;codigo" does not.
-            if (!preg_match('/^[A-Za-z0-9-]+$/', $order) || !preg_match('/^[A-Z0-9-]{6,40}$/', $code) || !preg_match('/\d/', $code)) {
+            if (!preg_match('/^[A-Za-z0-9-]+$/', $order)
+                || !preg_match('/^[A-Z0-9-]{6,40}$/', $code)
+                || !preg_match('/\d/', $code)
+            ) {
                 if ($i === 0) {
                     continue;
                 }

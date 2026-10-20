@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model\Config\Source\Labels;
 
 use Magento\Framework\Data\OptionSourceInterface;
+use Magento\Framework\Phrase;
 
 /**
  * Options of the labels setting "Journey".
@@ -17,7 +18,9 @@ use Magento\Framework\Data\OptionSourceInterface;
 class Journey implements OptionSourceInterface
 {
     /**
-     * @inheritDoc
+     * Returns the selectable options of the labels journey setting.
+     *
+     * @return array<int, array{value: string, label: Phrase}>
      */
     public function toOptionArray(): array
     {

@@ -41,14 +41,16 @@ class AddressMapper
         } elseif ($count === 3) {
             $out['AddressNumber'] = $lines[1];
             $out['AddressQuarter'] = $lines[2];
-        } elseif ($count === 2 && preg_match(self::NUMBER, $lines[1], $n)) {
-            $out['AddressNumber'] = $n[1];
+        } elseif ($count === 2 && preg_match(self::NUMBER, $lines[1], $numberMatch)) {
+            $out['AddressNumber'] = $numberMatch[1];
         } elseif ($count === 2) {
             $out['AddressQuarter'] = $lines[1];
         }
-        if ($out['AddressNumber'] === '' && preg_match('/^(.+?)[\s,]+(?:n[º°o.]?\s*)?(\d+[A-Za-z]?|s\/?n)\s*$/iu', $out['Street'], $m)) {
-            $out['Street'] = rtrim($m[1], ' ,');
-            $out['AddressNumber'] = $m[2];
+        if ($out['AddressNumber'] === ''
+            && preg_match('/^(.+?)[\s,]+(?:n[º°o.]?\s*)?(\d+[A-Za-z]?|s\/?n)\s*$/iu', $out['Street'], $streetMatch)
+        ) {
+            $out['Street'] = rtrim($streetMatch[1], ' ,');
+            $out['AddressNumber'] = $streetMatch[2];
         }
         if ($out['AddressQuarter'] === '') {
             $out['AddressQuarter'] = '-';

@@ -14,6 +14,8 @@ use Magento\Framework\Serialize\Serializer\Json;
 
 /**
  * Frenet wallet (GET /wallet), cached for 5 minutes. Never throws: null means "unavailable".
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class Wallet
 {
@@ -39,13 +41,16 @@ class Wallet
      *
      * @param bool $fresh Skip the cache (after buying or cancelling).
      * @return array{balance: float, labels: int}|null
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function get(bool $fresh = false): ?array
     {
         if (!$this->config->isAvailable()) {
             return null;
         }
-        if (!$fresh && ($cached = $this->cache->load(self::CACHE_KEY))) {
+        $cached = $fresh ? false : $this->cache->load(self::CACHE_KEY);
+        if ($cached) {
             $data = (array) $this->json->unserialize($cached);
             return $data ? ['balance' => (float) $data['balance'], 'labels' => (int) $data['labels']] : null;
         }
@@ -63,12 +68,14 @@ class Wallet
     }
 
     /**
-     * Mercado Pago checkout of a wallet deposit (POST /wallet/deposit → PreferenceId). Frenet credits the wallet when
-     * Mercado Pago confirms; the notification URL only tells this store to refresh the cached balance.
+     * Mercado Pago checkout of a wallet deposit (POST /wallet/deposit → PreferenceId).
+     *
+     * Frenet credits the wallet when Mercado Pago confirms; the notification URL only tells this store to refresh
+     * the cached balance.
      *
      * @param float $value Amount in BRL.
      * @param string $notify URL Frenet calls when the deposit changes.
-     * @param array{success: string, failure: string, pending: string} $back URLs Mercado Pago returns to.
+     * @param string[] $back URLs Mercado Pago returns to (success, failure, pending).
      * @return string Checkout URL.
      * @throws LabelException
      */
@@ -90,12 +97,17 @@ class Wallet
         $preference = (string) (Client::field($res, 'preferenceId') ?? '');
         if ($preference === '') {
             throw new LabelException(
-                __('Frenet did not start the payment. Nothing was charged; try again or add balance in the Frenet panel.')
+                __(
+                    'Frenet did not start the payment. Nothing was charged; '
+                    . 'try again or add balance in the Frenet panel.'
+                )
             );
         }
         $this->clear();
         $initPoint = (string) (Client::field($res, 'initPoint') ?? '');
-        return self::allowedCheckout($initPoint, $this->config->isSimulated()) ? $initPoint : self::checkoutUrl($preference);
+        return self::allowedCheckout($initPoint, $this->config->isSimulated())
+            ? $initPoint
+            : self::checkoutUrl($preference);
     }
 
     /**
@@ -110,8 +122,12 @@ class Wallet
         if ($url === '') {
             return false;
         }
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction
         $host = (string) parse_url($url, PHP_URL_HOST);
-        return $simulated || (str_starts_with($url, 'https://') && (bool) preg_match('/(^|\.)mercadopago\.com(\.[a-z]{2})?$/', $host));
+        return $simulated || (
+            str_starts_with($url, 'https://')
+            && (bool) preg_match('/(^|\.)mercadopago\.com(\.[a-z]{2})?$/', $host)
+        );
     }
 
     /**

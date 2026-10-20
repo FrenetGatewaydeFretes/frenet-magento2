@@ -10,11 +10,14 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model\Labels;
 
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Address;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 
 /**
  * Data of "Create shipment": orders that can get a Frenet shipment, and for the selected ones every carrier with
  * price and delivery time (quoted now), the preselected service, the checks (OK/NOK) and the totals.
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class Review
 {
@@ -47,13 +50,13 @@ class Review
      *
      * @param string $search Order number or customer name.
      * @param int $limit
-     * @return array
+     * @return array<int, mixed[]>
      */
     public function candidates(string $search = '', int $limit = 50): array
     {
         $collection = $this->orders->create()
             ->addFieldToFilter('state', ['in' => [Order::STATE_NEW, Order::STATE_PROCESSING]])
-            ->addFieldToFilter('is_virtual', 0)
+            ->addFieldToFilter('is_virtual', '0')
             ->setOrder('entity_id', 'DESC')
             ->setPageSize($limit * 2);
         $search = trim($search);
@@ -94,7 +97,7 @@ class Review
      * Comparison of the selected orders.
      *
      * @param int[] $orderIds
-     * @return array{rows: array, header: array, wallet: ?array, truncated: bool}
+     * @return array{rows: mixed[], header: mixed[], wallet: mixed[]|null, truncated: bool}
      */
     public function review(array $orderIds): array
     {
@@ -110,7 +113,7 @@ class Review
                 $rows[] = $this->row($order, isset($taken[(int) $order->getId()]));
             }
         }
-        $quoted = array_values(array_filter($rows, static fn ($r) => $r['ok']));
+        $quoted = array_values(array_filter($rows, static fn ($row) => $row['ok']));
         return [
             'rows' => $rows,
             'header' => Compare::carriers(array_column($quoted, 'services')),
@@ -135,7 +138,10 @@ class Review
      *
      * @param Order $order
      * @param bool $hasShipment
-     * @return array
+     * @return mixed[]
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function row(Order $order, bool $hasShipment): array
     {
@@ -151,7 +157,10 @@ class Review
             'phone' => $address ? (string) $address->getTelephone() : '',
             'document' => (string) ($order->getCustomerTaxvat() ?: ($address ? $address->getVatId() : '')),
             'postcode' => $address ? (string) $address->getPostcode() : '',
-            'street' => $address ? implode(', ', array_filter((array) $address->getStreet(), 'strlen')) : '',
+            'street' => $address ? implode(
+                ', ',
+                array_filter((array) $address->getStreet(), fn ($value): bool => (string) $value !== '')
+            ) : '',
             'city' => $address ? trim($address->getCity() . ' / ' . $this->regionOf($address), ' /') : '',
             'items' => implode(', ', array_map(
                 static fn ($item) => (int) $item->getQtyOrdered() . 'x ' . $item->getName(),
@@ -217,7 +226,7 @@ class Review
     /**
      * UF of an address.
      *
-     * @param \Magento\Sales\Model\Order\Address $address
+     * @param Address $address
      * @return string
      */
     private function regionOf($address): string

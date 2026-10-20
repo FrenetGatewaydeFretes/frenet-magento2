@@ -12,6 +12,7 @@ namespace Frenet\Shipping\Model\TrackingSync;
 use Frenet\Shipping\Model\Labels\Shipper;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
+use Throwable;
 
 class Importer
 {
@@ -34,8 +35,8 @@ class Importer
     /**
      * What will happen to each row, without changing anything.
      *
-     * @param array $rows [{order, code}]
-     * @return array [{order, code, action, order_id, customer}]
+     * @param mixed[] $rows [{order, code}]
+     * @return array<int, mixed[]> [{order, code, action, order_id, customer}]
      */
     public function preview(array $rows): array
     {
@@ -51,9 +52,11 @@ class Importer
     /**
      * Applies the rows that can be applied.
      *
-     * @param array $rows [{order, code}]
+     * @param mixed[] $rows [{order, code}]
      * @param bool $notify
      * @return array{shipped: int, added: int, skipped: int, errors: array<int, string>}
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public function apply(array $rows, bool $notify): array
     {
@@ -74,7 +77,7 @@ class Importer
                 } else {
                     $out['skipped']++;
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $out['errors'][] = (string) __('Order #%1: %2', $r['order'], $e->getMessage());
             }
         }
@@ -93,7 +96,10 @@ class Importer
         if (!$order) {
             return ['action' => self::NOT_FOUND, 'order_id' => 0, 'customer' => ''];
         }
-        $info = ['order_id' => (int) $order->getId(), 'customer' => trim($order->getCustomerFirstname() . ' ' . $order->getCustomerLastname())];
+        $info = [
+            'order_id' => (int) $order->getId(),
+            'customer' => trim($order->getCustomerFirstname() . ' ' . $order->getCustomerLastname()),
+        ];
         foreach ($order->getTracksCollection() as $t) {
             if (strtoupper((string) $t->getTrackNumber()) === $code) {
                 return ['action' => self::EXISTS] + $info;
@@ -113,7 +119,7 @@ class Importer
      */
     private function load(array $incrementIds): array
     {
-        $ids = array_values(array_unique(array_filter($incrementIds, 'strlen')));
+        $ids = array_values(array_unique(array_filter($incrementIds, fn ($value): bool => (string) $value !== '')));
         if (!$ids) {
             return [];
         }

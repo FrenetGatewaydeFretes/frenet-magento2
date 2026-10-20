@@ -24,7 +24,7 @@ class CepConfigProvider implements ConfigProviderInterface
     /**
      * Checkout options of the CEP lookup.
      *
-     * @return array
+     * @return array<string, array<string, bool>>
      */
     public function getConfig(): array
     {

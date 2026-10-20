@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\TrackingSync;
 
+use DateTime;
+
 class StatusMapper
 {
     public const IN_TRANSIT = 'frenet_in_transit';
@@ -31,12 +33,16 @@ class StatusMapper
     public const FINAL = [self::DELIVERED];
 
     /**
-     * Order status for an event. Frenet's EventType wins when it is conclusive (9 delivered, 3 returned);
-     * otherwise the description decides. '' when the package has not been posted yet (no change).
+     * Order status for an event; '' when the package has not been posted yet (no change).
+     *
+     * Frenet's EventType wins when it is conclusive (9 delivered, 3 returned); otherwise the description decides.
      *
      * @param string $description
      * @param string $eventType
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public static function statusFor(string $description, string $eventType = ''): string
     {
@@ -55,8 +61,11 @@ class StatusMapper
         if (str_contains($text, 'devolvido') || str_contains($text, 'devolução') || str_contains($text, 'devolucao')) {
             return self::RETURNING;
         }
-        if (str_contains($text, 'entregue') && !str_contains($text, 'não entregue') && !str_contains($text, 'nao entregue')
-            && !str_contains($text, 'ponto de postagem')) {
+        if (str_contains($text, 'entregue')
+            && !str_contains($text, 'não entregue')
+            && !str_contains($text, 'nao entregue')
+            && !str_contains($text, 'ponto de postagem')
+        ) {
             return self::DELIVERED;
         }
         if (str_contains($text, 'aguardando retirada') || str_contains($text, 'disponível para retirada')
@@ -71,10 +80,12 @@ class StatusMapper
      *
      * @param string $date
      * @return int
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public static function eventTime(string $date): int
     {
-        $parsed = \DateTime::createFromFormat('d/m/Y H:i', trim($date));
+        $parsed = DateTime::createFromFormat('d/m/Y H:i', trim($date));
         return $parsed ? $parsed->getTimestamp() : 0;
     }
 

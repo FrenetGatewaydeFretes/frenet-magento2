@@ -31,9 +31,9 @@ class InvoiceStore
      */
     public function get(int $orderId): string
     {
-        $db = $this->resource->getConnection('sales');
-        return (string) $db->fetchOne(
-            $db->select()->from($this->table(), 'access_key')->where('order_id = ?', $orderId)
+        $connection = $this->resource->getConnection('sales');
+        return (string) $connection->fetchOne(
+            $connection->select()->from($this->table(), 'access_key')->where('order_id = ?', $orderId)
         );
     }
 
@@ -46,12 +46,12 @@ class InvoiceStore
      */
     public function save(int $orderId, string $key): void
     {
-        $db = $this->resource->getConnection('sales');
+        $connection = $this->resource->getConnection('sales');
         if ($key === '') {
-            $db->delete($this->table(), ['order_id = ?' => $orderId]);
+            $connection->delete($this->table(), ['order_id = ?' => $orderId]);
             return;
         }
-        $db->insertOnDuplicate($this->table(), ['order_id' => $orderId, 'access_key' => $key], ['access_key']);
+        $connection->insertOnDuplicate($this->table(), ['order_id' => $orderId, 'access_key' => $key], ['access_key']);
     }
 
     /**

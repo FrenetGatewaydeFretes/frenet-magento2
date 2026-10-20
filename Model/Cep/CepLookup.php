@@ -79,7 +79,12 @@ class CepLookup implements CepLookupInterface
                 'city' => (string) $api['City'],
                 'uf' => strtoupper((string) ($api['UF'] ?? '')),
             ];
-            $this->cache->save($this->json->serialize($data), self::CACHE_PREFIX . $digits, [self::CACHE_TAG], self::CACHE_TTL);
+            $this->cache->save(
+                $this->json->serialize($data),
+                self::CACHE_PREFIX . $digits,
+                [self::CACHE_TAG],
+                self::CACHE_TTL
+            );
         }
         $region = $this->regionFactory->create()->loadByCode($data['uf'], 'BR');
         return new CepAddress(

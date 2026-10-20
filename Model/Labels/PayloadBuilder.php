@@ -20,6 +20,8 @@ use Magento\Sales\Model\Order\Item;
  * - Order.Created is ISO 8601 UTC with milliseconds;
  * - Quotation needs Carrier, CarrierCode, ShippingPrice and DeliveryTime (else HTTP 500 null reference);
  * - Order.From needs the full sender address even with UseFrenetRegistration.
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class PayloadBuilder
 {
@@ -92,20 +94,20 @@ class PayloadBuilder
      * ShippingItemArray for POST /shipping/quote.
      *
      * @param Order $order
-     * @return array
+     * @return array<int, mixed[]>
      */
     public function quoteItems(Order $order): array
     {
         $out = [];
         foreach ($this->shippableItems($order) as $item) {
-            $d = $this->dimensions($item);
+            $dimensions = $this->dimensions($item);
             $out[] = [
                 'SKU' => (string) $item->getSku(),
                 'Quantity' => (int) $item->getQtyOrdered(),
                 'Weight' => $this->unitWeightKg($item),
-                'Length' => $d['length'],
-                'Height' => $d['height'],
-                'Width' => $d['width'],
+                'Length' => $dimensions['length'],
+                'Height' => $dimensions['height'],
+                'Width' => $dimensions['width'],
             ];
         }
         return $out;
@@ -125,11 +127,11 @@ class PayloadBuilder
         $height = 0.0;
         foreach ($this->shippableItems($order) as $item) {
             $qty = (int) $item->getQtyOrdered();
-            $d = $this->dimensions($item);
+            $dimensions = $this->dimensions($item);
             $weight += $this->unitWeightKg($item) * $qty;
-            $length = max($length, $d['length']);
-            $width = max($width, $d['width']);
-            $height += $d['height'] * $qty;
+            $length = max($length, $dimensions['length']);
+            $width = max($width, $dimensions['width']);
+            $height += $dimensions['height'] * $qty;
         }
         return ['weight' => round($weight, 3), 'length' => $length, 'width' => $width, 'height' => $height];
     }
@@ -138,14 +140,17 @@ class PayloadBuilder
      * Store information as the sender.
      *
      * @param int $storeId
-     * @return array
+     * @return mixed[]
      * @throws LocalizedException When the store address is incomplete.
      */
     public function sender(int $storeId): array
     {
         $info = fn (string $key): string => $this->config->storeValue('general/store_information/' . $key, $storeId);
         $address = AddressMapper::toFrenet(
-            array_filter([$info('street_line1'), $info('street_line2')], 'strlen'),
+            array_filter(
+                [$info('street_line1'), $info('street_line2')],
+                fn ($value): bool => (string) $value !== ''
+            ),
             $info('city'),
             $this->regions->code((int) $info('region_id'), ''),
             $info('postcode')
@@ -170,8 +175,8 @@ class PayloadBuilder
      * Body of one shipment.
      *
      * @param Order $order
-     * @param array $service Chosen service: code, carrier, carrier_code, name, price, days.
-     * @return array
+     * @param mixed[] $service Chosen service: code, carrier, carrier_code, name, price, days.
+     * @return mixed[]
      * @throws LocalizedException
      */
     public function build(Order $order, array $service): array
@@ -182,7 +187,7 @@ class PayloadBuilder
         }
         $items = [];
         foreach ($this->shippableItems($order) as $item) {
-            $d = $this->dimensions($item);
+            $dimensions = $this->dimensions($item);
             $items[] = [
                 'OrderId' => (string) $order->getIncrementId(),
                 'ItemId' => (string) $item->getItemId(),
@@ -192,9 +197,9 @@ class PayloadBuilder
                 'Quantity' => (int) $item->getQtyOrdered(),
                 'Price' => round((float) $item->getPrice(), 2),
                 'Weight' => $this->unitWeightKg($item),
-                'Length' => $d['length'],
-                'Height' => $d['height'],
-                'Width' => $d['width'],
+                'Length' => $dimensions['length'],
+                'Height' => $dimensions['height'],
+                'Width' => $dimensions['width'],
                 'IsFragile' => false,
             ];
         }
@@ -258,7 +263,7 @@ class PayloadBuilder
      * Order.Invoice from the NF-e key saved for the order (null when there is none).
      *
      * @param Order $order
-     * @return array|null
+     * @return mixed[]|null
      */
     public function invoice(Order $order): ?array
     {
@@ -266,12 +271,12 @@ class PayloadBuilder
         if ($key === '' || !NfeKey::isValid($key)) {
             return null;
         }
-        $nf = NfeKey::parse($key);
+        $nfe = NfeKey::parse($key);
         $created = strtotime((string) $order->getCreatedAt()) ?: time();
         return [
             'Key' => $key,
-            'Number' => $nf['number'],
-            'Series' => $nf['series'],
+            'Number' => $nfe['number'],
+            'Series' => $nfe['series'],
             'Value' => round((float) $order->getGrandTotal(), 2),
             'Date' => gmdate('Y-m-d\TH:i:s', $created),
         ];
