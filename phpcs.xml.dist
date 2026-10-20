@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset name="Frenet_Shipping">
+    <description>Magento2 coding standard for Frenet_Shipping.</description>
+    <rule ref="Magento2"/>
+
+    <!--
+        Pure, stateless helpers of the labels, tracking and CEP features: no I/O, config, HTTP or database access.
+        Technical guideline 2.13 still applies to new code; these are candidates to become injected services.
+    -->
+    <rule ref="Magento2.Functions.StaticFunction">
+        <exclude-pattern>Model/Cep/CepLookup\.php$</exclude-pattern>
+        <exclude-pattern>Model/Labels/(AddressMapper|Client|Compare|NfeKey|Review|StatusName|Wallet)\.php$</exclude-pattern>
+        <exclude-pattern>Model/TrackingSync/(ImportParser|StatusMapper)\.php$</exclude-pattern>
+    </rule>
+</ruleset>

@@ -78,7 +78,7 @@
         "phpunit": "vendor/bin/phpunit",
         "phpstan": "vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
         "phpmd": "vendor/bin/phpmd Api/,Block/,Controller/,Model/,Service/,Setup/,ViewModel/ text cleancode,codesize,controversial,design,naming,unusedcode",
-        "phpcs": "vendor/bin/phpcs --standard=Magento2 --extensions=php,phtml Api Block Controller Model Service Setup Test ViewModel view registration.php",
+        "phpcs": "vendor/bin/phpcs --extensions=php,phtml Api Block Controller Model Service Setup Test ViewModel view registration.php",
         "php-compatibility": "vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 8.2- --extensions=php Api Block Controller Model Service Setup Test ViewModel registration.php"
     },
     "config": {
