@@ -76,6 +76,7 @@ Recursos opcionais, no mesmo painel:
 - **Package Max Weight (kg)**: peso máximo por pacote em quilogramas (padrão 30). Só precisa ser alterado se houver instrução específica.
 - **Maximum Item Quantity per Shipping Line**: teto de segurança (padrão 5000) para a quantidade de um mesmo item considerada no cálculo de pacotes.
 - **Product Quote**: habilita a cotação de frete diretamente na página de produto, antes do cliente adicionar ao carrinho.
+- **Quote Limit per Visitor (per minute)** / **Quote Limit per Store (per minute)**: limitam as cotações da página do produto por minuto, por visitante (padrão 60) e somando todos os visitantes do website (padrão 1000). Acima do limite, o widget pede para aguardar um minuto e a API da Frenet não é chamada. Use 0 para não limitar. As cotações do carrinho e do checkout nunca são limitadas.
 - **Show Shipping Forecast** / **Shipping Forecast Message**: exibe uma mensagem de prazo estimado de entrega.
 - **Debug**: grava as requisições/respostas da API da Frenet em `var/log/<Debug Filename>`, útil para diagnosticar problemas de cotação.
 - **API Hostname** / **API Protocol**: sobrescrevem o endpoint da API da Frenet (protocolo padrão HTTPS). O hostname só aceita endereços `frenet.com.br`, como `api.frenet.com.br`. Só altere se o suporte da Frenet orientar.
@@ -98,7 +99,19 @@ Recursos opcionais, no mesmo painel:
 
 **Adicionado**
 
-- Compatibilidade com **Magento 2.4.8-p5** (PHP 8.2, 8.3 e 8.4), validada contra as correções de segurança do boletim APSB26-49: cotação na página do produto e no carrinho, checkout de visitante e de cliente logado, e envio com rastreio no admin. O módulo não precisou de alterações para esta versão.
+- Compatibilidade com **Magento 2.4.8-p5** (PHP 8.2, 8.3 e 8.4), validada contra as correções de segurança do boletim APSB26-49: cotação na página do produto e no carrinho, checkout de visitante e de cliente logado, e envio com rastreio no admin.
+
+**Segurança**
+
+- Limite de cotações na página do produto, para que um script não consuma a cota da sua conta na API da Frenet. São dois campos em **Product Quote**:
+  - **Quote Limit per Visitor (per minute)**, padrão 60: cotações por minuto de um mesmo visitante. Visitantes atrás do mesmo proxy ou CDN são contados separadamente.
+  - **Quote Limit per Store (per minute)**, padrão 1000: cotações por minuto somando todos os visitantes do website. Contém ataques vindos de muitos endereços.
+  - Acima do limite, o widget mostra "Muitas cotações de frete em pouco tempo. Aguarde um minuto e tente novamente." e a API da Frenet não é chamada. O bloqueio termina no minuto seguinte. O primeiro bloqueio de cada minuto fica registrado no log do Magento.
+  - Funciona com qualquer cache do Magento (arquivo, banco, Redis ou Valkey), sem configuração extra. Use 0 para desligar cada limite. As cotações do carrinho e do checkout nunca são limitadas.
+
+**Corrigido**
+
+- Quando a cotação da página do produto falha no servidor, o widget mostra uma mensagem de erro em vez de ficar em branco.
 
 ### 2.4.8-p4
 
