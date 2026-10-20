@@ -11,6 +11,7 @@ namespace Frenet\Shipping\Controller\Adminhtml\Shipment;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Backend\Model\View\Result\Page as BackendPage;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
@@ -38,9 +39,10 @@ class Index extends Action implements HttpGetActionInterface
      */
     public function execute(): Page
     {
+        /** @var BackendPage $page */
         $page = $this->pageFactory->create();
         $page->setActiveMenu('Frenet_Shipping::menu_create');
-        $page->getConfig()->getTitle()->prepend(__('Create shipment'));
+        $page->getConfig()->getTitle()->prepend((string) __('Create shipment'));
         return $page;
     }
 }

@@ -25,17 +25,17 @@ class AddTrackingOrderStatuses implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function apply(): self
     {
-        $db = $this->resource->getConnection('sales');
+        $connection = $this->resource->getConnection('sales');
         $statusTable = $this->resource->getTableName('sales_order_status');
         $stateTable = $this->resource->getTableName('sales_order_status_state');
         foreach (StatusMapper::LABELS as $status => $label) {
-            $db->insertOnDuplicate($statusTable, ['status' => $status, 'label' => $label], ['label']);
+            $connection->insertOnDuplicate($statusTable, ['status' => $status, 'label' => $label], ['label']);
             foreach ([Order::STATE_PROCESSING, Order::STATE_COMPLETE] as $state) {
-                $db->insertOnDuplicate(
+                $connection->insertOnDuplicate(
                     $stateTable,
                     ['status' => $status, 'state' => $state, 'is_default' => 0, 'visible_on_front' => 1],
                     ['visible_on_front']
@@ -46,7 +46,7 @@ class AddTrackingOrderStatuses implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function getDependencies(): array
     {
@@ -54,7 +54,7 @@ class AddTrackingOrderStatuses implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getAliases(): array
     {

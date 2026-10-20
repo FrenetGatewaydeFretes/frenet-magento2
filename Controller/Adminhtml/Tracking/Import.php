@@ -33,14 +33,19 @@ class Import extends Action implements HttpPostActionInterface
     }
 
     /**
-     * step=preview | confirm | cancel.
+     * Handles step=preview | confirm | cancel.
      *
      * @return Redirect
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function execute(): Redirect
     {
         $step = (string) $this->getRequest()->getParam('step');
-        $redirect = $this->resultRedirectFactory->create()->setPath('frenetshipping/tracking/index', ['_fragment' => 'frenet-import']);
+        $redirect = $this->resultRedirectFactory->create()->setPath(
+            'frenetshipping/tracking/index',
+            ['_fragment' => 'frenet-import']
+        );
         $session = $this->_session;
         if ($step === 'cancel') {
             $session->unsetData(self::SESSION_KEY);
@@ -53,14 +58,14 @@ class Import extends Action implements HttpPostActionInterface
                 $this->messageManager->addNoticeMessage(__('Nothing to import. Paste the codes again.'));
                 return $redirect;
             }
-            $r = $this->importer->apply($saved['rows'], (bool) ($saved['notify'] ?? false));
+            $result = $this->importer->apply($saved['rows'], (bool) ($saved['notify'] ?? false));
             $this->messageManager->addSuccessMessage(__(
                 '%1 order(s) shipped with the code, %2 code(s) added to existing shipments, %3 skipped.',
-                $r['shipped'],
-                $r['added'],
-                $r['skipped']
+                $result['shipped'],
+                $result['added'],
+                $result['skipped']
             ));
-            foreach (array_slice($r['errors'], 0, 10) as $error) {
+            foreach (array_slice($result['errors'], 0, 10) as $error) {
                 $this->messageManager->addErrorMessage($error);
             }
             return $redirect;
@@ -68,8 +73,17 @@ class Import extends Action implements HttpPostActionInterface
         $raw = (string) $this->getRequest()->getParam('lines');
         $parsed = ImportParser::parse($raw);
         if (!$parsed['rows']) {
-            $this->messageManager->addErrorMessage(__('No line could be read. Use one order per line: order number and tracking code, separated by ";", "," or a tab.'));
-            $session->setData(self::SESSION_KEY, ['raw' => $raw, 'rows' => [], 'preview' => [], 'invalid' => $parsed['invalid'], 'notify' => false]);
+            $this->messageManager->addErrorMessage(__(
+                'No line could be read. Use one order per line: order number and tracking code, '
+                . 'separated by ";", "," or a tab.'
+            ));
+            $session->setData(self::SESSION_KEY, [
+                'raw' => $raw,
+                'rows' => [],
+                'preview' => [],
+                'invalid' => $parsed['invalid'],
+                'notify' => false,
+            ]);
             return $redirect;
         }
         $rows = array_slice($parsed['rows'], 0, self::MAX_ROWS);

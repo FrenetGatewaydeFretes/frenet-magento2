@@ -17,6 +17,8 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
 
 /**
  * Shared bits of the Frenet labels screens: availability, simulator banner, wallet, money, status pills, URLs.
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class Common implements ArgumentInterface
 {
@@ -57,6 +59,8 @@ class Common implements ArgumentInterface
      *
      * @param bool $fresh
      * @return array{balance: float, labels: int}|null
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function wallet(bool $fresh = false): ?array
     {
@@ -110,7 +114,7 @@ class Common implements ArgumentInterface
      * Admin URL.
      *
      * @param string $route
-     * @param array $params
+     * @param mixed[] $params
      * @return string
      */
     public function url(string $route, array $params = []): string
@@ -125,7 +129,8 @@ class Common implements ArgumentInterface
      */
     public function settingsUrl(): string
     {
-        return $this->url->getUrl('adminhtml/system_config/edit', ['section' => 'carriers']) . '#carriers_frenetshipping-link';
+        return $this->url->getUrl('adminhtml/system_config/edit', ['section' => 'carriers'])
+            . '#carriers_frenetshipping-link';
     }
 
     /**

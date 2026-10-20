@@ -24,10 +24,13 @@ use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Throwable;
 
 /**
  * Creates the Frenet shipments of the confirmed orders. The service is re-quoted now (prices change), the NF-e keys
  * typed in the comparison are saved first, and one failure never stops the others.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Create extends Action implements HttpPostActionInterface
 {
@@ -82,7 +85,12 @@ class Create extends Action implements HttpPostActionInterface
         $before = $this->wallet->get(true);
         $results = [];
         foreach ($orderIds as $orderId) {
-            $results[] = $this->createOne($orderId, (string) ($services[$orderId] ?? ''), (string) ($keys[$orderId] ?? ''), $journey);
+            $results[] = $this->createOne(
+                $orderId,
+                (string) ($services[$orderId] ?? ''),
+                (string) ($keys[$orderId] ?? ''),
+                $journey
+            );
         }
         $this->wallet->clear();
         $this->session->setData(self::SESSION_KEY, [
@@ -101,7 +109,9 @@ class Create extends Action implements HttpPostActionInterface
      * @param string $serviceCode
      * @param string $nfe
      * @param string $journey
-     * @return array
+     * @return mixed[]
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     private function createOne(int $orderId, string $serviceCode, string $nfe, string $journey): array
     {
@@ -114,7 +124,9 @@ class Create extends Action implements HttpPostActionInterface
             $key = NfeKey::normalize($nfe);
             if ($key !== '') {
                 if (!NfeKey::isValid($key)) {
-                    throw new LocalizedException(__('The NF-e key is not valid (44 digits, the last one is a check digit). Nothing was created.'));
+                    throw new LocalizedException(
+                        __('The NF-e key is not valid (44 digits, the last one is a check digit). Nothing was created.')
+                    );
                 }
                 $this->invoices->save($orderId, $key);
             }
@@ -125,14 +137,18 @@ class Create extends Action implements HttpPostActionInterface
             $result['price'] = (float) $row['price'];
             $result['status'] = (int) $row['status'];
             $result['ok'] = true;
-            if ($journey === LabelsConfig::JOURNEY_HERE && !in_array((int) $row['status'], ShipmentService::PAID, true)) {
+            if ($journey === LabelsConfig::JOURNEY_HERE
+                && !in_array((int) $row['status'], ShipmentService::PAID, true)
+            ) {
                 $result['message'] = $this->config->walletPayment()
-                    ? (string) __('Created but not paid: not enough balance or the payment did not answer. Pay it in Labels.')
+                    ? (string) __(
+                        'Created but not paid: not enough balance or the payment did not answer. Pay it in Labels.'
+                    )
                     : (string) __('Created. Pay it in Labels to release the label.');
             }
         } catch (LocalizedException $e) {
             $result['message'] = $e->getMessage();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $result['message'] = (string) __('Unexpected error: %1', $e->getMessage());
         }
         return $result;
@@ -143,7 +159,7 @@ class Create extends Action implements HttpPostActionInterface
      *
      * @param Order $order
      * @param string $serviceCode
-     * @return array
+     * @return mixed[]
      * @throws LocalizedException
      */
     private function service(Order $order, string $serviceCode): array
@@ -160,6 +176,11 @@ class Create extends Action implements HttpPostActionInterface
                 return $service;
             }
         }
-        throw new LocalizedException(__('The chosen carrier no longer delivers this order. Calculate again and choose another one. Nothing was created.'));
+        throw new LocalizedException(
+            __(
+                'The chosen carrier no longer delivers this order. Calculate again and choose another one. '
+                . 'Nothing was created.'
+            )
+        );
     }
 }

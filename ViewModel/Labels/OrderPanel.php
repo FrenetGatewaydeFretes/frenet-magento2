@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\ViewModel\Labels;
 
-use Frenet\Shipping\Model\Labels\LabelStore;
 use Frenet\Shipping\Model\Labels\LabelsConfig;
+use Frenet\Shipping\Model\Labels\LabelStore;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 
@@ -44,7 +44,7 @@ class OrderPanel implements ArgumentInterface
     /**
      * Frenet shipment of the order that still exists, or null.
      *
-     * @return array|null
+     * @return mixed[]|null
      */
     public function shipment(): ?array
     {

@@ -52,7 +52,7 @@ class PrintPdf extends Action implements HttpPostActionInterface
             $this->getRequest()->getParam('format') === 'A4' ? 'A4' : $this->config->printingFormat()
         );
         try {
-            $r = $this->shipments->batchPdf((array) $this->getRequest()->getParam('ids', []), $format);
+            $result = $this->shipments->batchPdf((array) $this->getRequest()->getParam('ids', []), $format);
         } catch (LabelException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             return $this->resultRedirectFactory->create()->setRefererOrBaseUrl();
@@ -62,6 +62,6 @@ class PrintPdf extends Action implements HttpPostActionInterface
         return $raw->setHeader('Content-Type', 'application/pdf', true)
             ->setHeader('Content-Disposition', 'inline; filename="etiquetas-frenet-' . date('Ymd-His') . '.pdf"', true)
             ->setHeader('Cache-Control', 'private, no-store', true)
-            ->setContents($r['pdf']);
+            ->setContents($result['pdf']);
     }
 }

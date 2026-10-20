@@ -45,12 +45,12 @@ class OrderTracking implements ArgumentInterface
     /**
      * Frenet codes of the order with their stored events (codes never checked included).
      *
-     * @return array
+     * @return mixed[]
      */
     public function codes(): array
     {
-        $db = $this->resource->getConnection('sales');
-        $tracks = $db->fetchPairs($db->select()
+        $connection = $this->resource->getConnection('sales');
+        $tracks = $connection->fetchPairs($connection->select()
             ->from($this->resource->getTableName('sales_shipment_track'), ['entity_id', 'track_number'])
             ->where('order_id = ?', $this->orderId())
             ->where('carrier_code = ?', 'frenetshipping'));

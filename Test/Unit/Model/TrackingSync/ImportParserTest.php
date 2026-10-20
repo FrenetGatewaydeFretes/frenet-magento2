@@ -12,6 +12,11 @@ namespace Frenet\Shipping\Test\Unit\Model\TrackingSync;
 use Frenet\Shipping\Model\TrackingSync\ImportParser;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Unit tests of the bulk tracking import parser.
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class ImportParserTest extends TestCase
 {
     /**
@@ -21,13 +26,16 @@ class ImportParserTest extends TestCase
      */
     public function testParse(): void
     {
-        $r = ImportParser::parse("pedido;código\n000000012;aa123456789br\n#000000013,AA987654321BR\n\n000000014\tAB111222333BR\n000000012;AA123456789BR\numa-coluna\n");
+        $result = ImportParser::parse(
+            "pedido;código\n000000012;aa123456789br\n#000000013,AA987654321BR\n\n"
+            . "000000014\tAB111222333BR\n000000012;AA123456789BR\numa-coluna\n"
+        );
         $this->assertSame([
             ['order' => '000000012', 'code' => 'AA123456789BR'],
             ['order' => '000000013', 'code' => 'AA987654321BR'],
             ['order' => '000000014', 'code' => 'AB111222333BR'],
-        ], $r['rows']);
-        $this->assertSame([7], $r['invalid']);
+        ], $result['rows']);
+        $this->assertSame([7], $result['invalid']);
     }
 
     /**
@@ -38,12 +46,12 @@ class ImportParserTest extends TestCase
     public function testHeaderWithoutAccents(): void
     {
         foreach (["pedido;codigo", "#pedido;CODIGO", "pedido;código", "Pedido,Codigo"] as $header) {
-            $r = ImportParser::parse($header . "\n000000048;AA123456785BR");
-            $this->assertSame([['order' => '000000048', 'code' => 'AA123456785BR']], $r['rows'], $header);
-            $this->assertSame([], $r['invalid'], $header);
+            $result = ImportParser::parse($header . "\n000000048;AA123456785BR");
+            $this->assertSame([['order' => '000000048', 'code' => 'AA123456785BR']], $result['rows'], $header);
+            $this->assertSame([], $result['invalid'], $header);
         }
-        $r = ImportParser::parse("pedido;codigo\n000000048;AA123456785BR");
-        $this->assertSame([['order' => '000000048', 'code' => 'AA123456785BR']], $r['rows']);
-        $this->assertSame([], $r['invalid']);
+        $result = ImportParser::parse("pedido;codigo\n000000048;AA123456785BR");
+        $this->assertSame([['order' => '000000048', 'code' => 'AA123456785BR']], $result['rows']);
+        $this->assertSame([], $result['invalid']);
     }
 }

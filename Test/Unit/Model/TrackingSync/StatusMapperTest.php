@@ -13,12 +13,17 @@ use Frenet\Shipping\Model\TrackingSync\StatusMapper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Unit tests of the Frenet tracking event to order status mapping.
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class StatusMapperTest extends TestCase
 {
     /**
      * Event description (and Frenet EventType) → order status.
      *
-     * @return array
+     * @return string[][]
      */
     public static function events(): array
     {
@@ -55,7 +60,10 @@ class StatusMapperTest extends TestCase
     {
         $this->assertSame('03298', StatusMapper::serviceCode('frenetshipping_03298'));
         $this->assertSame('', StatusMapper::serviceCode('flatrate_flatrate'));
-        $this->assertGreaterThan(StatusMapper::eventTime('01/10/2026 10:00'), StatusMapper::eventTime('02/10/2026 09:00'));
+        $this->assertGreaterThan(
+            StatusMapper::eventTime('01/10/2026 10:00'),
+            StatusMapper::eventTime('02/10/2026 09:00')
+        );
         $this->assertSame(0, StatusMapper::eventTime('ontem'));
     }
 }

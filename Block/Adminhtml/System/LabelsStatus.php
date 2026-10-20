@@ -24,7 +24,7 @@ class LabelsStatus extends Field
      * @param Context $context
      * @param LabelsConfig $config
      * @param Wallet $wallet
-     * @param array $data
+     * @param mixed[] $data
      */
     public function __construct(
         Context $context,
@@ -40,27 +40,34 @@ class LabelsStatus extends Field
      *
      * @param AbstractElement $element
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function _getElementHtml(AbstractElement $element)
     {
-        $e = fn (string $s): string => (string) $this->escapeHtml($s);
+        $escape = fn (string $value): string => (string) $this->escapeHtml($value);
         if (!$this->config->isAvailable()) {
             return '<div class="frenet-status frenet-status--off">'
-                . $e((string) __('Paste the partner token and save: the connection and the balance appear here.'))
+                . $escape((string) __('Paste the partner token and save: the connection and the balance appear here.'))
                 . '</div>';
         }
         $wallet = $this->wallet->get(true);
         if ($wallet === null) {
             return '<div class="frenet-status frenet-status--bad">'
-                . $e((string) __('Frenet did not accept the tokens or did not answer. Check the partner token and the Frenet token.'))
+                . $escape((string) __(
+                    'Frenet did not accept the tokens or did not answer. Check the partner token and the Frenet token.'
+                ))
                 . '</div>';
         }
         $title = $this->config->isSimulated()
             ? (string) __('Simulator mode: connected to the local test simulator, nothing is charged')
             : (string) __('Connected to Frenet');
-        return '<div class="frenet-status ' . ($this->config->isSimulated() ? 'frenet-status--off' : 'frenet-status--ok') . '">'
-            . '<strong>' . $e($title) . '</strong>'
-            . '<span>' . $e((string) __(
+        return '<div class="frenet-status '
+            . ($this->config->isSimulated() ? 'frenet-status--off' : 'frenet-status--ok')
+            . '">'
+            . '<strong>' . $escape($title) . '</strong>'
+            . '<span>' . $escape((string) __(
                 'Balance: R$ %1 · %2 labels available',
                 number_format($wallet['balance'], 2, ',', '.'),
                 $wallet['labels']

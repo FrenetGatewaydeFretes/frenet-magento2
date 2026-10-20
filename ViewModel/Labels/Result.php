@@ -28,7 +28,7 @@ class Result implements ArgumentInterface
     /**
      * Results, wallet before and after; null when there is nothing to show.
      *
-     * @return array|null
+     * @return mixed[]|null
      */
     public function data(): ?array
     {

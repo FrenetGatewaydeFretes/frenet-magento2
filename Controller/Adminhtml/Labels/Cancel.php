@@ -40,7 +40,9 @@ class Cancel extends Action implements HttpPostActionInterface
     public function execute(): Redirect
     {
         try {
-            $this->messageManager->addSuccessMessage($this->shipments->cancel((string) $this->getRequest()->getParam('id')));
+            $this->messageManager->addSuccessMessage(
+                $this->shipments->cancel((string) $this->getRequest()->getParam('id'))
+            );
         } catch (LabelException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
         }

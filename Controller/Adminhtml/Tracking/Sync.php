@@ -32,19 +32,27 @@ class Sync extends Action implements HttpPostActionInterface
      * Runs the check and tells what happened.
      *
      * @return Redirect
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public function execute(): Redirect
     {
         $orderId = (int) $this->getRequest()->getParam('order_id');
-        $r = $this->sync->run($orderId ?: null);
-        if ($r['synced'] === 0 && $r['errors'] === 0) {
+        $result = $this->sync->run($orderId ?: null);
+        if ($result['synced'] === 0 && $result['errors'] === 0) {
             $this->messageManager->addNoticeMessage(__('No Frenet tracking code to check right now.'));
-        } elseif ($r['errors'] > 0 && $r['synced'] === 0) {
-            $this->messageManager->addErrorMessage(__('Frenet did not answer the tracking of %1 code(s). Try again in a few minutes.', $r['errors']));
+        } elseif ($result['errors'] > 0 && $result['synced'] === 0) {
+            $this->messageManager->addErrorMessage(
+                __('Frenet did not answer the tracking of %1 code(s). Try again in a few minutes.', $result['errors'])
+            );
         } else {
-            $this->messageManager->addSuccessMessage(__('%1 code(s) checked, %2 order status(es) changed.', $r['synced'], $r['changed']));
-            if ($r['errors']) {
-                $this->messageManager->addWarningMessage(__('%1 code(s) did not answer and will be checked again later.', $r['errors']));
+            $this->messageManager->addSuccessMessage(
+                __('%1 code(s) checked, %2 order status(es) changed.', $result['synced'], $result['changed'])
+            );
+            if ($result['errors']) {
+                $this->messageManager->addWarningMessage(
+                    __('%1 code(s) did not answer and will be checked again later.', $result['errors'])
+                );
             }
         }
         $redirect = $this->resultRedirectFactory->create();

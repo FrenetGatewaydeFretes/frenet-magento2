@@ -21,11 +21,16 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory as StatusCollectionFactory;
 
+/**
+ * Shipment tracking screen: Frenet tracking codes with their latest event, one code's timeline and the bulk import.
+ *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ */
 class Tracking implements ArgumentInterface
 {
     public const PER_PAGE = 30;
 
-    /** @var array|null */
+    /** @var mixed[]|null */
     private ?array $overview = null;
 
     /** @var array<string, string>|null */
@@ -56,8 +61,8 @@ class Tracking implements ArgumentInterface
      */
     public function filter(): string
     {
-        $f = (string) $this->request->getParam('show');
-        return in_array($f, ['moving', 'pickup', 'delivered', 'returning', 'never'], true) ? $f : 'all';
+        $show = (string) $this->request->getParam('show');
+        return in_array($show, ['moving', 'pickup', 'delivered', 'returning', 'never'], true) ? $show : 'all';
     }
 
     /**
@@ -73,20 +78,20 @@ class Tracking implements ArgumentInterface
     /**
      * Rows, total and how many codes were never checked.
      *
-     * @return array{rows: array, total: int, never: int}
+     * @return array{rows: mixed[], total: int, never: int}
      */
     public function overview(): array
     {
         if ($this->overview === null) {
             $this->overview = $this->sync->overview(self::PER_PAGE, $this->page() * self::PER_PAGE, $this->filter());
-            foreach ($this->overview['rows'] as &$r) {
-                $r['order_url'] = $this->url->getUrl('sales/order/view', ['order_id' => $r['order_id']]);
-                $r['events_url'] = $this->pageUrl(['track' => (int) $r['track_id']]);
+            foreach ($this->overview['rows'] as &$row) {
+                $row['order_url'] = $this->url->getUrl('sales/order/view', ['order_id' => $row['order_id']]);
+                $row['events_url'] = $this->pageUrl(['track' => (int) $row['track_id']]);
                 $known = $this->statusLabels();
-                $status = (string) $r['status'];
+                $status = (string) $row['status'];
                 // Status that no longer exists (e.g. left by an old module): raw code, grey.
-                $r['status_label'] = $known[$status] ?? $status;
-                $r['tone'] = match (true) {
+                $row['status_label'] = $known[$status] ?? $status;
+                $row['tone'] = match (true) {
                     !isset($known[$status]) => 'off',
                     $status === StatusMapper::DELIVERED, $status === 'complete' => 'ok',
                     $status === StatusMapper::RETURNING, $status === 'canceled', $status === 'holded' => 'bad',
@@ -130,7 +135,7 @@ class Tracking implements ArgumentInterface
     /**
      * Timeline of the code asked with ?track=, newest first; null when none.
      *
-     * @return array|null
+     * @return mixed[]|null
      */
     public function selected(): ?array
     {
@@ -154,7 +159,7 @@ class Tracking implements ArgumentInterface
     /**
      * Bulk import waiting for confirmation (from the admin session), or null.
      *
-     * @return array|null
+     * @return mixed[]|null
      */
     public function importPreview(): ?array
     {
@@ -165,12 +170,15 @@ class Tracking implements ArgumentInterface
     /**
      * Counts per action of the preview.
      *
-     * @param array $preview
+     * @param mixed[] $preview
      * @return array<string, int>
      */
     public function previewCounts(array $preview): array
     {
-        $out = array_fill_keys([Importer::SHIP, Importer::ADD, Importer::EXISTS, Importer::NOT_FOUND, Importer::CANNOT], 0);
+        $out = array_fill_keys(
+            [Importer::SHIP, Importer::ADD, Importer::EXISTS, Importer::NOT_FOUND, Importer::CANNOT],
+            0
+        );
         foreach ($preview as $r) {
             $out[$r['action']]++;
         }
@@ -211,20 +219,23 @@ class Tracking implements ArgumentInterface
     /**
      * URL of this page keeping the filter and the page.
      *
-     * @param array $params
+     * @param mixed[] $params
      * @return string
      */
     public function pageUrl(array $params = []): string
     {
         $params += ['show' => $this->filter() === 'all' ? null : $this->filter(), 'p' => $this->page() ?: null];
-        return $this->url->getUrl('frenetshipping/tracking/index', array_filter($params, static fn ($v) => $v !== null));
+        return $this->url->getUrl(
+            'frenetshipping/tracking/index',
+            array_filter($params, static fn ($value) => $value !== null)
+        );
     }
 
     /**
      * Admin URL.
      *
      * @param string $route
-     * @param array $params
+     * @param mixed[] $params
      * @return string
      */
     public function url(string $route, array $params = []): string

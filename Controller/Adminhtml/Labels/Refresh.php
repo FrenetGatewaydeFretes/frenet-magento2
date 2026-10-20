@@ -40,7 +40,9 @@ class Refresh extends Action implements HttpPostActionInterface
     {
         $this->shipments->fetchLabel((string) $this->getRequest()->getParam('id'))
             ? $this->messageManager->addSuccessMessage(__('Frenet label ready to print.'))
-            : $this->messageManager->addNoticeMessage(__('Frenet has not released the label yet. Try again in a minute.'));
+            : $this->messageManager->addNoticeMessage(
+                __('Frenet has not released the label yet. Try again in a minute.')
+            );
         return $this->resultRedirectFactory->create()->setRefererOrBaseUrl();
     }
 }

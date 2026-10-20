@@ -42,18 +42,20 @@ class Pay extends Action implements HttpPostActionInterface
         $ids = (array) $this->getRequest()->getParam('ids', []);
         if (!$ids) {
             $this->messageManager->addErrorMessage(__('Select the labels to pay.'));
-        } else {
-            try {
-                $r = $this->shipments->pay($ids);
-                if ($r['paid']) {
-                    $this->messageManager->addSuccessMessage(__('%1 label(s) paid.', count($r['paid'])));
-                }
-                if ($r['unpaid']) {
-                    $this->messageManager->addErrorMessage(__('%1 label(s) not paid: %2', count($r['unpaid']), $r['message']));
-                }
-            } catch (LabelException $e) {
-                $this->messageManager->addErrorMessage($e->getMessage());
+            return $this->resultRedirectFactory->create()->setRefererOrBaseUrl();
+        }
+        try {
+            $result = $this->shipments->pay($ids);
+            if ($result['paid']) {
+                $this->messageManager->addSuccessMessage(__('%1 label(s) paid.', count($result['paid'])));
             }
+            if ($result['unpaid']) {
+                $this->messageManager->addErrorMessage(
+                    __('%1 label(s) not paid: %2', count($result['unpaid']), $result['message'])
+                );
+            }
+        } catch (LabelException $e) {
+            $this->messageManager->addErrorMessage($e->getMessage());
         }
         return $this->resultRedirectFactory->create()->setRefererOrBaseUrl();
     }

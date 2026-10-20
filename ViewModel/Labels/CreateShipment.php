@@ -19,7 +19,7 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
  */
 class CreateShipment implements ArgumentInterface
 {
-    /** @var array|null */
+    /** @var mixed[]|null */
     private ?array $review = null;
 
     /**
@@ -57,7 +57,7 @@ class CreateShipment implements ArgumentInterface
     /**
      * Orders that can get a Frenet shipment.
      *
-     * @return array
+     * @return mixed[]
      */
     public function candidates(): array
     {
@@ -67,7 +67,7 @@ class CreateShipment implements ArgumentInterface
     /**
      * Comparison of the selected orders (computed once).
      *
-     * @return array
+     * @return mixed[]
      */
     public function review(): array
     {
@@ -77,7 +77,9 @@ class CreateShipment implements ArgumentInterface
     /**
      * Totals of the preselected services, for the first render (the page script recalculates them).
      *
-     * @return array
+     * @return mixed[]
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function initialSummary(): array
     {
