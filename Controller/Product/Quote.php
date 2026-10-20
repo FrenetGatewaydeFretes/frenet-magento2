@@ -17,6 +17,8 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Controller\Product;
 
 use Frenet\Shipping\Api\QuoteProductInterface;
+use Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiterInterface;
+use Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolverInterface;
 use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
@@ -39,16 +41,25 @@ class Quote extends Action implements HttpPostActionInterface
     private const POSTCODE_LENGTH = 8;
 
     /**
-     * @param Context               $context
-     * @param QuoteProductInterface $quoteProduct
-     * @param ConfigInterface       $config
-     * @param LoggerInterface       $logger
+     * @var int
+     */
+    private const HTTP_TOO_MANY_REQUESTS = 429;
+
+    /**
+     * @param Context                       $context
+     * @param QuoteProductInterface         $quoteProduct
+     * @param ConfigInterface               $config
+     * @param LoggerInterface               $logger
+     * @param QuoteRateLimiterInterface     $rateLimiter
+     * @param QuoteVisitorResolverInterface $visitorResolver
      */
     public function __construct(
         Context $context,
         private readonly QuoteProductInterface $quoteProduct,
         private readonly ConfigInterface $config,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly QuoteRateLimiterInterface $rateLimiter,
+        private readonly QuoteVisitorResolverInterface $visitorResolver
     ) {
         parent::__construct($context);
     }
@@ -78,6 +89,15 @@ class Quote extends Action implements HttpPostActionInterface
 
         if ($qty <= 0 || $qty > $this->config->getMaxUnitQuantity()) {
             return $this->jsonError($page, (string) __('Invalid quantity informed.'));
+        }
+
+        if (!$this->rateLimiter->isAllowed($this->visitorResolver->resolve($this->getRequest()))) {
+            $page->setHttpResponseCode(self::HTTP_TOO_MANY_REQUESTS);
+
+            return $this->jsonError(
+                $page,
+                (string) __('Too many shipping quotes in a short time. Please wait a minute and try again.')
+            );
         }
 
         try {
