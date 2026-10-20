@@ -7,7 +7,10 @@
  */
 $features = [
     'whatsapp' => [__('WhatsApp'), __('Send the tracking of each order to the customer by WhatsApp.')],
-    'reverse' => [__('Returns (reverse logistics)'), __('Create the return label of an order and follow it until it arrives.')],
+    'reverse' => [
+        __('Returns (reverse logistics)'),
+        __('Create the return label of an order and follow it until it arrives.'),
+    ],
     'receipt' => [__('Proof of delivery'), __('See and download the proof that the package was delivered.')],
     'tower' => [__('Control tower'), __('All your shipments in one panel: delays, problems and what needs attention.')],
 ];
@@ -20,6 +23,9 @@ $key = (string) $block->getRequest()->getParam('feature');
         <span class="frenet-pill frenet-pill--wait"><?= $escaper->escapeHtml(__('Coming soon')) ?></span>
         <h2><?= $escaper->escapeHtml($title) ?></h2>
         <p><?= $escaper->escapeHtml($text) ?></p>
-        <a class="action-default" href="<?= $escaper->escapeUrl($block->getUrl('frenetshipping/shipment/index')) ?>"><?= $escaper->escapeHtml(__('Back to Create shipment')) ?></a>
+        <a class="action-default"
+           href="<?= $escaper->escapeUrl($block->getUrl(
+               'frenetshipping/shipment/index'
+           )) ?>"><?= $escaper->escapeHtml(__('Back to Create shipment')) ?></a>
     </div>
 </div>
