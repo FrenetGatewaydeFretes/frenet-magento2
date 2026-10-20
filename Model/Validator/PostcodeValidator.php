@@ -15,23 +15,30 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\Validator;
 
+use Frenet\Shipping\Model\Formatters\PostcodeNormalizer;
+
 /**
- * Class PostcodeValidator
+ * Rejects empty postcodes and those that normalize to all zeros before a quote is requested.
  */
 class PostcodeValidator
 {
     /**
-     * @var \Frenet\Shipping\Model\Formatters\PostcodeNormalizer
+     * @var PostcodeNormalizer
      */
     private $postcodeNormalizer;
 
+    /**
+     * @param PostcodeNormalizer $postcodeNormalizer
+     */
     public function __construct(
-        \Frenet\Shipping\Model\Formatters\PostcodeNormalizer $postcodeNormalizer
+        PostcodeNormalizer $postcodeNormalizer
     ) {
         $this->postcodeNormalizer = $postcodeNormalizer;
     }
 
     /**
+     * Checks that the postcode is filled in and holds at least one non-zero digit once normalized.
+     *
      * @param string|null $postcode
      *
      * @return bool

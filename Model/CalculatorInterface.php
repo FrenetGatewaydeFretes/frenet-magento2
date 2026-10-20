@@ -15,15 +15,17 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
-use Frenet\Shipping\Model\Packages\PackageItem;
+use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 
 /**
- * Interface CalculatorInterface
+ * Entry point the carrier uses to quote the current rate request against the Frenet API.
  */
 interface CalculatorInterface
 {
     /**
-     * @return PackageItem[]
+     * Quotes the current rate request and returns the Frenet services that become shipping rates.
+     *
+     * @return Service[]
      */
     public function getQuote() : array;
 }

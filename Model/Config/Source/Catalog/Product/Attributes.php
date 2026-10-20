@@ -15,39 +15,52 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Config\Source\Catalog\Product;
 
+use Magento\Catalog\Api\Data\ProductAttributeInterface;
+use Magento\Catalog\Api\Data\ProductAttributeSearchResultsInterface;
+use Magento\Catalog\Api\ProductAttributeRepositoryInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Data\OptionSourceInterface;
+
 /**
- * Class Attributes
+ * Lists the product attributes as "label [code]" options for mapping the weight and dimension attributes.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-class Attributes implements \Magento\Framework\Data\OptionSourceInterface
+class Attributes implements OptionSourceInterface
 {
     /**
-     * @var array
+     * @var string[]
      */
     private $options = [];
 
     /**
-     * @var \Magento\Catalog\Api\ProductAttributeRepositoryInterface
+     * @var ProductAttributeRepositoryInterface
      */
     private $attributeRepository;
 
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
+     * @var SearchCriteriaBuilder
      */
     private $searchCriteriaBuilder;
 
+    /**
+     * @param ProductAttributeRepositoryInterface $attributeRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     */
     public function __construct(
-        \Magento\Catalog\Api\ProductAttributeRepositoryInterface $attributeRepository,
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
+        ProductAttributeRepositoryInterface $attributeRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->attributeRepository = $attributeRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     /**
-     * Return array of options as value-label pairs
+     * Returns the attributes as value-label option rows, with the attribute code appended to each label.
      *
-     * @return array Format: array(array('value' => '<value>', 'label' => '<label>'), ...)
+     * @return string[][]
      */
     public function toOptionArray()
     {
@@ -64,14 +77,14 @@ class Attributes implements \Magento\Framework\Data\OptionSourceInterface
     }
 
     /**
-     * Get options in "key-value" format
+     * Returns the attribute default frontend labels keyed by attribute code, loaded once per instance.
      *
-     * @return array
+     * @return string[]
      */
     public function toArray()
     {
         if (empty($this->options)) {
-            /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
+            /** @var Attribute $attribute */
             foreach ($this->getCollection() as $attribute) {
                 $this->options[$attribute->getAttributeCode()] = $attribute->getDefaultFrontendLabel();
             }
@@ -81,14 +94,16 @@ class Attributes implements \Magento\Framework\Data\OptionSourceInterface
     }
 
     /**
-     * @return \Magento\Catalog\Api\Data\ProductAttributeInterface[]
+     * Loads every product attribute through the attribute repository.
+     *
+     * @return ProductAttributeInterface[]
      */
     private function getCollection()
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
-        $searchCriteria->setData('entity_type_id', \Magento\Catalog\Model\Product::ENTITY);
+        $searchCriteria->setData('entity_type_id', Product::ENTITY);
 
-        /** @var \Magento\Catalog\Api\Data\ProductAttributeSearchResultsInterface $attributeRepository */
+        /** @var ProductAttributeSearchResultsInterface $attributeRepository */
         $attributeRepository = $this->attributeRepository->getList(
             $searchCriteria
         );

@@ -70,6 +70,7 @@
 
                 <!-- API CONNECTION -->
                 <api_protocol>https</api_protocol>
+                <api_timeout>30</api_timeout>
 
                 <!-- DEBUG -->
                 <debug>0</debug>

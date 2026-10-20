@@ -52,6 +52,16 @@ class RateRequestProvider implements RateRequestProviderInterface
     /**
      * @inheritDoc
      */
+    public function getStoreId(): ?int
+    {
+        $storeId = (int) $this->rateRequest?->getStoreId();
+
+        return $storeId > 0 ? $storeId : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function clear(): self
     {
         $this->rateRequest = null;

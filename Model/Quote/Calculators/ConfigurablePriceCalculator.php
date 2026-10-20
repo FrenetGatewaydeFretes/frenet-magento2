@@ -18,7 +18,8 @@ use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class DefaultPriceCalculator
+ * Prices a configurable child item from its parent item, which carries the price and the row total.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class ConfigurablePriceCalculator implements PriceCalculatorInterface
@@ -28,6 +29,9 @@ class ConfigurablePriceCalculator implements PriceCalculatorInterface
      */
     private $itemQtyCalculator;
 
+    /**
+     * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
+     */
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator
     ) {

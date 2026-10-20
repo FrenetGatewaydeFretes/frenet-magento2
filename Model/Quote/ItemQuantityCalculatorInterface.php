@@ -18,14 +18,16 @@ namespace Frenet\Shipping\Model\Quote;
 use Magento\Quote\Model\Quote\Item\AbstractItem;
 
 /**
- * Class ItemQuantityCalculatorInterface
+ * Resolves how many units of a cart item are shipped, taking the parent item of bundles and configurables into account.
  */
 interface ItemQuantityCalculatorInterface
 {
     /**
+     * Calculates the effective quantity of a quote item, capped at the configured maximum.
+     *
      * @param AbstractItem $item
      *
-     * @return integer
+     * @return float
      */
     public function calculate(AbstractItem $item);
 }

@@ -20,19 +20,28 @@ use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
-use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Sums the carrier forecast, the slowest item's lead time and the store's extra days into one delivery estimate.
  *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface
+class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface, ResetAfterRequestInterface
 {
+    /**
+     * @var array<string, int>
+     */
+    private array $leadTimes = [];
+
+    /**
+     * @param ProductResource              $productResource
+     * @param ConfigInterface              $config
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly ProductResource $productResource,
-        private readonly StoreManagerInterface $storeManagement,
         private readonly ConfigInterface $config,
         private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
@@ -73,14 +82,29 @@ class DeliveryTimeCalculator implements DeliveryTimeCalculatorInterface
     {
         $leadTime = max((int) $product->getData('lead_time'), 0);
 
-        if (!$leadTime) {
-            $leadTime = $this->productResource->getAttributeRawValue(
+        if ($leadTime) {
+            return $leadTime;
+        }
+
+        $cacheKey = $product->getId() . '|' . $product->getStoreId();
+
+        if (!array_key_exists($cacheKey, $this->leadTimes)) {
+            $this->leadTimes[$cacheKey] = (int) $this->productResource->getAttributeRawValue(
                 $product->getId(),
                 'lead_time',
-                $this->storeManagement->getStore()
+                $product->getStore()
             );
         }
 
-        return (int) $leadTime;
+        return $this->leadTimes[$cacheKey];
+    }
+
+    /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->leadTimes = [];
     }
 }

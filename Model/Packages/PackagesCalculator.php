@@ -25,6 +25,14 @@ use Magento\Quote\Model\Quote\Address\RateRequest;
  */
 class PackagesCalculator
 {
+    /**
+     * @param MultiQuoteValidatorInterface $multiQuoteValidator
+     * @param PackageProcessor             $packageProcessor
+     * @param PackageManager               $packageManager
+     * @param PackageLimit                 $packageLimit
+     * @param PackageMatching              $packageMatching
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly MultiQuoteValidatorInterface $multiQuoteValidator,
         private readonly PackageProcessor $packageProcessor,
@@ -72,13 +80,12 @@ class PackagesCalculator
          * Reset the limit so the next process will split the cart into packages.
          */
         $this->packageLimit->resetMaxWeight();
-        $packages = $this->processPackages();
 
         /**
          * Package Matching binds the results for Correios only.
          * The other options (not for Correios) are got from the full call (the first one).
          */
-        return $this->packageMatching->match($packages);
+        return $this->packageMatching->match($this->quotePackages());
     }
 
     /**
@@ -145,16 +152,24 @@ class PackagesCalculator
      */
     private function processPackages(): array
     {
+        return $this->consolidatePackages($this->quotePackages());
+    }
+
+    /**
+     * Quotes every built package, keeping each result under its package key ('full' and one entry per split package).
+     *
+     * @return array<int|string, Service[]>
+     */
+    private function quotePackages(): array
+    {
         $this->packageManager->process();
         $results = [];
 
         /** @var Package $package */
         foreach ($this->packageManager->getPackages() as $key => $package) {
-            /** @var Service[] $services */
-            $services = $this->packageProcessor->process($package);
-            $results[$key] = $services;
+            $results[$key] = $this->packageProcessor->process($package);
         }
 
-        return $this->consolidatePackages($results);
+        return $results;
     }
 }

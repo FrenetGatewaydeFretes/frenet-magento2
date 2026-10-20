@@ -19,7 +19,8 @@ use Magento\Bundle\Model\Product\Price;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class DefaultPriceCalculator
+ * Prices a bundle child item, splitting the bundle row total evenly across its children when the price is fixed.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class BundlePriceCalculator implements PriceCalculatorInterface
@@ -30,8 +31,6 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     private $itemQtyCalculator;
 
     /**
-     * BundlePriceCalculator constructor.
-     *
      * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
      */
     public function __construct(
@@ -86,6 +85,8 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     }
 
     /**
+     * Checks whether the parent bundle product uses the fixed price type.
+     *
      * @param QuoteItem $item
      *
      * @return bool
@@ -103,6 +104,8 @@ class BundlePriceCalculator implements PriceCalculatorInterface
     }
 
     /**
+     * Returns the bundle item the child item belongs to.
+     *
      * @param QuoteItem $item
      *
      * @return QuoteItem

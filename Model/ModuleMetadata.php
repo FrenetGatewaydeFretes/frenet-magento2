@@ -18,6 +18,7 @@ use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Composer\ComposerInformation;
+use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\SerializerInterface;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\Finder\FinderFactory;
@@ -48,10 +49,17 @@ class ModuleMetadata
     private $version = null;
 
     /**
-     * @var array
+     * @var mixed[]
      */
     private $package = [];
 
+    /**
+     * @param ComposerInformation $composerInformation
+     * @param CacheInterface      $cache
+     * @param SerializerInterface $serializer
+     * @param DirectoryList       $directoryList
+     * @param FinderFactory       $finderFactory
+     */
     public function __construct(
         private readonly ComposerInformation $composerInformation,
         private readonly CacheInterface $cache,
@@ -62,6 +70,8 @@ class ModuleMetadata
     }
 
     /**
+     * Returns the Composer package name the module is distributed under.
+     *
      * @return string
      */
     public function getName() : string
@@ -70,6 +80,8 @@ class ModuleMetadata
     }
 
     /**
+     * Returns the Composer package type declared for the module.
+     *
      * @return string
      */
     public function getType() : string
@@ -95,9 +107,9 @@ class ModuleMetadata
     }
 
     /**
-     * Get version from module package
+     * Resolves the version from the Composer install first, then from an app/code checkout, else a fallback label.
      *
-     * @return string
+     * @return string|Phrase
      */
     private function getPackageVersion()
     {
@@ -115,7 +127,9 @@ class ModuleMetadata
     }
 
     /**
-     * @return array
+     * Returns the installed Composer package data of the module, or an empty array when not installed via Composer.
+     *
+     * @return mixed[]
      */
     private function getPackage() : array
     {
@@ -129,6 +143,8 @@ class ModuleMetadata
     }
 
     /**
+     * Loads the module entry from the installed Magento Composer packages once and keeps it in memory.
+     *
      * @return void
      */
     private function preparePackage()
@@ -145,6 +161,8 @@ class ModuleMetadata
     }
 
     /**
+     * Builds the version label from the composer.json of an app/code checkout, or null when none is found.
+     *
      * @return string|null
      */
     private function getLocalVersion()
@@ -163,7 +181,9 @@ class ModuleMetadata
     }
 
     /**
-     * @return array
+     * Reads the composer.json shipped in app/code/Frenet/Shipping, or an empty array when it is missing.
+     *
+     * @return mixed[]
      */
     private function getLocalComposerInfo()
     {

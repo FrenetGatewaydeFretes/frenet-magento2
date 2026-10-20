@@ -15,18 +15,17 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
-use Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface;
-use Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class PackagesManager
+ * Fills packages with the cart items, opening a new package whenever the next batch would exceed the weight limit.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageManager
 {
     /**
-     * @var Package
+     * @var Package|null
      */
     private $currentPackage;
 
@@ -41,16 +40,6 @@ class PackageManager
     private $packageFactory;
 
     /**
-     * @var QuoteItemValidatorInterface
-     */
-    private $quoteItemValidator;
-
-    /**
-     * @var ItemQuantityCalculatorInterface
-     */
-    private $itemQuantityCalculator;
-
-    /**
      * @var PackageLimit
      */
     private $packageLimit;
@@ -61,21 +50,15 @@ class PackageManager
     private $packageItemDistributor;
 
     /**
-     * @param QuoteItemValidatorInterface     $quoteItemValidator
-     * @param ItemQuantityCalculatorInterface $itemQuantityCalculator
-     * @param PackageFactory                  $packageFactory
-     * @param PackageLimit                    $packageLimit
-     * @param PackageItemDistributor          $packageItemDistributor
+     * @param PackageFactory         $packageFactory
+     * @param PackageLimit           $packageLimit
+     * @param PackageItemDistributor $packageItemDistributor
      */
     public function __construct(
-        QuoteItemValidatorInterface $quoteItemValidator,
-        ItemQuantityCalculatorInterface $itemQuantityCalculator,
         PackageFactory $packageFactory,
         PackageLimit $packageLimit,
         PackageItemDistributor $packageItemDistributor
     ) {
-        $this->quoteItemValidator = $quoteItemValidator;
-        $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->packageFactory = $packageFactory;
         $this->packageLimit = $packageLimit;
         $this->packageItemDistributor = $packageItemDistributor;

@@ -15,15 +15,20 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface;
+
 /**
- * Class TrackingInterface
+ * Looks up the tracking events of a shipment on the Frenet API.
  */
 interface TrackingInterface
 {
     /**
+     * Returns the Frenet tracking information for the tracking number and the shipping service code.
+     *
      * @param string $number
      * @param string $shippingServiceCode
-     * @return \Frenet\ObjectType\Entity\Tracking\TrackingInfoInterface
+     *
+     * @return TrackingInfoInterface
      */
     public function track($number, $shippingServiceCode);
 }

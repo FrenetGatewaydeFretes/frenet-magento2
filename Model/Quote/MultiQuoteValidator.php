@@ -19,9 +19,10 @@ use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\PackageLimit;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Magento\Quote\Model\Quote\Item\AbstractItem;
 
 /**
- * Class MultiQuoteValidator
+ * Allows splitting an overweight cart into packages only when multi-quote is enabled and every item fits one package.
  */
 class MultiQuoteValidator implements MultiQuoteValidatorInterface
 {
@@ -40,6 +41,11 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
      */
     private $rateRequestProvider;
 
+    /**
+     * @param ConfigInterface              $config
+     * @param PackageLimit                 $packageLimit
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         ConfigInterface $config,
         PackageLimit $packageLimit,
@@ -69,7 +75,7 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
             return false;
         }
 
-        /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $item */
+        /** @var AbstractItem $item */
         foreach ($rateRequest->getAllItems() as $item) {
             /**
              * If any single product is overweight then the multi quote cannot be done.

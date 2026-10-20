@@ -16,6 +16,8 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Model\Carrier\Frenet;
+use Frenet\Shipping\Model\Config\ApiHostnameValidator;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterface;
@@ -42,9 +44,27 @@ class Config implements ConfigInterface
      */
     public const DEFAULT_DEBUG_FILENAME = 'frenet_request_debug.log';
 
+    /**
+     * @var float
+     */
+    public const DEFAULT_API_TIMEOUT = 30.0;
+
+    /**
+     * @var float
+     */
+    public const MAX_API_TIMEOUT = 120.0;
+
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreManagerInterface $storeManager
+     * @param ApiHostnameValidator $apiHostnameValidator
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly ApiHostnameValidator $apiHostnameValidator,
+        private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
     }
 
@@ -69,7 +89,9 @@ class Config implements ConfigInterface
      */
     public function getApiHostname($store = null): string
     {
-        return trim((string) $this->getCarrierConfig('api_hostname', $store));
+        $hostname = strtolower(trim((string) $this->getCarrierConfig('api_hostname', $store)));
+
+        return $this->apiHostnameValidator->isAllowed($hostname) ? $hostname : '';
     }
 
     /**
@@ -78,6 +100,16 @@ class Config implements ConfigInterface
     public function getApiProtocol($store = null): string
     {
         return strtolower(trim((string) $this->getCarrierConfig('api_protocol', $store)));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getApiTimeout($store = null): float
+    {
+        $timeout = (float) $this->getCarrierConfig('api_timeout', $store);
+
+        return $timeout > 0 ? min($timeout, self::MAX_API_TIMEOUT) : self::DEFAULT_API_TIMEOUT;
     }
 
     /**
@@ -272,11 +304,11 @@ class Config implements ConfigInterface
     public function get($section, $group, $field, $store = null, $scopeType = ScopeInterface::SCOPE_STORE)
     {
         $path = implode('/', [$section, $group, $field]);
-        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store));
+        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store)?->getId());
     }
 
     /**
-     * Resolves the store to use, falling back to the default store view.
+     * Resolves the given store, else the store being quoted, else the current one, falling back to the default view.
      *
      * @param string|int|StoreInterface|null $store
      *
@@ -284,6 +316,8 @@ class Config implements ConfigInterface
      */
     private function getStore($store = null)
     {
+        $store ??= $this->rateRequestProvider->getStoreId();
+
         try {
             return $this->storeManager->getStore($store);
         } catch (NoSuchEntityException $exception) {

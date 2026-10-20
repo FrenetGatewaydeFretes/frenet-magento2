@@ -26,20 +26,23 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 class PackageMatching
 {
     /**
-     * @var array
+     * @var Service[][]
      */
     private array $results = [];
 
     /**
-     * @var array
+     * @var Service[]
      */
     private array $fullResults = [];
 
     /**
-     * @var array
+     * @var mixed[][]
      */
     private array $services = [];
 
+    /**
+     * @param ServiceFactory $serviceFactory
+     */
     public function __construct(
         private readonly ServiceFactory $serviceFactory
     ) {
@@ -48,9 +51,9 @@ class PackageMatching
     /**
      * Consolidates the per-package results ('full' plus one entry per package) into a single service list.
      *
-     * @param array $results
+     * @param Service[][] $results
      *
-     * @return array
+     * @return Service[]
      */
     public function match(array $results): array
     {
@@ -61,11 +64,11 @@ class PackageMatching
     /**
      * Binds each package's Correios services, then appends the carriers kept from the full call.
      *
-     * @return array
+     * @return Service[]
      */
     private function matchResults(): array
     {
-        /** @var array $services */
+        /** @var Service[] $services */
         foreach ($this->results as $services) {
             $this->prepareServices($services);
         }
@@ -76,7 +79,7 @@ class PackageMatching
     /**
      * Feeds one package's non-error Correios services into the running per-code totals.
      *
-     * @param array $services
+     * @param Service[] $services
      *
      * @return $this
      */
@@ -147,13 +150,13 @@ class PackageMatching
     /**
      * Builds the bound Correios services and merges them with the carriers kept from the full call.
      *
-     * @return array
+     * @return Service[]
      */
     private function buildServicesResult(): array
     {
         $results = [];
 
-        /** @var array $serviceData */
+        /** @var mixed[] $serviceData */
         foreach ($this->services as $serviceData) {
             $results[] = $this->serviceFactory->create()->setData($serviceData);
         }
@@ -164,7 +167,7 @@ class PackageMatching
     /**
      * Returns the zeroed accumulator a service code starts from before the first package is added.
      *
-     * @return array
+     * @return mixed[]
      */
     private function getNewEmpty(): array
     {
@@ -184,7 +187,7 @@ class PackageMatching
     /**
      * Splits the incoming results into the full-call list and the per-package lists.
      *
-     * @param array $results
+     * @param Service[][] $results
      *
      * @return $this
      */

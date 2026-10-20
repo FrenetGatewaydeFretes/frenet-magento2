@@ -18,11 +18,13 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 use Magento\Catalog\Model\Product;
 
 /**
- * Interface ProductExtractorInterface
+ * Dimensions extractor bound to a catalog product whose attributes supply the package values.
  */
 interface ProductExtractorInterface extends DimensionsExtractorInterface
 {
     /**
+     * Sets the product to read the values from, ignoring products without an ID or store.
+     *
      * @param Product $product
      *
      * @return $this
