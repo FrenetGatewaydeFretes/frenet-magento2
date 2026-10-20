@@ -218,7 +218,7 @@ class Sync
         $detail = trim($event['description'] . ' · ' . $event['date'] . ' ' . $event['location'], ' ·');
         $comment = (string) __('Tracking: %1', $detail);
         $history = $order->addCommentToStatusHistory($comment, $status, true);
-        $history->setIsCustomerNotified($notify);
+        $history->setIsCustomerNotified((int) $notify);
         $this->orderRepository->save($order);
         if ($notify) {
             try {
