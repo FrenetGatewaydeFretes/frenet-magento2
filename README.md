@@ -28,6 +28,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 | Módulo | Magento | PHP |
 |---|---|---|
 | `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
+| `2.4.8-p5` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 / 2.4.8-p4 / 2.4.8-p5 | 8.2, 8.3, 8.4 |
 | `2.4.8-p4` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 / 2.4.8-p4 | 8.2, 8.3, 8.4 |
 | `2.4.8-p3` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 | 8.2, 8.3, 8.4 |
 | `2.4.8-p2` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 | 8.2, 8.3, 8.4 |
@@ -57,7 +58,7 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:2.4.8-p4
+composer require frenet/frenet-magento2:2.4.8-p5
 ```
 
 ## Configuração
@@ -92,6 +93,12 @@ Recursos opcionais, no mesmo painel:
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
 
 ## Changelog
+
+### 2.4.8-p5
+
+**Adicionado**
+
+- Compatibilidade com **Magento 2.4.8-p5** (PHP 8.2, 8.3 e 8.4), validada contra as correções de segurança do boletim APSB26-49: cotação na página do produto e no carrinho, checkout de visitante e de cliente logado, e envio com rastreio no admin. O módulo não precisou de alterações para esta versão.
 
 ### 2.4.8-p4
 
