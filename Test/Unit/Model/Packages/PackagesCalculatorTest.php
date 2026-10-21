@@ -15,6 +15,7 @@ namespace Frenet\Shipping\Test\Unit\Model\Packages;
 
 use Frenet\Framework\Data\SerializerInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
+use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 use Frenet\Shipping\Model\Packages\Package;
 use Frenet\Shipping\Model\Packages\PackageLimit;
 use Frenet\Shipping\Model\Packages\PackageManager;
@@ -29,7 +30,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that PackagesCalculator always returns a flat, consolidated Service list even when the cart is split.
+ * Tests that PackagesCalculator returns a flat Service list for split carts and keeps Multi Quote results per package.
  */
 #[AllowMockObjectsWithoutExpectations]
 class PackagesCalculatorTest extends TestCase
@@ -170,6 +171,80 @@ class PackagesCalculatorTest extends TestCase
     }
 
     /**
+     * With Multi Quote, the matcher must receive the full-cart call and every package separately, not a merged list.
+     *
+     * @return void
+     */
+    public function testShouldHandTheMatcherTheFullCallAndEachPackageWhenMultiQuoteIsOn(): void
+    {
+        $this->givenAMultiQuoteSplit();
+        $full = [$this->service('JTE_INT', 190.56, 4, 'J&T Express')];
+        $first = [$this->service('03298', 120.00, 5)];
+        $second = [$this->service('03298', 40.00, 6)];
+        $this->packageProcessor->method('process')->willReturnOnConsecutiveCalls($full, $first, $second);
+
+        $matched = [$this->service('MATCHED', 1.00, 1)];
+        $this->packageMatching->expects($this->once())
+            ->method('match')
+            ->with(['full' => $full, 0 => $first, 1 => $second])
+            ->willReturn($matched);
+
+        $this->assertSame($matched, $this->subject->calculate());
+    }
+
+    /**
+     * With Multi Quote, Correios is priced as the sum of the packages and other carriers come from the full-cart call.
+     *
+     * @return void
+     */
+    public function testShouldSumCorreiosPerPackageAndUseTheFullCallForOthersWhenMultiQuoteSplitsTheCart(): void
+    {
+        $serviceFactory = $this->createMock(ServiceFactory::class);
+        $serviceFactory->method('create')->willReturnCallback(fn () => new Service($this->serializer));
+        $subject = new PackagesCalculator(
+            $this->multiQuoteValidator,
+            $this->packageProcessor,
+            $this->packageManager,
+            $this->packageLimit,
+            new PackageMatching($serviceFactory),
+            $this->rateRequestProvider
+        );
+
+        $this->givenAMultiQuoteSplit();
+        $this->packageProcessor->method('process')->willReturnOnConsecutiveCalls(
+            [$this->service('JTE_INT', 190.56, 4, 'J&T Express'), $this->service('03298', 999.00, 9)],
+            [$this->service('03298', 120.00, 5), $this->service('JTE_INT', 50.00, 2, 'J&T Express')],
+            [$this->service('03298', 40.00, 6)]
+        );
+
+        $byCode = [];
+        foreach ($subject->calculate() as $service) {
+            $byCode[$service->getServiceCode()] = $service;
+        }
+
+        $this->assertEqualsWithDelta(160.00, $byCode['03298']->getShippingPrice(), 0.001);
+        $this->assertSame(6, (int) $byCode['03298']->getDeliveryTime());
+        $this->assertEqualsWithDelta(190.56, $byCode['JTE_INT']->getShippingPrice(), 0.001);
+        $this->assertCount(2, $byCode);
+    }
+
+    /**
+     * Configures an overweight cart with Multi Quote on, split into the full-cart package plus two packages.
+     *
+     * @return void
+     */
+    private function givenAMultiQuoteSplit(): void
+    {
+        $this->packageLimit->method('isOverWeight')->willReturn(true);
+        $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturn(true);
+        $this->packageManager->method('getPackages')->willReturn([
+            'full' => $this->createStub(Package::class),
+            0 => $this->createStub(Package::class),
+            1 => $this->createStub(Package::class),
+        ]);
+    }
+
+    /**
      * Returns two distinct package stubs, the shape PackageManager::getPackages() reports for a split cart.
      *
      * @return Package[]
@@ -185,12 +260,14 @@ class PackagesCalculatorTest extends TestCase
      * @param string $code
      * @param float  $price
      * @param int    $deliveryTime
+     * @param string $carrier
      *
      * @return Service
      */
-    private function service(string $code, float $price, int $deliveryTime): Service
+    private function service(string $code, float $price, int $deliveryTime, string $carrier = 'Correios'): Service
     {
         return new Service($this->serializer, [
+            'Carrier'               => $carrier,
             'ServiceCode'           => $code,
             'ShippingPrice'         => (string) $price,
             'OriginalShippingPrice' => (string) $price,

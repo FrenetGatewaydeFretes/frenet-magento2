@@ -57,6 +57,15 @@ interface ConfigInterface
     public function getApiProtocol($store = null): string;
 
     /**
+     * Returns the time limit, in seconds, for a request to the Frenet API, capped at 120.
+     *
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return float
+     */
+    public function getApiTimeout($store = null): float;
+
+    /**
      * Returns the product attribute code mapped to weight.
      *
      * @param string|int|StoreInterface|null $store
@@ -227,6 +236,24 @@ interface ConfigInterface
      * @return string[]
      */
     public function getProductQuoteProductTypes($store = null): array;
+
+    /**
+     * Returns how many product page quotes a single visitor may request per minute, where 0 means no limit.
+     *
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return int
+     */
+    public function getProductQuoteVisitorLimit($store = null): int;
+
+    /**
+     * Returns how many product page quotes all visitors of a website may request per minute, where 0 means no limit.
+     *
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return int
+     */
+    public function getProductQuoteStoreLimit($store = null): int;
 
     /**
      * Returns the shipping origin postcode.

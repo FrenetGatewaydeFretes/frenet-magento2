@@ -16,18 +16,17 @@ namespace Frenet\Shipping\ViewModel\Catalog\Product\View;
 
 use Frenet\Shipping\Block\Catalog\Product\View\Quote as QuoteBlock;
 use Frenet\Shipping\Model\ConfigInterface;
+use Magento\Framework\View\Element\Block\ArgumentInterface;
 
 /**
- * Class Quote
- *
- * @package Frenet\Shipping\ViewModel\Catalog\Product\View
+ * Decides whether the product page quote widget shows up and builds the URL its AJAX requests are sent to.
  */
-class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
+class Quote implements ArgumentInterface
 {
     /**
      * @var string
      */
-    const URI_PATH = 'frenet/product/quote';
+    public const URI_PATH = 'frenet/product/quote';
 
     /**
      * @var QuoteBlock
@@ -39,12 +38,22 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
      */
     private $config;
 
+    /**
+     * @param ConfigInterface $config
+     */
     public function __construct(
         ConfigInterface $config
     ) {
         $this->config = $config;
     }
 
+    /**
+     * Keeps the block being rendered so the product and base URL can be read from it.
+     *
+     * @param QuoteBlock $block
+     *
+     * @return $this
+     */
     public function setBlock(QuoteBlock $block)
     {
         $this->block = $block;
@@ -52,6 +61,8 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     }
 
     /**
+     * Checks that a product is loaded, the product page quote is enabled and its product type is allowed.
+     *
      * @return bool
      */
     public function isProductQuoteAllowed() : bool
@@ -69,6 +80,8 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     }
 
     /**
+     * Returns the absolute URL of the product quote controller.
+     *
      * @return string
      */
     public function getUrl() : string
@@ -77,6 +90,8 @@ class Quote implements \Magento\Framework\View\Element\Block\ArgumentInterface
     }
 
     /**
+     * Returns the store base URL taken from the block being rendered.
+     *
      * @return string
      */
     private function getBaseUrl() : string

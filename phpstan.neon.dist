@@ -1,0 +1,18 @@
+includes:
+    - vendor/bitexpert/phpstan-magento/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - Api
+        - Block
+        - Controller
+        - Model
+        - Service
+        - Setup
+        - ViewModel
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        -
+            message: '#^PHPDoc tag @SuppressWarnings has invalid value#'
+            identifier: phpDoc.parseError

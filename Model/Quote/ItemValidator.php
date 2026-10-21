@@ -18,7 +18,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Quote\Model\Quote\Item\AbstractItem;
 
 /**
- * Class ItemValidator
+ * Accepts only the cart items shipped on their own, skipping composite parents and virtual products.
  */
 class ItemValidator implements QuoteItemValidatorInterface
 {
@@ -39,9 +39,11 @@ class ItemValidator implements QuoteItemValidatorInterface
     }
 
     /**
+     * Returns the product behind the cart item.
+     *
      * @param AbstractItem $item
      *
-     * @return bool|Product
+     * @return Product
      */
     private function getProduct(AbstractItem $item)
     {

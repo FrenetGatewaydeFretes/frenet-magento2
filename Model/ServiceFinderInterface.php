@@ -15,15 +15,21 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface;
+use Magento\Framework\Exception\LocalizedException;
+
 /**
- * Class ServiceFinderInterface
+ * Resolves which Frenet shipping service a tracking number was shipped with.
  */
 interface ServiceFinderInterface
 {
     /**
-     * @param $trackingNumber
-     * @return \Frenet\ObjectType\Entity\Shipping\Info\ServiceInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Returns the Frenet service the tracked shipment was sent with, or null when no service matches.
+     *
+     * @param string $trackingNumber
+     *
+     * @return ServiceInterface|null
+     * @throws LocalizedException
      */
     public function findByTrackingNumber($trackingNumber);
 }

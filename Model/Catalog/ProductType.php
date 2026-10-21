@@ -14,52 +14,52 @@
 
 namespace Frenet\Shipping\Model\Catalog;
 
+use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Type;
-use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\Downloadable\Model\Product\Type as Downloadable;
+use Magento\GroupedProduct\Model\Product\Type\Grouped;
 
 /**
- * Class ProductType
+ * Lists the product type codes that carry the Frenet shipping attributes and checks a product against them.
  */
 class ProductType
 {
     /**
      * @var string
      */
-    const TYPE_SIMPLE = Type::TYPE_SIMPLE;
+    public const TYPE_SIMPLE = Type::TYPE_SIMPLE;
 
     /**
      * @var string
      */
-    const TYPE_VIRTUAL = Type::TYPE_VIRTUAL;
+    public const TYPE_VIRTUAL = Type::TYPE_VIRTUAL;
 
     /**
      * @var string
      */
-    const TYPE_CONFIGURABLE = Configurable::TYPE_CODE;
+    public const TYPE_CONFIGURABLE = Configurable::TYPE_CODE;
 
     /**
      * @var string
      */
-    const TYPE_BUNDLE = Bundle::TYPE_CODE;
+    public const TYPE_BUNDLE = Bundle::TYPE_CODE;
 
     /**
      * @var string
      */
-    const TYPE_GROUPED = Grouped::TYPE_CODE;
+    public const TYPE_GROUPED = Grouped::TYPE_CODE;
 
     /**
      * @var string
      */
-    const TYPE_DOWNLOADABLE = Downloadable::TYPE_DOWNLOADABLE;
+    public const TYPE_DOWNLOADABLE = Downloadable::TYPE_DOWNLOADABLE;
 
     /**
-     * @var array
+     * @var string[]
      */
-    const PRODUCT_TYPES = [
+    public const PRODUCT_TYPES = [
         self::TYPE_SIMPLE,
         self::TYPE_VIRTUAL,
         self::TYPE_CONFIGURABLE,
@@ -69,6 +69,8 @@ class ProductType
     ];
 
     /**
+     * Checks whether the product is of the simple type.
+     *
      * @param ProductInterface $product
      *
      * @return bool
@@ -79,6 +81,8 @@ class ProductType
     }
 
     /**
+     * Checks whether the product is of the virtual type.
+     *
      * @param ProductInterface $product
      *
      * @return bool
@@ -89,6 +93,8 @@ class ProductType
     }
 
     /**
+     * Checks whether the product is of the configurable type.
+     *
      * @param ProductInterface $product
      *
      * @return bool
@@ -99,6 +105,8 @@ class ProductType
     }
 
     /**
+     * Checks whether the product is of the bundle type.
+     *
      * @param ProductInterface $product
      *
      * @return bool
@@ -109,6 +117,8 @@ class ProductType
     }
 
     /**
+     * Checks whether the product is of the grouped type.
+     *
      * @param ProductInterface $product
      *
      * @return bool
@@ -119,6 +129,8 @@ class ProductType
     }
 
     /**
+     * Checks whether the product is of the downloadable type.
+     *
      * @param ProductInterface $product
      *
      * @return bool
@@ -129,6 +141,8 @@ class ProductType
     }
 
     /**
+     * Compares the product type ID with the given one strictly.
+     *
      * @param ProductInterface $product
      * @param string           $typeId
      *

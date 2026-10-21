@@ -16,16 +16,17 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Setup\Patch\Data;
 
 use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
+use Magento\Catalog\Model\Product\Attribute\Backend\Boolean as BooleanBackend;
+use Magento\Catalog\Model\Product\Attribute\Source\Boolean as BooleanSource;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Framework\Console\Cli;
 
 /**
- * Class AttributeContainer
+ * Defines the product shipping attributes (package dimensions, lead time, fragile flag) the install patch creates.
  */
 class AttributeContainer implements DataPatchInterface
 {
     /**
-     * @var array
+     * @var mixed[][]
      */
     private $attributes = [
         AttributesMappingInterface::DEFAULT_ATTRIBUTE_LENGTH    => [
@@ -63,28 +64,28 @@ class AttributeContainer implements DataPatchInterface
             'default'     => false,
             'type'        => 'int',
             'input'       => 'boolean',
-            'backend'     => \Magento\Catalog\Model\Product\Attribute\Backend\Boolean::class,
-            'source'      => \Magento\Catalog\Model\Product\Attribute\Source\Boolean::class,
+            'backend'     => BooleanBackend::class,
+            'source'      => BooleanSource::class,
         ],
     ];
 
     /**
-     * @var array
+     * @var string[]
      */
     private $translatable = [
         'label', 'description', 'note'
     ];
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function apply()
     {
-        return Cli::RETURN_SUCCESS;
+        return $this;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function getDependencies()
     {
@@ -92,7 +93,9 @@ class AttributeContainer implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * Returns the module version this patch was introduced in.
+     *
+     * @return string
      */
     public static function getVersion()
     {
@@ -100,7 +103,7 @@ class AttributeContainer implements DataPatchInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getAliases()
     {
@@ -108,16 +111,18 @@ class AttributeContainer implements DataPatchInterface
     }
 
     /**
-     * @param string $attributeCode
+     * Returns the translated definition of one attribute, all of them when no code is given, or false if unknown.
      *
-     * @return array|bool
+     * @param string|null $attributeCode
+     *
+     * @return mixed[]|bool
      */
     public function getAttributeProperties($attributeCode = null)
     {
         if (empty($attributeCode)) {
             $result = [];
 
-            /** @var array $attribute */
+            /** @var mixed[] $attribute */
             foreach ($this->attributes as $code => $attribute) {
                 $result[$code] = $this->applyTranslations($attribute);
             }
@@ -133,9 +138,11 @@ class AttributeContainer implements DataPatchInterface
     }
 
     /**
-     * @param array $attribute
+     * Wraps the label, description and note of the attribute definition in translatable phrases.
      *
-     * @return array
+     * @param mixed[] $attribute
+     *
+     * @return mixed[]
      */
     private function applyTranslations(array $attribute) : array
     {
@@ -151,7 +158,9 @@ class AttributeContainer implements DataPatchInterface
     }
 
     /**
-     * @param $attributeCode
+     * Checks whether a non-empty definition exists for the attribute code.
+     *
+     * @param string $attributeCode
      *
      * @return bool
      */

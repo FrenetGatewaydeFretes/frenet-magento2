@@ -14,22 +14,34 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Block\Form\Element;
 
+use Frenet\Shipping\Model\ModuleMetadata;
+use Magento\Framework\Data\Form\Element\CollectionFactory;
+use Magento\Framework\Data\Form\Element\Factory;
+use Magento\Framework\Data\Form\Element\Label as FormLabel;
+use Magento\Framework\Escaper;
+
 /**
- * Class Label
- * A customized label for using in admin form.
+ * Admin configuration field that displays the installed module version instead of an editable value.
  */
-class Label extends \Magento\Framework\Data\Form\Element\Label
+class Label extends FormLabel
 {
     /**
-     * @var \Frenet\Shipping\Model\ModuleMetadata
+     * @var ModuleMetadata
      */
     private $moduleMetadata;
 
+    /**
+     * @param Factory           $factoryElement
+     * @param CollectionFactory $factoryCollection
+     * @param Escaper           $escaper
+     * @param ModuleMetadata    $moduleMetadata
+     * @param mixed[]           $data
+     */
     public function __construct(
-        \Magento\Framework\Data\Form\Element\Factory $factoryElement,
-        \Magento\Framework\Data\Form\Element\CollectionFactory $factoryCollection,
-        \Magento\Framework\Escaper $escaper,
-        \Frenet\Shipping\Model\ModuleMetadata $moduleMetadata,
+        Factory $factoryElement,
+        CollectionFactory $factoryCollection,
+        Escaper $escaper,
+        ModuleMetadata $moduleMetadata,
         $data = []
     ) {
         parent::__construct($factoryElement, $factoryCollection, $escaper, $data);

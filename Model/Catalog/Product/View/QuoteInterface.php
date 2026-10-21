@@ -17,28 +17,34 @@ namespace Frenet\Shipping\Model\Catalog\Product\View;
 use Magento\Catalog\Api\Data\ProductInterface;
 
 /**
- * Class QuoteInterface
+ * Contract for quoting shipping on the product page from a product instance, ID or SKU.
  */
 interface QuoteInterface
 {
     /**
+     * Returns the shipping services available for the given product.
+     *
      * @param ProductInterface $product
      *
-     * @return array
+     * @return mixed[][]
      */
     public function quote(ProductInterface $product) : array;
 
     /**
+     * Loads the product by ID and returns the shipping services available for it.
+     *
      * @param int $productId
      *
-     * @return array
+     * @return mixed[][]
      */
     public function quoteByProductId(int $productId) : array;
 
     /**
+     * Loads the product by SKU and returns the shipping services available for it.
+     *
      * @param string $productSku
      *
-     * @return array
+     * @return mixed[][]
      */
     public function quoteByProductSku(string $productSku) : array;
 }

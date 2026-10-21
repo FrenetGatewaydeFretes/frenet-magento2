@@ -18,14 +18,14 @@ namespace Frenet\Shipping\Model\Packages;
 use Frenet\Shipping\Model\ConfigInterface;
 
 /**
- * Class PackageLimit
+ * Holds the package weight cap, which the calculator lifts for the single unlimited full-cart quote.
  */
 class PackageLimit
 {
     /**
-     * @var float
+     * @var int
      */
-    const PACKAGE_NO_LIMIT = 999999999;
+    public const PACKAGE_NO_LIMIT = 999999999;
 
     /**
      * @var float|null

@@ -14,11 +14,17 @@
 
 namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 
+use Magento\Bundle\Model\Option;
+use Magento\Bundle\Model\Product\Type as BundleType;
+use Magento\Bundle\Model\ResourceModel\Option\Collection as OptionCollection;
+use Magento\Bundle\Model\Selection;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
 use Magento\Framework\DataObject;
 
 /**
- * Class BundleBuilder
+ * Fills the bundle options of the buy request, defaulting each required option to its default or first selection.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class BundleBuilder implements BuilderInterface
@@ -37,38 +43,41 @@ class BundleBuilder implements BuilderInterface
             return;
         }
 
-        $this->buildDefaultOptions($product, $request);
+        if ($product instanceof Product) {
+            $this->buildDefaultOptions($product, $request);
+        }
     }
 
     /**
-     * @param ProductInterface $product
+     * Selects the default, or else the first, selection of every required bundle option.
+     *
+     * @param Product          $product
      * @param DataObject       $request
      *
      * @return void
      */
-    private function buildDefaultOptions(ProductInterface $product, DataObject $request)
+    private function buildDefaultOptions(Product $product, DataObject $request)
     {
-        /** @var \Magento\Catalog\Model\Product\Type\AbstractType $typeInstance */
+        /** @var BundleType $typeInstance */
         $typeInstance = $product->getTypeInstance();
 
         $bundleOptions = [];
         $bundleOptionsQty = [];
 
-        /** @var \Magento\Bundle\Model\ResourceModel\Option\Collection $optionsCollection */
+        /** @var OptionCollection $optionsCollection */
         $optionsCollection = $typeInstance->getOptionsCollection($product);
 
-        /** @var \Magento\Bundle\Model\Option $option */
+        /** @var Option $option */
         foreach ($optionsCollection as $option) {
             /** If the option is not required then we can by pass it. */
             if (!$option->getRequired()) {
                 continue;
             }
 
-            /** @var \Magento\Bundle\Model\Selection $selection */
+            /** @var Selection $selection */
             $selection = $option->getDefaultSelection();
 
             if (!$selection) {
-                /** @var \Magento\Bundle\Model\ResourceModel\Selection\Collection $selections */
                 $selection = $typeInstance->getSelectionsCollection(
                     $option->getId(),
                     $product

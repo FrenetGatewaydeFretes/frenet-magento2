@@ -17,21 +17,23 @@ declare(strict_types = 1);
 namespace Frenet\Shipping\Model\Config\Source\Catalog\Product\Quote;
 
 use Frenet\Shipping\Model\Catalog\ProductType;
+use Magento\Framework\Data\OptionSourceInterface;
+use Magento\Framework\Phrase;
 
 /**
- * Class ProductTypes
+ * Lists the product types that can be enabled for the shipping quote on the product page.
  */
-class ProductTypes implements \Magento\Framework\Data\OptionSourceInterface
+class ProductTypes implements OptionSourceInterface
 {
     /**
-     * @var array
+     * @var Phrase[]
      */
     private $options = [];
 
     /**
-     * Return array of options as value-label pairs
+     * Returns the supported product types as value-label option rows.
      *
-     * @return array Format: array(array('value' => '<value>', 'label' => '<label>'), ...)
+     * @return mixed[][]
      */
     public function toOptionArray()
     {
@@ -48,9 +50,9 @@ class ProductTypes implements \Magento\Framework\Data\OptionSourceInterface
     }
 
     /**
-     * Get options in "key-value" format
+     * Returns the translated product type labels keyed by product type code.
      *
-     * @return array
+     * @return Phrase[]
      */
     public function toArray()
     {

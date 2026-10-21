@@ -15,10 +15,13 @@
 namespace Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder;
 
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
 use Magento\Framework\DataObject;
 
 /**
- * Class ConfigurableBuilder
+ * Fills the super attributes of the buy request, defaulting each configurable attribute to its first value.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class ConfigurableBuilder implements BuilderInterface
@@ -33,20 +36,24 @@ class ConfigurableBuilder implements BuilderInterface
             return;
         }
 
-        $this->buildDefaultOptions($product, $request);
+        if ($product instanceof Product) {
+            $this->buildDefaultOptions($product, $request);
+        }
     }
 
     /**
-     * @param ProductInterface $product
+     * Selects the first value of every configurable attribute of the product.
+     *
+     * @param Product          $product
      * @param DataObject       $request
      *
      * @return void
      */
-    private function buildDefaultOptions(ProductInterface $product, DataObject $request)
+    private function buildDefaultOptions(Product $product, DataObject $request)
     {
         $options = [];
 
-        /** @var \Magento\Catalog\Model\Product\Type\AbstractType $typeInstance */
+        /** @var ConfigurableType $typeInstance */
         $typeInstance = $product->getTypeInstance();
         $configurableOptions = $typeInstance->getConfigurableOptions($product);
 
@@ -54,7 +61,7 @@ class ConfigurableBuilder implements BuilderInterface
          * Get the default attribute options.
          */
         foreach ($configurableOptions as $configurableOptionId => $configurableOption) {
-            /** @var array $option */
+            /** @var mixed[] $option */
             $option = array_shift($configurableOption);
             $options[$configurableOptionId] = $option['value_index'];
         }

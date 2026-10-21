@@ -23,6 +23,8 @@
     <preference for="Frenet\Shipping\Model\TrackingInterface" type="Frenet\Shipping\Model\Tracking"/>
     <preference for="Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface" type="Frenet\Shipping\Model\Quote\MultiQuoteValidator"/>
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
+    <preference for="Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiterInterface" type="Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiter"/>
+    <preference for="Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolverInterface" type="Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolver"/>
     <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
@@ -30,12 +32,6 @@
 
     <!-- API Classes -->
     <preference for="Frenet\Shipping\Api\QuoteProductInterface" type="Frenet\Shipping\Model\Catalog\Product\View\Quote"/>
-
-    <type name="Frenet\Shipping\Model\Calculator">
-        <arguments>
-            <argument name="dimensionsExtractor" xsi:type="object">Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor</argument>
-        </arguments>
-    </type>
 
     <virtualType name="Frenet\Shipping\Model\Quote\Calculators\SimplePriceCalculator" type="Frenet\Shipping\Model\Quote\Calculators\DefaultPriceCalculator">
     </virtualType>
@@ -88,6 +84,20 @@
     <type name="Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory">
         <arguments>
             <argument name="objectClass" xsi:type="string">Frenet\ObjectType\Entity\Shipping\Quote\ServiceInterface</argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="carriers/frenetshipping/token" xsi:type="string">1</item>
+            </argument>
+            <argument name="environment" xsi:type="array">
+                <item name="carriers/frenetshipping/api_hostname" xsi:type="string">1</item>
+                <item name="carriers/frenetshipping/api_protocol" xsi:type="string">1</item>
+                <item name="carriers/frenetshipping/debug" xsi:type="string">1</item>
+                <item name="carriers/frenetshipping/debug_filename" xsi:type="string">1</item>
+            </argument>
         </arguments>
     </type>
 

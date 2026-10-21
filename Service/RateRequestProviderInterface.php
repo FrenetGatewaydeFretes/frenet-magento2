@@ -39,6 +39,13 @@ interface RateRequestProviderInterface
     public function getRateRequest(): RateRequest;
 
     /**
+     * Returns the store the rate request is quoted for, or null when no request or store is set.
+     *
+     * @return int|null
+     */
+    public function getStoreId(): ?int;
+
+    /**
      * Drops the stored rate request once the quote is done.
      *
      * @return self

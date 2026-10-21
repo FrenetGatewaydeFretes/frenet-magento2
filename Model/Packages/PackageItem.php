@@ -15,19 +15,20 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Packages;
 
+use Exception;
 use Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface;
-use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Frenet\Shipping\Model\Catalog\Product\CategoryExtractor;
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Frenet\Shipping\Model\Quote\ItemPriceCalculator;
 use Frenet\Shipping\Model\WeightConverterInterface;
-use Magento\Catalog\Model\ResourceModel\ProductFactory;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Catalog\Model\ResourceModel\ProductFactory;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class PackageItem
+ * Wraps a cart item inside a package and exposes the weight, size and price data sent to the Frenet quote API.
+ *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PackageItem
@@ -41,11 +42,6 @@ class PackageItem
      * @var float
      */
     private $qty;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManagement;
 
     /**
      * @var ProductFactory
@@ -73,10 +69,7 @@ class PackageItem
     private $itemPriceCalculator;
 
     /**
-     * PackageItem constructor.
-     *
      * @param QuoteItem                    $cartItem
-     * @param StoreManagerInterface        $storeManagement
      * @param ProductFactory               $productResourceFactory
      * @param WeightConverterInterface     $weightConverter
      * @param CategoryExtractor            $categoryExtractor
@@ -85,7 +78,6 @@ class PackageItem
      */
     public function __construct(
         QuoteItem $cartItem,
-        StoreManagerInterface $storeManagement,
         ProductFactory $productResourceFactory,
         WeightConverterInterface $weightConverter,
         CategoryExtractor $categoryExtractor,
@@ -93,7 +85,6 @@ class PackageItem
         ItemPriceCalculator $itemPriceCalculator
     ) {
         $this->cartItem = $cartItem;
-        $this->storeManagement = $storeManagement;
         $this->productResourceFactory = $productResourceFactory;
         $this->weightConverter = $weightConverter;
         $this->categoryExtractor = $categoryExtractor;
@@ -102,6 +93,8 @@ class PackageItem
     }
 
     /**
+     * Returns the cart item this package entry was built from.
+     *
      * @return QuoteItem
      */
     public function getCartItem()
@@ -110,6 +103,8 @@ class PackageItem
     }
 
     /**
+     * Replaces the cart item this package entry wraps.
+     *
      * @param QuoteItem $item
      *
      * @return $this
@@ -121,6 +116,8 @@ class PackageItem
     }
 
     /**
+     * Returns the quantity of the item packed here, defaulting to one when none was set.
+     *
      * @return float
      */
     public function getQty()
@@ -129,6 +126,8 @@ class PackageItem
     }
 
     /**
+     * Returns the item's unit price as resolved by the calculator for its product type.
+     *
      * @return float
      */
     public function getPrice()
@@ -140,6 +139,8 @@ class PackageItem
     }
 
     /**
+     * Returns the item's final unit price as resolved by the calculator for its product type.
+     *
      * @return float
      */
     public function getFinalPrice()
@@ -151,6 +152,8 @@ class PackageItem
     }
 
     /**
+     * Returns the final unit price multiplied by the packed quantity.
+     *
      * @return float
      */
     public function getTotalPrice()
@@ -160,6 +163,8 @@ class PackageItem
     }
 
     /**
+     * Sets the quantity of the item packed in this package.
+     *
      * @param float $qty
      *
      * @return $this
@@ -171,6 +176,8 @@ class PackageItem
     }
 
     /**
+     * Returns the cart item's product, or the parent item's product when requested and available.
+     *
      * @param bool $useParentItemIfAvailable
      *
      * @return bool|Product
@@ -181,14 +188,15 @@ class PackageItem
         $this->initProduct();
 
         if ((true === $useParentItemIfAvailable) && $this->cartItem->getParentItem()) {
-            return $this->getProduct($this->cartItem->getParentItem());
+            return $this->cartItem->getParentItem()->getProduct();
         }
 
-        /** @var Product $product */
         return $this->cartItem->getProduct();
     }
 
     /**
+     * Returns the cart item's SKU, sent as the shipping item identifier.
+     *
      * @return string|null
      */
     public function getSku()
@@ -197,6 +205,8 @@ class PackageItem
     }
 
     /**
+     * Returns the unit weight converted from the catalog weight unit to kilograms.
+     *
      * @return float
      */
     public function getWeight()
@@ -206,6 +216,8 @@ class PackageItem
     }
 
     /**
+     * Returns the unit weight in kilograms multiplied by the packed quantity.
+     *
      * @return float
      */
     public function getTotalWeight()
@@ -215,6 +227,8 @@ class PackageItem
     }
 
     /**
+     * Returns the product length resolved by the dimensions extractor.
+     *
      * @return float
      */
     public function getLength()
@@ -224,6 +238,8 @@ class PackageItem
     }
 
     /**
+     * Returns the product height resolved by the dimensions extractor.
+     *
      * @return float
      */
     public function getHeight()
@@ -233,6 +249,8 @@ class PackageItem
     }
 
     /**
+     * Returns the product width resolved by the dimensions extractor.
+     *
      * @return float
      */
     public function getWidth()
@@ -242,6 +260,8 @@ class PackageItem
     }
 
     /**
+     * Returns the product categories sent to the Frenet API, preferring the parent product when there is one.
+     *
      * @return string|null
      */
     public function getProductCategories()
@@ -251,7 +271,9 @@ class PackageItem
     }
 
     /**
-     * @return mixed
+     * Reads the fragile flag from the loaded product, falling back to the raw attribute value.
+     *
+     * @return bool
      */
     public function isProductFragile()
     {
@@ -268,16 +290,18 @@ class PackageItem
             $value = (bool) $resource->getAttributeRawValue(
                 $product->getId(),
                 AttributesMappingInterface::DEFAULT_ATTRIBUTE_FRAGILE,
-                $this->storeManagement->getStore()
+                $product->getStore()
             );
 
             return (bool) $value;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }
 
     /**
+     * Points the dimensions extractor at this entry's cart item before any of its data is read.
+     *
      * @return $this
      */
     private function initProduct()

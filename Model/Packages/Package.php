@@ -26,14 +26,22 @@ class Package
 {
     /**
      * Scale factor used to convert weights to integers for exact packing arithmetic.
+     *
+     * @var int
      */
     private const WEIGHT_SCALE = 10000;
 
     /**
-     * @var array
+     * @var PackageItem[]
      */
     private $items = [];
 
+    /**
+     * @param DimensionsExtractorInterface $dimensionsExtractor
+     * @param PackageItemFactory           $packageItemFactory
+     * @param PackageLimit                 $packageLimit
+     * @param WeightConverterInterface     $weightConverter
+     */
     public function __construct(
         private readonly DimensionsExtractorInterface $dimensionsExtractor,
         private readonly PackageItemFactory $packageItemFactory,
@@ -46,7 +54,7 @@ class Package
      * Adds a quantity of an item to the package.
      *
      * @param QuoteItem  $item
-     * @param int        $qty
+     * @param float|int  $qty
      * @param float|null $unitWeight
      *
      * @return bool
@@ -94,7 +102,7 @@ class Package
     /**
      * Returns a package item by its cart item ID.
      *
-     * @param $itemId
+     * @param string $itemId
      *
      * @return PackageItem|null
      */
@@ -107,7 +115,7 @@ class Package
      * Checks whether a quantity of an item still fits within the package weight limit.
      *
      * @param QuoteItem  $item
-     * @param int        $qty
+     * @param float|int  $qty
      * @param float|null $unitWeight
      *
      * @return bool
@@ -181,11 +189,11 @@ class Package
         $convertedUnitWeight = $this->weightConverter->convertToKg($unitWeight);
 
         $unitWeightScaled = (int) round($unitWeight * self::WEIGHT_SCALE);
-        $convertedUnitWeightScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
+        $convertedScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
         $fullCapacityScaled = (int) round($this->packageLimit->getMaxWeight() * self::WEIGHT_SCALE);
         $remainingScaled = max(0, (int) round($this->getRemainingWeight() * self::WEIGHT_SCALE));
 
-        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedUnitWeightScaled);
+        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedScaled);
 
         if ($unitsPerFullPackage < 1) {
             return [];
@@ -194,7 +202,7 @@ class Package
         $requestedQtyInt = (int) $requestedQty;
         $firstBatch = min(
             $requestedQtyInt,
-            $this->unitsFitting($remainingScaled, $unitWeightScaled, $convertedUnitWeightScaled)
+            $this->unitsFitting($remainingScaled, $unitWeightScaled, $convertedScaled)
         );
         $remaining = $requestedQtyInt - $firstBatch;
 
@@ -230,17 +238,17 @@ class Package
      *
      * @param int $capacityScaled
      * @param int $rawUnitWeightScaled
-     * @param int $convertedUnitWeightScaled
+     * @param int $convertedScaled
      *
      * @return int
      */
-    private function unitsFitting(int $capacityScaled, int $rawUnitWeightScaled, int $convertedUnitWeightScaled): int
+    private function unitsFitting(int $capacityScaled, int $rawUnitWeightScaled, int $convertedScaled): int
     {
         if ($rawUnitWeightScaled > $capacityScaled) {
             return 0;
         }
 
-        return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedUnitWeightScaled, 1)) + 1;
+        return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedScaled, 1)) + 1;
     }
 
     /**

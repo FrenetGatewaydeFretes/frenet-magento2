@@ -15,25 +15,31 @@
 namespace Frenet\Shipping\Model\Catalog\Product\View;
 
 use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
+use Frenet\Shipping\Model\Catalog\Product\View\RateRequestBuilder\BuilderInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Option as ProductOption;
 use Magento\Framework\DataObject;
+use Magento\Framework\DataObjectFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Model\Quote as CartQuote;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
+use Magento\Quote\Model\QuoteFactory;
 
 /**
- * Class RateRequestBuilder
+ * Builds the rate request of a product page quote by adding the product to a throwaway quote to resolve its items.
  */
 class RateRequestBuilder
 {
     /**
-     * @var \Magento\Framework\DataObjectFactory
+     * @var DataObjectFactory
      */
     private $dataObjectFactory;
 
     /**
-     * @var \Magento\Quote\Model\QuoteFactory
+     * @var QuoteFactory
      */
     private $quoteFactory;
 
@@ -43,7 +49,7 @@ class RateRequestBuilder
     private $rateRequestFactory;
 
     /**
-     * @var array
+     * @var BuilderInterface[]
      */
     private $builders;
 
@@ -52,11 +58,20 @@ class RateRequestBuilder
      */
     private $dimensionsExtractor;
 
+    /**
+     * @param DataObjectFactory $dataObjectFactory
+     * @param QuoteFactory $quoteFactory
+     * @param RateRequestFactory $rateRequestFactory
+     * @param DimensionsExtractorInterface $dimensionsExtractor
+     * @param ProductOption $productOption
+     * @param BuilderInterface[] $builders
+     */
     public function __construct(
-        \Magento\Framework\DataObjectFactory $dataObjectFactory,
-        \Magento\Quote\Model\QuoteFactory $quoteFactory,
+        DataObjectFactory $dataObjectFactory,
+        QuoteFactory $quoteFactory,
         RateRequestFactory $rateRequestFactory,
         DimensionsExtractorInterface $dimensionsExtractor,
+        private readonly ProductOption $productOption,
         array $builders = []
     ) {
         $this->dataObjectFactory = $dataObjectFactory;
@@ -67,32 +82,38 @@ class RateRequestBuilder
     }
 
     /**
+     * Adds the product to a temporary quote and builds a rate request to the postcode with its items and total weight.
+     *
      * @param ProductInterface $product
      * @param string           $postcode
      * @param int              $qty
-     * @param array            $options
+     * @param mixed[]          $options
      *
      * @return RateRequest
      * @throws LocalizedException
      */
     public function build(ProductInterface $product, string $postcode, int $qty = 1, array $options = []): RateRequest
     {
+        if (!$product instanceof Product) {
+            throw new LocalizedException(__('The shipping quote is not available.'));
+        }
+
         $quote = $this->createQuote();
         $quote->getShippingAddress()->setPostcode($postcode);
         $request = $this->prepareProductRequest($product, $qty, $options);
-        $rs = $quote->addProduct($product, $request);
+        $addResult = $quote->addProduct($product, $request);
         $this->fixQuoteItems($quote);
         $allitems = $quote->getAllItems();
 
         if (count($allitems) == 0) {
             $request = $this->prepareProductOptionRequest($product, $qty, $options);
-            $rs = $quote->addProduct($product, $request);
-            if (is_string($rs)) {
-                throw new \Magento\Framework\Exception\LocalizedException(
-                    __($rs)
+            $addResult = $quote->addProduct($product, $request);
+            if (is_string($addResult)) {
+                throw new LocalizedException(
+                    __($addResult)
                 );
             }
-    
+
             $this->fixQuoteItems($quote);
             $allitems = $quote->getAllItems();
         }
@@ -115,7 +136,14 @@ class RateRequestBuilder
         return $rateRequest;
     }
 
-    private function fixQuoteItems(\Magento\Quote\Model\Quote $quote)
+    /**
+     * Gives each quote item its product ID when it has none and sets its row weight from the extracted weight.
+     *
+     * @param CartQuote $quote
+     *
+     * @return void
+     */
+    private function fixQuoteItems(CartQuote $quote)
     {
         /** @var QuoteItem $item */
         foreach ($quote->getAllItems() as $item) {
@@ -129,7 +157,9 @@ class RateRequestBuilder
     }
 
     /**
-     * @param float $itemWeight
+     * Multiplies the item weight, with the configured default as fallback, by the quantity.
+     *
+     * @param QuoteItem $item
      * @param float $qty
      *
      * @return float
@@ -142,22 +172,26 @@ class RateRequestBuilder
     }
 
     /**
-     * @param ProductInterface $product
-     * @param int              $qty
-     * @param array            $options
+     * Builds a retry buy request with only the given custom options that exist on the product.
+     *
+     * @param Product $product
+     * @param int     $qty
+     * @param mixed[] $options
      *
      * @return DataObject
      */
-    private function prepareProductOptionRequest(ProductInterface $product, int $qty = 1, array $options = []): DataObject
-    {
+    private function prepareProductOptionRequest(
+        Product $product,
+        int $qty = 1,
+        array $options = []
+    ): DataObject {
         /** @var DataObject $request */
         $request = $this->dataObjectFactory->create();
         if (isset($options['options']) && !empty($options['options'])) {
             // sync options: https://magento.stackexchange.com/questions/286402/error-exception-message-the-products-required-options-werent-entered-make
             $optionsRequest = $options["options"];
-            $objtManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $customOptions = $objtManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($product);
-            
+            $customOptions = $this->productOption->getProductOptionCollection($product);
+
             $optionsValues = [];
             foreach ($customOptions->getItems() as $option) {
                 if (array_key_exists($option->getId(), $optionsRequest)) {
@@ -172,9 +206,11 @@ class RateRequestBuilder
     }
 
     /**
+     * Builds the buy request with the quantity and the options filled by the builder of the product type.
+     *
      * @param ProductInterface $product
      * @param int              $qty
-     * @param array            $options
+     * @param mixed[]          $options
      *
      * @return DataObject
      */
@@ -190,17 +226,21 @@ class RateRequestBuilder
     }
 
     /**
-     * @return \Magento\Quote\Model\Quote
+     * Creates the empty quote used only to resolve the items of the rate request.
+     *
+     * @return CartQuote
      */
-    private function createQuote(): \Magento\Quote\Model\Quote
+    private function createQuote(): CartQuote
     {
         return $this->quoteFactory->create();
     }
 
     /**
+     * Returns the buy request builder registered for the product type, or the default one.
+     *
      * @param string $type
      *
-     * @return RateRequestBuilder\BuilderInterface
+     * @return BuilderInterface
      */
     private function getBuilder(string $type): RateRequestBuilder\BuilderInterface
     {

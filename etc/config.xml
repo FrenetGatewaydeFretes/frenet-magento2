@@ -66,10 +66,13 @@
                 <product_quote>
                     <enabled>0</enabled>
                     <product_types>simple,configurable,bundle,grouped</product_types>
+                    <visitor_limit>60</visitor_limit>
+                    <store_limit>1000</store_limit>
                 </product_quote>
 
                 <!-- API CONNECTION -->
                 <api_protocol>https</api_protocol>
+                <api_timeout>30</api_timeout>
 
                 <!-- DEBUG -->
                 <debug>0</debug>

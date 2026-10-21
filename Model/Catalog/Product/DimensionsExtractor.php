@@ -18,12 +18,13 @@ namespace Frenet\Shipping\Model\Catalog\Product;
 use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class DataExtractor
+ * Reads weight and dimensions via the attribute mapping, using the defaults when a value is missing or not positive.
  */
-class DimensionsExtractor implements ProductExtractorInterface
+class DimensionsExtractor implements ProductExtractorInterface, ResetAfterRequestInterface
 {
     /**
      * @var Product
@@ -50,6 +51,16 @@ class DimensionsExtractor implements ProductExtractorInterface
      */
     private $config;
 
+    /**
+     * @var array<string, mixed>
+     */
+    private array $rawValues = [];
+
+    /**
+     * @param ProductResource $productResource
+     * @param AttributesMappingInterface $attributesMapping
+     * @param ConfigInterface $config
+     */
     public function __construct(
         ProductResource $productResource,
         AttributesMappingInterface $attributesMapping,
@@ -61,7 +72,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setProduct(Product $product): ProductExtractorInterface
     {
@@ -73,9 +84,7 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * @param QuoteItem $cartItem
-     *
-     * @return $this
+     * @inheritDoc
      */
     public function setProductByCartItem(QuoteItem $cartItem)
     {
@@ -85,13 +94,13 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getWeight()
     {
         $value = $this->extractData($this->attributesMapping->getWeightAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultWeight();
         }
 
@@ -99,13 +108,13 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getHeight()
     {
         $value = $this->extractData($this->attributesMapping->getHeightAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultHeight();
         }
 
@@ -113,13 +122,13 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getWidth()
     {
         $value = $this->extractData($this->attributesMapping->getWidthAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultWidth();
         }
 
@@ -127,13 +136,13 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getLength()
     {
         $value = $this->extractData($this->attributesMapping->getLengthAttributeCode());
 
-        if (empty($value)) {
+        if ((float) $value <= 0) {
             $value = $this->config->getDefaultLength();
         }
 
@@ -141,6 +150,8 @@ class DimensionsExtractor implements ProductExtractorInterface
     }
 
     /**
+     * Reads an attribute from the cart item, then the product, then the stored raw value cached per product and store.
+     *
      * @param string $key
      *
      * @return mixed|null
@@ -159,16 +170,31 @@ class DimensionsExtractor implements ProductExtractorInterface
             return $this->product->getData($key);
         }
 
-        $value = $this->productResource->getAttributeRawValue(
-            $this->product->getId(),
-            $key,
-            $this->product->getStore()
-        );
+        $cacheKey = $this->product->getId() . '|' . $this->product->getStoreId() . '|' . $key;
 
-        return $value;
+        if (!array_key_exists($cacheKey, $this->rawValues)) {
+            $this->rawValues[$cacheKey] = $this->productResource->getAttributeRawValue(
+                $this->product->getId(),
+                $key,
+                $this->product->getStore()
+            );
+        }
+
+        return $this->rawValues[$cacheKey];
     }
 
     /**
+     * @inheritDoc
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     */
+    public function _resetState(): void
+    {
+        $this->rawValues = [];
+    }
+
+    /**
+     * Accepts only a saved product that is bound to a store, so raw attribute values can be loaded for it.
+     *
      * @param Product $product
      *
      * @return bool

@@ -16,6 +16,8 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model;
 
 use Frenet\Shipping\Model\Carrier\Frenet;
+use Frenet\Shipping\Model\Config\ApiHostnameValidator;
+use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterface;
@@ -27,9 +29,52 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config implements ConfigInterface
 {
+    /**
+     * @var float
+     */
+    public const DEFAULT_PACKAGE_MAX_WEIGHT = 30.0;
+
+    /**
+     * @var int
+     */
+    public const DEFAULT_MAX_UNIT_QUANTITY = 5000;
+
+    /**
+     * @var int
+     */
+    public const DEFAULT_PRODUCT_QUOTE_VISITOR_LIMIT = 60;
+
+    /**
+     * @var int
+     */
+    public const DEFAULT_PRODUCT_QUOTE_STORE_LIMIT = 1000;
+
+    /**
+     * @var string
+     */
+    public const DEFAULT_DEBUG_FILENAME = 'frenet_request_debug.log';
+
+    /**
+     * @var float
+     */
+    public const DEFAULT_API_TIMEOUT = 30.0;
+
+    /**
+     * @var float
+     */
+    public const MAX_API_TIMEOUT = 120.0;
+
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreManagerInterface $storeManager
+     * @param ApiHostnameValidator $apiHostnameValidator
+     * @param RateRequestProviderInterface $rateRequestProvider
+     */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly ApiHostnameValidator $apiHostnameValidator,
+        private readonly RateRequestProviderInterface $rateRequestProvider
     ) {
     }
 
@@ -54,7 +99,9 @@ class Config implements ConfigInterface
      */
     public function getApiHostname($store = null): string
     {
-        return trim((string) $this->getCarrierConfig('api_hostname', $store));
+        $hostname = strtolower(trim((string) $this->getCarrierConfig('api_hostname', $store)));
+
+        return $this->apiHostnameValidator->isAllowed($hostname) ? $hostname : '';
     }
 
     /**
@@ -63,6 +110,16 @@ class Config implements ConfigInterface
     public function getApiProtocol($store = null): string
     {
         return strtolower(trim((string) $this->getCarrierConfig('api_protocol', $store)));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getApiTimeout($store = null): float
+    {
+        $timeout = (float) $this->getCarrierConfig('api_timeout', $store);
+
+        return $timeout > 0 ? min($timeout, self::MAX_API_TIMEOUT) : self::DEFAULT_API_TIMEOUT;
     }
 
     /**
@@ -166,7 +223,9 @@ class Config implements ConfigInterface
      */
     public function getPackageMaxWeight($store = null): float
     {
-        return (float) $this->getCarrierConfig('package_max_weight', $store);
+        $weight = (float) $this->getCarrierConfig('package_max_weight', $store);
+
+        return $weight > 0 ? $weight : self::DEFAULT_PACKAGE_MAX_WEIGHT;
     }
 
     /**
@@ -174,7 +233,9 @@ class Config implements ConfigInterface
      */
     public function getMaxUnitQuantity($store = null): int
     {
-        return (int) $this->getCarrierConfig('max_unit_quantity', $store);
+        $quantity = (int) $this->getCarrierConfig('max_unit_quantity', $store);
+
+        return $quantity > 0 ? $quantity : self::DEFAULT_MAX_UNIT_QUANTITY;
     }
 
     /**
@@ -190,7 +251,9 @@ class Config implements ConfigInterface
      */
     public function getDebugFilename($store = null): string
     {
-        return (string) $this->getCarrierConfig('debug_filename', $store);
+        $filename = trim((string) $this->getCarrierConfig('debug_filename', $store));
+
+        return preg_match('/^\w[\w.-]*\.log$/', $filename) === 1 ? $filename : self::DEFAULT_DEBUG_FILENAME;
     }
 
     /**
@@ -224,6 +287,22 @@ class Config implements ConfigInterface
     /**
      * @inheritDoc
      */
+    public function getProductQuoteVisitorLimit($store = null): int
+    {
+        return $this->getQuoteLimit('product_quote/visitor_limit', self::DEFAULT_PRODUCT_QUOTE_VISITOR_LIMIT, $store);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getProductQuoteStoreLimit($store = null): int
+    {
+        return $this->getQuoteLimit('product_quote/store_limit', self::DEFAULT_PRODUCT_QUOTE_STORE_LIMIT, $store);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getOriginPostcode($store = null): string
     {
         return (string) $this->get('shipping', 'origin', 'postcode', $store);
@@ -251,11 +330,27 @@ class Config implements ConfigInterface
     public function get($section, $group, $field, $store = null, $scopeType = ScopeInterface::SCOPE_STORE)
     {
         $path = implode('/', [$section, $group, $field]);
-        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store));
+        return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store)?->getId());
     }
 
     /**
-     * Resolves the store to use, falling back to the default store view.
+     * Returns a per-minute product quote limit made of digits only, where 0 turns it off, else the given default.
+     *
+     * @param string $field
+     * @param int $default
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return int
+     */
+    private function getQuoteLimit(string $field, int $default, $store): int
+    {
+        $limit = trim((string) $this->getCarrierConfig($field, $store));
+
+        return preg_match('/^\d+$/', $limit) === 1 ? (int) $limit : $default;
+    }
+
+    /**
+     * Resolves the given store, else the store being quoted, else the current one, falling back to the default view.
      *
      * @param string|int|StoreInterface|null $store
      *
@@ -263,6 +358,8 @@ class Config implements ConfigInterface
      */
     private function getStore($store = null)
     {
+        $store ??= $this->rateRequestProvider->getStoreId();
+
         try {
             return $this->storeManager->getStore($store);
         } catch (NoSuchEntityException $exception) {

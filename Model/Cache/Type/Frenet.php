@@ -15,38 +15,42 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Cache\Type;
 
+use Magento\Framework\App\Cache\Manager;
+use Magento\Framework\App\Cache\Type\FrontendPool;
 use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 use Magento\Framework\Config\CacheInterface;
 
 /**
- * Class Frenet
+ * Dedicated cache type for Frenet API answers, so they can be flushed or disabled apart from other caches.
  */
 class Frenet extends TagScope implements CacheInterface
 {
     /**
      * Cache type code unique among all cache types
+     *
+     * @var string
      */
-    const TYPE_IDENTIFIER = 'frenet_api_result';
+    public const TYPE_IDENTIFIER = 'frenet_api_result';
 
     /**
      * Cache tag used to distinguish the cache type from all other cache
+     *
+     * @var string
      */
-    const CACHE_TAG = 'FRENET_API_RESULT';
+    public const CACHE_TAG = 'FRENET_API_RESULT';
 
     /**
-     * @var \Magento\Framework\App\Cache\Manager
+     * @var Manager
      */
     protected $cacheManager;
 
     /**
-     * Frenet constructor.
-     *
-     * @param \Magento\Framework\App\Cache\Manager           $cacheManager
-     * @param \Magento\Framework\App\Cache\Type\FrontendPool $cacheFrontendPool
+     * @param Manager      $cacheManager
+     * @param FrontendPool $cacheFrontendPool
      */
     public function __construct(
-        \Magento\Framework\App\Cache\Manager $cacheManager,
-        \Magento\Framework\App\Cache\Type\FrontendPool $cacheFrontendPool
+        Manager $cacheManager,
+        FrontendPool $cacheFrontendPool
     ) {
         parent::__construct($cacheFrontendPool->get(self::TYPE_IDENTIFIER), self::CACHE_TAG);
 
@@ -64,6 +68,8 @@ class Frenet extends TagScope implements CacheInterface
     }
 
     /**
+     * Enables or disables the Frenet cache type through the application cache manager.
+     *
      * @param bool $flag
      *
      * @return $this

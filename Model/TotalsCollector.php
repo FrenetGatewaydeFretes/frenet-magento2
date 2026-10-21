@@ -13,21 +13,22 @@
 
 namespace Frenet\Shipping\Model;
 
+use Frenet\Shipping\Model\Totals\CollectorInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote;
 
 /**
- * Class TotalsCollector
+ * Sums the amounts that the injected collectors subtract from or add to a quote total.
  */
 class TotalsCollector
 {
     /**
-     * @var array
+     * @var CollectorInterface[]
      */
     private $discounts;
 
     /**
-     * @var array
+     * @var CollectorInterface[]
      */
     private $additions;
 
@@ -36,6 +37,11 @@ class TotalsCollector
      */
     private $checkoutSession;
 
+    /**
+     * @param CheckoutSession      $checkoutSession
+     * @param CollectorInterface[] $discounts
+     * @param CollectorInterface[] $additions
+     */
     public function __construct(
         CheckoutSession $checkoutSession,
         array $discounts = [],
@@ -47,7 +53,9 @@ class TotalsCollector
     }
 
     /**
-     * @return array
+     * Returns the collectors whose amounts are subtracted from the quote total.
+     *
+     * @return CollectorInterface[]
      */
     public function getDiscounts() : array
     {
@@ -55,7 +63,9 @@ class TotalsCollector
     }
 
     /**
-     * @return array
+     * Returns the collectors whose amounts are added to the quote total.
+     *
+     * @return CollectorInterface[]
      */
     public function getAdditions() : array
     {
@@ -63,7 +73,9 @@ class TotalsCollector
     }
 
     /**
-     * @param Quote $quote
+     * Sums the discount collectors for the given quote, or the checkout session quote when none is given.
+     *
+     * @param Quote|null $quote
      *
      * @return float
      */
@@ -73,7 +85,9 @@ class TotalsCollector
     }
 
     /**
-     * @param Quote $quote
+     * Sums the addition collectors for the given quote, or the checkout session quote when none is given.
+     *
+     * @param Quote|null $quote
      *
      * @return float
      */
@@ -83,8 +97,10 @@ class TotalsCollector
     }
 
     /**
-     * @param array      $collectors
-     * @param Quote|null $quote
+     * Adds up what each collector returns for the quote, skipping the session lookup when there are no collectors.
+     *
+     * @param CollectorInterface[] $collectors
+     * @param Quote|null           $quote
      *
      * @return float
      */

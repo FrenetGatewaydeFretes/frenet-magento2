@@ -18,20 +18,23 @@ namespace Frenet\Shipping\Model\Quote\Calculators;
 use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class PriceCalculatorFactory
+ * Picks the price calculator registered in DI for the item's product type, or for its parent's type on child items.
  */
 class PriceCalculatorFactory
 {
     /**
      * @var string
      */
-    const DEFAULT_CALCULATOR_TYPE = 'default';
+    public const DEFAULT_CALCULATOR_TYPE = 'default';
 
     /**
-     * @var array
+     * @var PriceCalculatorInterface[]
      */
     private $calculators;
 
+    /**
+     * @param PriceCalculatorInterface[] $calculators
+     */
     public function __construct(
         array $calculators = []
     ) {
@@ -39,6 +42,8 @@ class PriceCalculatorFactory
     }
 
     /**
+     * Returns the price calculator that matches the item's product type.
+     *
      * @param QuoteItem $item
      *
      * @return PriceCalculatorInterface
@@ -49,9 +54,11 @@ class PriceCalculatorFactory
     }
 
     /**
+     * Looks up the calculator registered for the item's type, falling back to the default calculator.
+     *
      * @param QuoteItem $item
      *
-     * @return mixed
+     * @return PriceCalculatorInterface
      */
     private function getCalculatorInstance(QuoteItem $item): PriceCalculatorInterface
     {
@@ -63,6 +70,8 @@ class PriceCalculatorFactory
     }
 
     /**
+     * Returns the item's product type, or the parent item's type when the item is a child.
+     *
      * @param QuoteItem $item
      *
      * @return string
@@ -77,6 +86,8 @@ class PriceCalculatorFactory
     }
 
     /**
+     * Returns the DI key of the calculator used when no type-specific one is registered.
+     *
      * @return string
      */
     private function getDefaultCalculatorType(): string
