@@ -24,6 +24,7 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -245,6 +246,78 @@ class QuoteTest extends TestCase
         $this->subject->execute();
 
         $this->assertSame(['error' => true, 'message' => 'Invalid quantity informed.'], $this->payload);
+    }
+
+    /**
+     * Confirms a grouped product is quoted with the quantities of its lines, as its form sends no qty field.
+     *
+     * @return void
+     */
+    public function testShouldQuoteAGroupedProductByTheQuantitiesOfItsLines(): void
+    {
+        $this->enableQuote(true);
+        $this->params = ['product' => 7, 'postcode' => '01310-100', 'super_group' => ['11' => '2', '12' => '']];
+        $this->rateLimiter->method('isAllowed')->willReturn(true);
+        $this->quoteProduct->expects($this->once())->method('quoteByProductId')
+            ->with(7, '01310-100', 1, $this->params)
+            ->willReturn([['service_code' => '03298']]);
+
+        $this->subject->execute();
+
+        $this->assertSame(['error' => false, 'rates' => [['service_code' => '03298']]], $this->payload);
+    }
+
+    /**
+     * Confirms a grouped product without any chosen quantity is quoted with the default quantities of its lines.
+     *
+     * @return void
+     */
+    public function testShouldQuoteTheDefaultQuantitiesWhenNoGroupedLineIsChosen(): void
+    {
+        $this->enableQuote(true);
+        $this->params = ['product' => 7, 'postcode' => '01310-100', 'super_group' => ['11' => '0', '12' => '']];
+        $this->rateLimiter->method('isAllowed')->willReturn(true);
+        $this->quoteProduct->expects($this->once())->method('quoteByProductId')
+            ->with(7, '01310-100', 1, ['product' => 7, 'postcode' => '01310-100'])
+            ->willReturn([]);
+
+        $this->subject->execute();
+
+        $this->assertFalse($this->payload['error']);
+    }
+
+    /**
+     * Confirms a grouped line with a negative or excessive quantity is refused before reaching the API.
+     *
+     * @param mixed $lineQty
+     *
+     * @return void
+     */
+    #[DataProvider('invalidGroupedLineProvider')]
+    public function testShouldRefuseAnInvalidGroupedLine(mixed $lineQty): void
+    {
+        $this->enableQuote(true);
+        $this->params = ['product' => 7, 'postcode' => '01310-100', 'super_group' => ['11' => '1', '12' => $lineQty]];
+        $this->rateLimiter->expects($this->never())->method('isAllowed');
+        $this->quoteProduct->expects($this->never())->method('quoteByProductId');
+
+        $this->subject->execute();
+
+        $this->assertSame(['error' => true, 'message' => 'Invalid quantity informed.'], $this->payload);
+    }
+
+    /**
+     * Lists grouped line quantities the endpoint must refuse.
+     *
+     * @return array<string, array{mixed}>
+     */
+    public static function invalidGroupedLineProvider(): array
+    {
+        return [
+            'negative' => ['-1'],
+            'above the maximum' => ['5001'],
+            'not a scalar' => [['1']],
+        ];
     }
 
     /**
