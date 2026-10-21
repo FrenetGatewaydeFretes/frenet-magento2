@@ -69,13 +69,13 @@ composer require frenet/frenet-magento2:2.4.8-p5  # Magento 2.4.8 a 2.4.8-p5
 Para atualizar uma loja que já usa o módulo (por exemplo, da `2.4.9` para a `2.4.9.1`):
 
 ```bash
-composer update frenet/frenet-magento2 -W     # Atualiza o módulo e a biblioteca frenet/frenet-php
-php bin/magento setup:upgrade                 # Aplica os patches de setup do módulo
-php bin/magento setup:di:compile              # Recompila o projeto (obrigatório em modo production)
-php bin/magento cache:flush                   # Limpa o cache
+composer update frenet/frenet-magento2 frenet/frenet-php   # Atualiza o módulo e a biblioteca da API Frenet
+php bin/magento setup:upgrade                              # Aplica os patches de setup do módulo
+php bin/magento setup:di:compile                           # Recompila o projeto (obrigatório em modo production)
+php bin/magento cache:flush                                # Limpa o cache
 ```
 
-O `-W` é necessário porque a `2.4.9.1` requer a `frenet/frenet-php` **1.3.4**, e a `2.4.9` instalava a 1.3.2: sem ele, o Composer mantém a versão travada no `composer.lock` e recusa a atualização. Se o `composer.json` da loja fixa uma versão exata do módulo, use `composer require frenet/frenet-magento2:2.4.9.1 -W`.
+A `frenet/frenet-php` entra no comando porque a `2.4.9.1` requer a versão **1.3.4**, e a `2.4.9` instalava a 1.3.2: sem ela, o Composer mantém a versão travada no `composer.lock` e recusa a atualização. Assim só esses dois pacotes mudam. Se o Composer ainda recusar por outra dependência, use `composer update frenet/frenet-magento2 -W`, que também atualiza as dependências dos dois. Se o `composer.json` da loja fixa uma versão exata do módulo, troque-a por `2.4.9.1` e rode o mesmo comando.
 
 ## Configuração
 
@@ -113,7 +113,7 @@ Recursos opcionais, no mesmo painel:
 
 ### 2.4.9.1
 
-Traz para o **Magento 2.4.9** (PHP 8.3, 8.4 e 8.5) as melhorias publicadas nas versões 2.4.8-p2 a 2.4.8-p5. O código é o mesmo da `2.4.8-p5`. Na atualização, use `composer update frenet/frenet-magento2 -W` (veja **Atualização**).
+Traz para o **Magento 2.4.9** (PHP 8.3, 8.4 e 8.5) as melhorias publicadas nas versões 2.4.8-p2 a 2.4.8-p5 e corrige a cotação de produtos agrupados na página do produto. Na atualização, use `composer update frenet/frenet-magento2 frenet/frenet-php` (veja **Atualização**).
 
 **Adicionado**
 
@@ -122,6 +122,7 @@ Traz para o **Magento 2.4.9** (PHP 8.3, 8.4 e 8.5) as melhorias publicadas nas v
 
 **Corrigido**
 
+- A cotação na página de produtos agrupados volta a funcionar, com as quantidades escolhidas em cada item. Antes, toda cotação respondia "Quantidade informada inválida.".
 - Com **Multi Quote** habilitado, carrinhos acima do peso máximo do pacote voltam a receber os fretes Frenet. Na 2.4.9 eles ficavam sem nenhuma opção. Os Correios são somados por pacote, e as demais transportadoras vêm da cotação do carrinho inteiro.
 - Com **Show Shipping Forecast** desligado, os fretes Frenet voltam a aparecer no carrinho e no checkout.
 - Os campos **Package Max Weight (kg)** e **Maximum Item Quantity per Shipping Line** salvos em branco voltam a usar os valores padrão (30 kg e 5000 unidades) em vez de zerar a cotação.
