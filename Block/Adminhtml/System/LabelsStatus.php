@@ -52,7 +52,7 @@ class LabelsStatus extends Field
                 . $escape((string) __('Paste the partner token and save: the connection and the balance appear here.'))
                 . '</div>';
         }
-        $wallet = $this->wallet->get(true);
+        $wallet = $this->wallet->refresh();
         if ($wallet === null) {
             return '<div class="frenet-status frenet-status--bad">'
                 . $escape((string) __(
@@ -60,13 +60,8 @@ class LabelsStatus extends Field
                 ))
                 . '</div>';
         }
-        $title = $this->config->isSimulated()
-            ? (string) __('Simulator mode: connected to the local test simulator, nothing is charged')
-            : (string) __('Connected to Frenet');
-        return '<div class="frenet-status '
-            . ($this->config->isSimulated() ? 'frenet-status--off' : 'frenet-status--ok')
-            . '">'
-            . '<strong>' . $escape($title) . '</strong>'
+        return '<div class="frenet-status frenet-status--ok">'
+            . '<strong>' . $escape((string) __('Connected to Frenet')) . '</strong>'
             . '<span>' . $escape((string) __(
                 'Balance: R$ %1 · %2 labels available',
                 number_format($wallet['balance'], 2, ',', '.'),
