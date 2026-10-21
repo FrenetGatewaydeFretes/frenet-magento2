@@ -28,6 +28,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 
 | Módulo | Magento | PHP |
 |---|---|---|
+| `2.4.9.1` | 2.4.9 | 8.3, 8.4, 8.5 |
 | `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
 | `2.4.8-p5` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 / 2.4.8-p4 / 2.4.8-p5 | 8.2, 8.3, 8.4 |
 | `2.4.8-p4` | 2.4.8 / 2.4.8-p1 / 2.4.8-p2 / 2.4.8-p3 / 2.4.8-p4 | 8.2, 8.3, 8.4 |
@@ -59,8 +60,22 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:2.4.8-p5
+composer require frenet/frenet-magento2:2.4.9.1   # Magento 2.4.9
+composer require frenet/frenet-magento2:2.4.8-p5  # Magento 2.4.8 a 2.4.8-p5
 ```
+
+### Atualização
+
+Para atualizar uma loja que já usa o módulo (por exemplo, da `2.4.9` para a `2.4.9.1`):
+
+```bash
+composer update frenet/frenet-magento2 frenet/frenet-php   # Atualiza o módulo e a biblioteca da API Frenet
+php bin/magento setup:upgrade                              # Aplica os patches de setup do módulo
+php bin/magento setup:di:compile                           # Recompila o projeto (obrigatório em modo production)
+php bin/magento cache:flush                                # Limpa o cache
+```
+
+A `frenet/frenet-php` entra no comando porque a `2.4.9.1` requer a versão **1.3.4**, e a `2.4.9` instalava a 1.3.2: sem ela, o Composer mantém a versão travada no `composer.lock` e recusa a atualização. Assim só esses dois pacotes mudam. Se o Composer ainda recusar por outra dependência, use `composer update frenet/frenet-magento2 -W`, que também atualiza as dependências dos dois. Se o `composer.json` da loja fixa uma versão exata do módulo, troque-a por `2.4.9.1` e rode o mesmo comando.
 
 ## Configuração
 
@@ -95,6 +110,44 @@ Recursos opcionais, no mesmo painel:
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
 
 ## Changelog
+
+### 2.4.9.1
+
+Traz para o **Magento 2.4.9** (PHP 8.3, 8.4 e 8.5) as melhorias publicadas nas versões 2.4.8-p2 a 2.4.8-p5 e corrige a cotação de produtos agrupados na página do produto. Na atualização, use `composer update frenet/frenet-magento2 frenet/frenet-php` (veja **Atualização**).
+
+**Adicionado**
+
+- Limite de cotações na página do produto, por visitante (padrão 60) e por loja (padrão 1000) a cada minuto, nos campos **Quote Limit per Visitor (per minute)** e **Quote Limit per Store (per minute)** de **Product Quote**. Acima do limite, o widget pede para aguardar um minuto e a API da Frenet não é chamada. Use 0 para desligar cada limite. As cotações do carrinho e do checkout nunca são limitadas.
+- Campo **API Timeout (seconds)**: tempo máximo de espera pela API da Frenet (padrão 30 segundos, máximo 120). Se a API demorar mais, a Frenet fica fora daquela cotação e o carrinho e o checkout seguem normalmente, em vez de travar.
+
+**Corrigido**
+
+- A cotação na página de produtos agrupados volta a funcionar, com as quantidades escolhidas em cada item. Antes, toda cotação respondia "Quantidade informada inválida.".
+- Com **Multi Quote** habilitado, carrinhos acima do peso máximo do pacote voltam a receber os fretes Frenet. Na 2.4.9 eles ficavam sem nenhuma opção. Os Correios são somados por pacote, e as demais transportadoras vêm da cotação do carrinho inteiro.
+- Com **Show Shipping Forecast** desligado, os fretes Frenet voltam a aparecer no carrinho e no checkout.
+- Os campos **Package Max Weight (kg)** e **Maximum Item Quantity per Shipping Line** salvos em branco voltam a usar os valores padrão (30 kg e 5000 unidades) em vez de zerar a cotação.
+- Produtos com peso ou medida salvos como **0** passam a usar os valores padrão (**Default Measurements**), em vez de enviar 0 à Frenet, que deixava o carrinho sem cotação.
+- Quando a cotação da página do produto falha no servidor, o widget mostra uma mensagem de erro em vez de ficar em branco.
+- A cotação usa a configuração da loja do pedido (token, CEP de origem, medidas padrão e prazo de cada produto). Antes usava a loja aberta no momento, o que dava errado em pedidos criados pelo admin e em lojas com mais de um website.
+- O cache de cotações passa a considerar tudo o que é enviado à Frenet: valor da nota, peso, medidas, cupom e a conta da loja. Antes, uma mudança de preço ou de peso, ou um website com outra conta Frenet, podia receber uma cotação antiga do cache.
+- Itens filhos (por exemplo, a variação escolhida de um produto configurável) passam a enviar à Frenet as categorias do produto pai, onde o catálogo as cadastra.
+- A tela de envio no admin não oferece mais a opção **Create Shipping Label**, que a Frenet não gera.
+- O comentário do campo **API Protocol** volta a aparecer traduzido no admin em português.
+
+**Segurança**
+
+- O campo **API Hostname** só aceita endereços `frenet.com.br` (por exemplo, `api.frenet.com.br`), sem protocolo, porta ou caminho. Outros valores são recusados ao salvar e, se chegarem por `env.php` ou `config.php`, são ignorados em favor do endereço padrão da Frenet. Assim o token nunca é enviado a outro servidor.
+- A cotação na página do produto só responde quando o recurso está habilitado, o CEP tem 8 dígitos e o produto está ativo, à venda no website atual e com tipo permitido.
+- Erros inesperados na cotação da página do produto são registrados no log e não exibem mais detalhes internos ao visitante.
+- O arquivo de debug é sempre gravado em `var/log` e precisa terminar em `.log`.
+- O token da Frenet é marcado como dado sensível e não é mais gravado no `app/etc/config.php` pelo `app:config:dump`.
+
+**Alterado**
+
+- Requer `frenet/frenet-php` **1.3.4** (a 2.4.9 usava a 1.3.2), que aplica os limites de tempo nas chamadas à API e grava cada chamada uma única vez no log de debug.
+- A cotação lê cada atributo de produto (peso, dimensões, prazo) e as categorias uma única vez por requisição, o que reduz bastante as consultas ao banco em carrinhos grandes. O frete calculado não muda.
+- Com **Multi Quote**, pacotes idênticos são cotados uma única vez por requisição, com menos chamadas à API e cotações mais rápidas.
+- O `composer.json` declara todos os módulos Magento usados pelo módulo, e o `module.xml` define a ordem de carga.
 
 ### 2.4.8-p5
 
@@ -204,10 +257,10 @@ Recursos opcionais, no mesmo painel:
 
 ## Desenvolvimento
 
-O módulo segue o padrão de código `Magento2` (PHPCS) e PHPMD. Para rodar as verificações localmente:
+O módulo segue o padrão de código `Magento2` (PHPCS), PHPCompatibility, PHPMD e PHPStan (nível 6). Para rodar as verificações localmente:
 
 ```bash
-composer coding-standard   # phpcs + phpmd
+composer coding-standard   # phpcs + PHPCompatibility + phpmd + phpstan
 composer phpunit           # testes unitários
 ```
 
