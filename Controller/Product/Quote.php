@@ -73,8 +73,8 @@ class Quote extends Action implements HttpPostActionInterface
     {
         $productId = (int) $this->getRequest()->getParam('product');
         $postcode = (string) $this->getRequest()->getParam('postcode');
-        $qty = (int) $this->getRequest()->getParam('qty');
         $options = (array) $this->getRequest()->getParams();
+        $qty = $this->resolveQty($options);
 
         /** @var Json $page */
         $page = $this->resultFactory->create(ResultFactory::TYPE_JSON);
@@ -87,7 +87,7 @@ class Quote extends Action implements HttpPostActionInterface
             return $this->jsonError($page, (string) __('Please inform a valid postcode'));
         }
 
-        if ($qty <= 0 || $qty > $this->config->getMaxUnitQuantity()) {
+        if ($qty === null) {
             return $this->jsonError($page, (string) __('Invalid quantity informed.'));
         }
 
@@ -117,6 +117,52 @@ class Quote extends Action implements HttpPostActionInterface
         }
 
         return $page;
+    }
+
+    /**
+     * Resolves the quantity to quote, taking a grouped product's quantities from its super_group lines.
+     *
+     * @param mixed[] $options
+     *
+     * @return int|null
+     */
+    private function resolveQty(array &$options): ?int
+    {
+        if (!isset($options['super_group']) || !is_array($options['super_group'])) {
+            $qty = (int) $this->getRequest()->getParam('qty');
+
+            return $this->isValidQty($qty) ? $qty : null;
+        }
+
+        $requested = 0;
+
+        foreach ($options['super_group'] as $lineQty) {
+            $lineQty = is_scalar($lineQty) ? (int) $lineQty : -1;
+
+            if ($lineQty !== 0 && !$this->isValidQty($lineQty)) {
+                return null;
+            }
+
+            $requested += $lineQty;
+        }
+
+        if ($requested === 0) {
+            unset($options['super_group']);
+        }
+
+        return 1;
+    }
+
+    /**
+     * Checks whether the quantity is positive and within the configured maximum per shipping line.
+     *
+     * @param int $qty
+     *
+     * @return bool
+     */
+    private function isValidQty(int $qty): bool
+    {
+        return $qty > 0 && $qty <= $this->config->getMaxUnitQuantity();
     }
 
     /**
