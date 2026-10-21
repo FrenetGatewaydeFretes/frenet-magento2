@@ -40,6 +40,16 @@ class Config implements ConfigInterface
     public const DEFAULT_MAX_UNIT_QUANTITY = 5000;
 
     /**
+     * @var int
+     */
+    public const DEFAULT_PRODUCT_QUOTE_VISITOR_LIMIT = 60;
+
+    /**
+     * @var int
+     */
+    public const DEFAULT_PRODUCT_QUOTE_STORE_LIMIT = 1000;
+
+    /**
      * @var string
      */
     public const DEFAULT_DEBUG_FILENAME = 'frenet_request_debug.log';
@@ -277,6 +287,22 @@ class Config implements ConfigInterface
     /**
      * @inheritDoc
      */
+    public function getProductQuoteVisitorLimit($store = null): int
+    {
+        return $this->getQuoteLimit('product_quote/visitor_limit', self::DEFAULT_PRODUCT_QUOTE_VISITOR_LIMIT, $store);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getProductQuoteStoreLimit($store = null): int
+    {
+        return $this->getQuoteLimit('product_quote/store_limit', self::DEFAULT_PRODUCT_QUOTE_STORE_LIMIT, $store);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getOriginPostcode($store = null): string
     {
         return (string) $this->get('shipping', 'origin', 'postcode', $store);
@@ -305,6 +331,22 @@ class Config implements ConfigInterface
     {
         $path = implode('/', [$section, $group, $field]);
         return $this->scopeConfig->getValue($path, $scopeType, $this->getStore($store)?->getId());
+    }
+
+    /**
+     * Returns a per-minute product quote limit made of digits only, where 0 turns it off, else the given default.
+     *
+     * @param string $field
+     * @param int $default
+     * @param string|int|StoreInterface|null $store
+     *
+     * @return int
+     */
+    private function getQuoteLimit(string $field, int $default, $store): int
+    {
+        $limit = trim((string) $this->getCarrierConfig($field, $store));
+
+        return preg_match('/^\d+$/', $limit) === 1 ? (int) $limit : $default;
     }
 
     /**

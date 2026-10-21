@@ -305,4 +305,53 @@ class ConfigTest extends TestCase
         $this->assertSame(12.5, $this->subject->getPackageMaxWeight());
         $this->assertSame(80, $this->subject->getMaxUnitQuantity());
     }
+
+    /**
+     * Lists stored quote limits that are not a whole number of quotes, including one a cast would turn into 0.
+     *
+     * @return array<string, array{string|null}>
+     */
+    public static function unusableQuoteLimitProvider(): array
+    {
+        return [
+            'saved empty' => [''],
+            'not saved' => [null],
+            'negative' => ['-5'],
+            'decimal' => ['2.5'],
+            'text' => ['abc'],
+            'overflows to infinity' => ['1e400'],
+        ];
+    }
+
+    /**
+     * Confirms an unusable quote limit keeps the default limits on instead of silently turning them off.
+     *
+     * @param string|null $value
+     *
+     * @return void
+     */
+    #[DataProvider('unusableQuoteLimitProvider')]
+    public function testShouldFallBackToTheDefaultQuoteLimitsWhenTheStoredValueIsUnusable(?string $value): void
+    {
+        $this->scopeConfig->method('getValue')->willReturn($value);
+
+        $this->assertSame(Config::DEFAULT_PRODUCT_QUOTE_VISITOR_LIMIT, $this->subject->getProductQuoteVisitorLimit());
+        $this->assertSame(Config::DEFAULT_PRODUCT_QUOTE_STORE_LIMIT, $this->subject->getProductQuoteStoreLimit());
+    }
+
+    /**
+     * Confirms configured quote limits are returned, and that 0 is kept because it turns the limit off.
+     *
+     * @return void
+     */
+    public function testShouldReturnTheConfiguredQuoteLimitsIncludingZero(): void
+    {
+        $this->scopeConfig->method('getValue')->willReturnCallback(fn (string $path) => match ($path) {
+            'carriers/frenetshipping/product_quote/visitor_limit' => ' 15 ',
+            'carriers/frenetshipping/product_quote/store_limit' => '0',
+        });
+
+        $this->assertSame(15, $this->subject->getProductQuoteVisitorLimit());
+        $this->assertSame(0, $this->subject->getProductQuoteStoreLimit());
+    }
 }

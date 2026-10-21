@@ -23,9 +23,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '8.2', framework: '103.0.8-p4' }
-          - { php: '8.3', framework: '103.0.8-p4' }
-          - { php: '8.4', framework: '103.0.8-p4' }
+          - { php: '8.2', framework: '103.0.8-p5' }
+          - { php: '8.3', framework: '103.0.8-p5' }
+          - { php: '8.4', framework: '103.0.8-p5' }
           - { php: '8.3', framework: '103.0.9' }
           - { php: '8.4', framework: '103.0.9' }
           - { php: '8.5', framework: '103.0.9' }
