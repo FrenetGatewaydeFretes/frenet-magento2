@@ -7,6 +7,8 @@
  */
 /** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
 $common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\Carriers $carriers */
+$carriers = $block->getData('carriers');
 /** @var \Frenet\Shipping\ViewModel\Labels\Result $vm */
 $vm = $block->getData('view_model');
 $data = $vm->data();
@@ -85,7 +87,9 @@ $panel = $data['journey'] === 'panel';
                             )) ?></span>
                         <?php endif; ?></td>
                     <td class="frenet-code"><?= $escaper->escapeHtml($r['shipment_id'] ?: '—') ?></td>
-                    <td><?= $escaper->escapeHtml($r['service'] ?: '—') ?></td>
+                    <?php $code = (string) ($r['carrier_code'] ?? ''); ?>
+                    <?php $svc = $carriers->serviceHtml($code, '', (string) $r['service']); ?>
+                    <td><?= /* @noEscape */ $svc ?></td>
                     <td class="is-num"><?= $r['ok']
                         ? $escaper->escapeHtml($common->money((float) $r['price']))
                         : '—' ?></td>

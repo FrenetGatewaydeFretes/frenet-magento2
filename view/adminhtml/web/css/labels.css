@@ -84,6 +84,10 @@
 .frenet-bad { color: var(--fr-bad); }
 .frenet-small { font-size: 1.2rem; line-height: 1.45; }
 .frenet-nowrap { white-space: nowrap; }
+.frenet-block { display: block; }
+/* The page script hides these with the hidden attribute; their display rules would otherwise keep them visible. */
+.frenet-note[hidden], .frenet-warning[hidden], .frenet-dropoff__editor[hidden] { display: none; }
+.frenet-note p { margin: .4rem 0 0; }
 .frenet-code { font-family: "SFMono-Regular", Menlo, Consolas, monospace; letter-spacing: .03em; color: var(--fr-navy); }
 .frenet-link { color: var(--fr-violet); font-weight: 600; }
 .frenet-link:hover { color: var(--fr-violet-dark); }
@@ -108,12 +112,11 @@
 .frenet-brand__cta:hover { background: var(--fr-violet-soft); color: var(--fr-navy); text-decoration: none; }
 .frenet-brand__cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 button.frenet-brand__cta { border: 0; cursor: pointer; }
-.frenet-brand__deposit { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .8rem; color: #fff; }
-.frenet-brand__deposit label { color: inherit; }
-.frenet-brand__amount { width: 8rem; color: var(--fr-navy); background: #fff; min-height: 36px; border: 0; border-radius: var(--fr-radius); padding: 0 .8rem; text-align: right; font-variant-numeric: tabular-nums; }
+.frenet-brand__refill { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.4rem; }
+.frenet-brand__link { padding: 0; border: 0; background: none; color: #f9f5ff; font-size: 1.3rem; text-decoration: underline; cursor: pointer; }
+.frenet-brand__link:hover, .frenet-brand__link:focus-visible { color: #fff; outline: 2px solid transparent; text-decoration-thickness: 2px; }
 
 /* Banners and states */
-.frenet-sim { margin: 0 0 1.8rem; padding: 1rem 1.4rem; border: 1px dashed #d98e04; border-radius: var(--fr-radius); background: #fffaf0; color: var(--fr-wait); }
 .frenet-empty { max-width: 680px; margin: 2rem auto; padding: 3.6rem 3.2rem; border: 1px dashed var(--fr-lavender); border-radius: 12px; background: var(--fr-violet-soft); text-align: center; }
 .frenet-empty h2 { margin: 1rem 0 .8rem; color: var(--fr-navy); font-size: 2.2rem; font-weight: 700; }
 .frenet-empty p { color: var(--fr-muted); }
@@ -148,9 +151,10 @@ button.frenet-brand__cta { border: 0; cursor: pointer; }
 
 /* Tables: flat surfaces */
 .frenet-table-wrap { overflow-x: auto; border: 1px solid var(--fr-line); border-radius: 12px; background: #fff; }
-.frenet-table { width: 100%; border-collapse: collapse; }
-.frenet-table th { padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--fr-line); background: var(--fr-surface); color: var(--fr-muted); font-size: 1.2rem; font-weight: 600; letter-spacing: .02em; text-align: left; white-space: nowrap; }
-.frenet-table td { padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--fr-row); vertical-align: top; }
+.frenet-table { width: 100%; border-collapse: collapse; font-size: 1.3rem; }
+.frenet-table th { padding: 1rem 1.2rem; border-bottom: 1px solid var(--fr-line); background: var(--fr-surface); color: var(--fr-muted); font-size: 1.2rem; font-weight: 600; letter-spacing: .02em; text-align: left; white-space: nowrap; }
+.frenet-table td { padding: 1rem 1.2rem; border-bottom: 1px solid var(--fr-row); line-height: 1.45; vertical-align: middle; }
+.frenet-table--orders td { vertical-align: top; }
 .frenet-table tbody tr:last-child td { border-bottom: 0; }
 .frenet-table tbody tr:hover td { background: var(--fr-surface); }
 .frenet-table tfoot th { border-top: 1px solid var(--fr-line); border-bottom: 0; background: var(--fr-violet-soft); color: var(--fr-navy); font-size: 1.4rem; }
@@ -159,12 +163,40 @@ button.frenet-brand__cta { border: 0; cursor: pointer; }
 .frenet-table tr.is-nok td { background: #fffafa; }
 .frenet-table tr.is-selected td { background: var(--fr-violet-soft); }
 .frenet-table--compact td { padding: .9rem 1.4rem; vertical-align: middle; }
-.frenet-table--orders .frenet-service select { min-width: 300px; max-width: 420px; border-radius: var(--fr-radius); }
+/* The orders table fits a 1440px screen: the service list and the key field do not stretch, products sit under the package. */
+.frenet-table--orders .frenet-service select { width: 100%; min-width: 240px; max-width: 320px; border-radius: var(--fr-radius); }
+.frenet-table--orders .frenet-package { min-width: 130px; max-width: 180px; }
+.frenet-table--orders .frenet-who { min-width: 150px; }
 .frenet-table input[type="checkbox"]:checked { accent-color: var(--fr-violet); }
-.frenet-nfe { min-width: 220px; border-radius: var(--fr-radius); font-family: "SFMono-Regular", Menlo, Consolas, monospace; }
+/* Carriers of "Create shipment": the option applied to every order, and the two "any carrier" rows. */
+.frenet-table .is-action { width: 1%; text-align: right; white-space: nowrap; }
+.frenet-table tbody tr.is-applied td,
+.frenet-table tbody tr.is-applied th { background: var(--fr-violet-tint); }
+.frenet-compare__best tr:first-child td,
+.frenet-compare__best tr:first-child th { border-top: 1px solid var(--fr-line); }
+.frenet-compare__best th,
+.frenet-compare__best td { background: var(--fr-violet-soft); color: var(--fr-navy); font-weight: 600; }
+.frenet-compare__best th { font-size: 1.3rem; letter-spacing: 0; white-space: normal; }
+.frenet-status-line { min-height: 1.4em; margin: .8rem 0 0; color: var(--fr-navy); font-weight: 500; }
+/* "Notes": a label that failed keeps the row red until it goes through. */
+.frenet-table tbody tr.is-failed td { background: var(--fr-bad-bg); }
+.frenet-table tbody tr.is-failed > :first-child { box-shadow: inset 3px 0 0 var(--fr-bad); }
+.frenet-order-panel__issue { margin: 0 0 1.2rem; padding: .8rem 1.2rem; border-left: 3px solid var(--fr-bad); border-radius: 0 var(--fr-radius) var(--fr-radius) 0; background: var(--fr-bad-bg); font-size: 1.3rem; line-height: 1.45; }
+.frenet-issue { min-width: 160px; max-width: 280px; font-size: 1.2rem; line-height: 1.45; }
+.frenet-nfe { width: 170px; min-width: 0; border-radius: var(--fr-radius); font-family: "SFMono-Regular", Menlo, Consolas, monospace; }
 .frenet-nfe[aria-invalid="true"] { border-color: var(--fr-bad); }
-.frenet-row-actions { white-space: nowrap; }
-.frenet-row-actions > * { margin-right: .6rem; }
+/* Carrier logos: bundled official files; a monogram in the brand colour when a carrier has none. */
+.frenet-carrier { display: inline-flex; align-items: center; gap: .8rem; vertical-align: middle; }
+.frenet-carrier__logo { display: block; width: auto; height: 20px; max-width: 84px; object-fit: contain; }
+.frenet-carrier__mark { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: #fff; font-size: 1rem; font-weight: 700; letter-spacing: .02em; line-height: 1; }
+.frenet-carrier__name { color: var(--fr-navy); font-weight: 600; }
+.frenet-svc { display: inline-flex; align-items: center; gap: 1rem; }
+.frenet-service__logo { display: block; margin-bottom: .4rem; }
+.frenet-service__logo:empty { display: none; }
+.frenet-table--compact .frenet-carrier__logo,
+.frenet-dropoff .frenet-carrier__logo { height: 22px; max-width: 96px; }
+.frenet-row-actions { width: 1%; text-align: right; white-space: nowrap; }
+.frenet-row-actions > * + * { margin-left: .6rem; }
 .frenet-btn-sm { padding: .5rem 1.2rem; font-size: 1.3rem; }
 .frenet-labels .frenet-danger,
 .frenet-labels .frenet-danger:focus { border: 1px solid var(--fr-bad); border-radius: var(--fr-radius); background: #fff; color: var(--fr-bad); box-shadow: none; }
@@ -175,11 +207,24 @@ button.frenet-brand__cta { border: 0; cursor: pointer; }
 .frenet-actionbar [data-frenet-count] { margin-right: auto; color: var(--fr-muted); }
 .frenet-format { display: inline-flex; align-items: center; gap: .6rem; }
 .frenet-format select { border-radius: var(--fr-radius); }
-.frenet-summary { position: sticky; bottom: 0; z-index: 2; margin-top: 2.4rem; padding: 1.8rem 2.4rem; border: 1px solid var(--fr-line); border-top: 3px solid var(--fr-violet); border-radius: 12px 12px 0 0; background: #fff; box-shadow: 0 -6px 16px rgba(12, 0, 90, .07); }
+/* Sticky action bar: the counts and the buttons stay in view, never "down there" after a long table. */
+.frenet-bar { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2.4rem;
+    margin: 1.6rem 0 0; padding: 1.2rem 2rem; border: 1px solid var(--fr-line); border-top: 3px solid var(--fr-violet);
+    border-radius: 12px 12px 0 0; background: #fff; box-shadow: 0 -8px 20px rgba(12, 0, 90, .07); }
+.frenet-bar__facts { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .4rem 2.4rem; }
+.frenet-bar__fact { display: flex; flex-direction: column; color: var(--fr-muted); font-size: 1.2rem; }
+.frenet-bar__fact strong { color: var(--fr-navy); font-family: var(--fr-display); font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; line-height: 1.2; }
+.frenet-bar__carriers { display: flex; flex-wrap: wrap; gap: .2rem 1.2rem; max-width: 42rem; margin: 0 0 .3rem; padding: 0; list-style: none; color: var(--fr-muted); font-size: 1.2rem; }
+.frenet-bar__carriers:empty { display: none; }
+.frenet-bar__actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin-left: auto; }
+.frenet-bar .frenet-format { margin-right: .4rem; }
+/* Result page totals */
 .frenet-summary__totals { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.2rem 3.6rem; }
 .frenet-summary__totals > div { display: flex; flex-direction: column; color: var(--fr-muted); }
 .frenet-summary__totals strong { color: var(--fr-navy); font-family: var(--fr-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.frenet-summary__carriers { margin: 0; padding: 0; list-style: none; color: var(--fr-muted); font-size: 1.2rem; }
+/* Notes that follow the selection (balance, NF-e, DC-e) sit right above the bar. */
+.frenet-notices:empty { display: none; }
+.frenet-notices > * { margin: 1.2rem 0 0; }
 .frenet-journey { display: flex; flex-wrap: wrap; gap: .8rem 1.2rem; margin: 1.6rem 0 0; padding: 0; border: 0; }
 .frenet-journey legend { margin-bottom: .8rem; color: var(--fr-navy); font-weight: 600; }
 .frenet-journey label { display: inline-flex; align-items: center; gap: .8rem; padding: .9rem 1.4rem; border: 1px solid var(--fr-line); border-radius: var(--fr-radius); background: #fff; cursor: pointer; }
@@ -241,3 +286,21 @@ button.frenet-brand__cta { border: 0; cursor: pointer; }
 .frenet-import .frenet-actionbar form { margin: 0; }
 .frenet-order-tracking__code + .frenet-order-tracking__code { margin-top: 1.6rem; padding-top: 1.6rem; border-top: 1px solid var(--fr-line); }
 .frenet-order-tracking h3 { display: flex; gap: .8rem; align-items: baseline; margin: 0 0 .8rem; }
+
+/* Drop-off point: overview per carrier, then the editor of the chosen one. */
+.frenet-dropoff .frenet-table-wrap,
+.frenet-dropoff__editor { max-width: 980px; }
+.frenet-dropoff .frenet-table tbody th { padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--fr-row); background: none; color: var(--fr-navy); font-size: 1.4rem; letter-spacing: 0; white-space: normal; }
+.frenet-dropoff .frenet-table tbody th .frenet-muted { font-weight: 400; font-size: 1.2rem; }
+.frenet-dropoff .is-action a { margin-top: .6rem; }
+.frenet-dropoff__editor { margin-top: 2rem; scroll-margin-top: 48px; }
+.frenet-dropoff__search { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .8rem; margin-bottom: 1.4rem; }
+.frenet-dropoff__search input { width: 160px; }
+.frenet-field { display: block; margin: 0 0 .4rem; color: var(--fr-navy); font-weight: 600; }
+.frenet-dropoff input[type="search"] { width: 100%; max-width: 520px; }
+.frenet-dropoff select[size] { display: block; width: 100%; height: auto; min-height: 220px; margin-top: .8rem; padding: .4rem; border-radius: var(--fr-radius); }
+.frenet-dropoff select[size] option { padding: .8rem 1rem; border-radius: 6px; white-space: normal; }
+.frenet-dropoff select[size] option:checked { background: var(--fr-violet-tint); color: var(--fr-navy); font-weight: 600; }
+.frenet-dropoff__address { min-height: 1.4em; margin: .8rem 0 0; color: var(--fr-navy); font-weight: 500; }
+.frenet-actionbar--start { justify-content: flex-start; }
+

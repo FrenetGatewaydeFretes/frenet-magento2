@@ -25,10 +25,12 @@ class CreateShipment implements ArgumentInterface
     /**
      * @param RequestInterface $request
      * @param Review $reviewModel
+     * @param Compare $compare
      */
     public function __construct(
         private readonly RequestInterface $request,
-        private readonly Review $reviewModel
+        private readonly Review $reviewModel,
+        private readonly Compare $compare
     ) {
     }
 
@@ -78,8 +80,6 @@ class CreateShipment implements ArgumentInterface
      * Totals of the preselected services, for the first render (the page script recalculates them).
      *
      * @return mixed[]
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function initialSummary(): array
     {
@@ -89,6 +89,6 @@ class CreateShipment implements ArgumentInterface
                 $chosen[] = $row['services'][$row['selected']];
             }
         }
-        return Compare::summarize($chosen);
+        return $this->compare->summarize($chosen);
     }
 }

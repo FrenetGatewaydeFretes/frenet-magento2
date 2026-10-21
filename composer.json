@@ -11,17 +11,18 @@
         }
     },
     "description":"Integrate your Magento 2 with Frenet Services in a simple way.",
-    "repositories": {
-        "mage": {
+    "repositories": [
+        {
+            "name": "mage-os",
             "type": "composer",
-            "url": "https://repo.magento.com",
-            "exclude": [ "frenet/frenet-magento2", "frenet/frenet-php" ]
+            "url": "https://mirror.mage-os.org/"
         },
-        "packagist": {
+        {
+            "name": "packagist",
             "type": "composer",
             "url": "https://packagist.org"
         }
-    },
+    ],
     "require": {
         "php": "~8.2.0||~8.3.0||~8.4.0||~8.5.0",
         "frenet/frenet-php": "^1.3.4",
@@ -83,7 +84,10 @@
     },
     "config": {
         "allow-plugins": {
-            "magento/composer-dependency-version-audit-plugin": true
+            "magento/composer-dependency-version-audit-plugin": true,
+            "magento/magento-composer-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "laminas/laminas-dependency-plugin": true
         }
     }
 }

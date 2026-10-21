@@ -14,8 +14,7 @@ use Magento\Framework\Serialize\Serializer\Json;
 
 /**
  * Frenet wallet (GET /wallet), cached for 5 minutes. Never throws: null means "unavailable".
- *
- * @SuppressWarnings(PHPMD.StaticAccess)
+ * Balance is added in the Frenet panel (its own payment gateway); "Atualizar saldo" clears the cache.
  */
 class Wallet
 {
@@ -27,32 +26,44 @@ class Wallet
      * @param LabelsConfig $config
      * @param CacheInterface $cache
      * @param Json $json
+     * @param ResponseReader $reader
      */
     public function __construct(
         private readonly Client $client,
         private readonly LabelsConfig $config,
         private readonly CacheInterface $cache,
-        private readonly Json $json
+        private readonly Json $json,
+        private readonly ResponseReader $reader
     ) {
     }
 
     /**
-     * Balance and label limit, or null when Frenet does not answer or labels are not configured.
+     * Balance and label limit (cached), or null when Frenet does not answer or labels are not configured.
      *
-     * @param bool $fresh Skip the cache (after buying or cancelling).
      * @return array{balance: float, labels: int}|null
-     *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
-    public function get(bool $fresh = false): ?array
+    public function get(): ?array
     {
         if (!$this->config->isAvailable()) {
             return null;
         }
-        $cached = $fresh ? false : $this->cache->load(self::CACHE_KEY);
+        $cached = $this->cache->load($this->key());
         if ($cached) {
             $data = (array) $this->json->unserialize($cached);
             return $data ? ['balance' => (float) $data['balance'], 'labels' => (int) $data['labels']] : null;
+        }
+        return $this->refresh();
+    }
+
+    /**
+     * Balance and label limit read from Frenet now (after buying, cancelling or paying in the panel).
+     *
+     * @return array{balance: float, labels: int}|null
+     */
+    public function refresh(): ?array
+    {
+        if (!$this->config->isAvailable()) {
+            return null;
         }
         try {
             $res = $this->client->whitelabel('GET', '/wallet');
@@ -60,85 +71,11 @@ class Wallet
             return null;
         }
         $out = [
-            'balance' => (float) (Client::field($res, 'balance') ?? 0),
-            'labels' => (int) (Client::field($res, 'labelLimit') ?? 0),
+            'balance' => (float) ($this->reader->field($res, 'balance') ?? 0),
+            'labels' => (int) ($this->reader->field($res, 'labelLimit') ?? 0),
         ];
-        $this->cache->save($this->json->serialize($out), self::CACHE_KEY, [], self::CACHE_TTL);
+        $this->cache->save($this->json->serialize($out), $this->key(), [], self::CACHE_TTL);
         return $out;
-    }
-
-    /**
-     * Mercado Pago checkout of a wallet deposit (POST /wallet/deposit → PreferenceId).
-     *
-     * Frenet credits the wallet when Mercado Pago confirms; the notification URL only tells this store to refresh
-     * the cached balance.
-     *
-     * @param float $value Amount in BRL.
-     * @param string $notify URL Frenet calls when the deposit changes.
-     * @param string[] $back URLs Mercado Pago returns to (success, failure, pending).
-     * @return string Checkout URL.
-     * @throws LabelException
-     */
-    public function deposit(float $value, string $notify, array $back): string
-    {
-        $value = round($value, 2);
-        if ($value < 1) {
-            throw new LabelException(__('Type an amount of at least R$ 1,00.'));
-        }
-        $res = $this->client->whitelabel('POST', '/wallet/deposit', [
-            'Value' => $value,
-            'NotificationUrl' => $notify,
-            'CallbackUrls' => [
-                'SuccessUrl' => $back['success'],
-                'FailureUrl' => $back['failure'],
-                'PendingUrl' => $back['pending'],
-            ],
-        ]);
-        $preference = (string) (Client::field($res, 'preferenceId') ?? '');
-        if ($preference === '') {
-            throw new LabelException(
-                __(
-                    'Frenet did not start the payment. Nothing was charged; '
-                    . 'try again or add balance in the Frenet panel.'
-                )
-            );
-        }
-        $this->clear();
-        $initPoint = (string) (Client::field($res, 'initPoint') ?? '');
-        return self::allowedCheckout($initPoint, $this->config->isSimulated())
-            ? $initPoint
-            : self::checkoutUrl($preference);
-    }
-
-    /**
-     * Whether a payment link Frenet returned can be opened: Mercado Pago over https, or anything in simulator mode.
-     *
-     * @param string $url
-     * @param bool $simulated
-     * @return bool
-     */
-    public static function allowedCheckout(string $url, bool $simulated): bool
-    {
-        if ($url === '') {
-            return false;
-        }
-        // phpcs:ignore Magento2.Functions.DiscouragedFunction
-        $host = (string) parse_url($url, PHP_URL_HOST);
-        return $simulated || (
-            str_starts_with($url, 'https://')
-            && (bool) preg_match('/(^|\.)mercadopago\.com(\.[a-z]{2})?$/', $host)
-        );
-    }
-
-    /**
-     * Mercado Pago Checkout Pro URL of a preference.
-     *
-     * @param string $preference
-     * @return string
-     */
-    public static function checkoutUrl(string $preference): string
-    {
-        return 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=' . rawurlencode($preference);
     }
 
     /**
@@ -148,6 +85,16 @@ class Wallet
      */
     public function clear(): void
     {
-        $this->cache->remove(self::CACHE_KEY);
+        $this->cache->remove($this->key());
+    }
+
+    /**
+     * Cache key of the current account and API.
+     *
+     * @return string
+     */
+    private function key(): string
+    {
+        return self::CACHE_KEY . '_' . $this->config->cacheScope();
     }
 }

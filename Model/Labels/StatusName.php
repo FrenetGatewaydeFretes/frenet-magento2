@@ -19,7 +19,7 @@ class StatusName
      *
      * @return array<int, array{0: string, 1: string}>
      */
-    public static function all(): array
+    public function all(): array
     {
         return [
             1 => [(string) __('Created'), 'wait'],
@@ -40,9 +40,9 @@ class StatusName
      * @param int $status
      * @return string
      */
-    public static function label(int $status): string
+    public function label(int $status): string
     {
-        return self::all()[$status][0] ?? (string) __('Status %1', $status);
+        return $this->all()[$status][0] ?? (string) __('Status %1', $status);
     }
 
     /**
@@ -51,8 +51,8 @@ class StatusName
      * @param int $status
      * @return string
      */
-    public static function tone(int $status): string
+    public function tone(int $status): string
     {
-        return self::all()[$status][1] ?? 'off';
+        return $this->all()[$status][1] ?? 'off';
     }
 }

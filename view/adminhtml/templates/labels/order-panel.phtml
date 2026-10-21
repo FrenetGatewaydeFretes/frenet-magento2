@@ -17,6 +17,12 @@ $s = $vm->shipment();
 <section class="admin__page-section">
     <div class="admin__page-section-title"><span class="title"><?= $escaper->escapeHtml(__('Frenet')) ?></span></div>
     <div class="frenet-order-panel">
+        <?php if ($issue = $vm->issue()): ?>
+            <div class="frenet-order-panel__issue" role="note">
+                <strong><?= $escaper->escapeHtml(__('Notes')) ?>:</strong>
+                <?= /* @noEscape */ $common->issueHtml($issue) ?>
+            </div>
+        <?php endif; ?>
         <?php if (!$s): ?>
             <p class="frenet-muted"><?= $escaper->escapeHtml(__(
                 'No Frenet shipment for this order yet. Compare carriers and create it in one step.'

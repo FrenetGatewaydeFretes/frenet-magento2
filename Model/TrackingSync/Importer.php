@@ -69,7 +69,9 @@ class Importer
             try {
                 /** @var Order $order */
                 $order = $this->load([$r['order']])[$r['order']];
-                $result = $this->shipper->attach($order, $r['code'], $notify);
+                $result = $notify
+                    ? $this->shipper->attachAndNotify($order, $r['code'])
+                    : $this->shipper->attach($order, $r['code']);
                 if ($result === Shipper::SHIPPED) {
                     $out['shipped']++;
                 } elseif ($result === Shipper::ADDED) {

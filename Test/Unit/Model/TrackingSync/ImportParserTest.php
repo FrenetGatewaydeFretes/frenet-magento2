@@ -26,7 +26,7 @@ class ImportParserTest extends TestCase
      */
     public function testParse(): void
     {
-        $result = ImportParser::parse(
+        $result = (new ImportParser())->parse(
             "pedido;código\n000000012;aa123456789br\n#000000013,AA987654321BR\n\n"
             . "000000014\tAB111222333BR\n000000012;AA123456789BR\numa-coluna\n"
         );
@@ -46,11 +46,11 @@ class ImportParserTest extends TestCase
     public function testHeaderWithoutAccents(): void
     {
         foreach (["pedido;codigo", "#pedido;CODIGO", "pedido;código", "Pedido,Codigo"] as $header) {
-            $result = ImportParser::parse($header . "\n000000048;AA123456785BR");
+            $result = (new ImportParser())->parse($header . "\n000000048;AA123456785BR");
             $this->assertSame([['order' => '000000048', 'code' => 'AA123456785BR']], $result['rows'], $header);
             $this->assertSame([], $result['invalid'], $header);
         }
-        $result = ImportParser::parse("pedido;codigo\n000000048;AA123456785BR");
+        $result = (new ImportParser())->parse("pedido;codigo\n000000048;AA123456785BR");
         $this->assertSame([['order' => '000000048', 'code' => 'AA123456785BR']], $result['rows']);
         $this->assertSame([], $result['invalid']);
     }

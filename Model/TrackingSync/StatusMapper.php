@@ -1,6 +1,6 @@
 <?php
 /**
- * Frenet Shipping Gateway — Frenet tracking event → order status. Pure functions (unit tested).
+ * Frenet Shipping Gateway — Frenet tracking event → order status, decided by an ordered rule table (unit tested).
  *
  * @category Frenet
  */
@@ -9,70 +9,67 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\Model\TrackingSync;
 
-use DateTime;
-
-class StatusMapper
+class StatusMapper implements StatusMapperInterface
 {
-    public const IN_TRANSIT = 'frenet_in_transit';
-    public const PICKUP = 'frenet_pickup';
-    public const DELIVERED = 'frenet_delivered';
-    public const RETURNING = 'frenet_returning';
-
-    /** Status labels as shown to the store and the customer (Brazilian stores). */
-    public const LABELS = [
-        self::IN_TRANSIT => 'Em transporte',
-        self::PICKUP => 'Aguardando retirada',
-        self::DELIVERED => 'Entregue',
-        self::RETURNING => 'Em devolução',
+    /**
+     * Default rules, first match wins. "event" matches Frenet's EventType; "pattern" is a regex on the lower-cased
+     * description; "status" '' means "not posted yet, no change". Nothing matching is "in transit".
+     * Correios events before posting: "Etiqueta emitida - Aguardando postagem", "Etiqueta expirada".
+     */
+    public const DEFAULT_RULES = [
+        'event_delivered' => ['event' => '9', 'status' => self::DELIVERED],
+        'event_returned' => ['event' => '3', 'status' => self::RETURNING],
+        'not_posted' => [
+            'pattern' => '/etiqueta emitida|etiqueta expirada|aguardando postagem|prazo para postagem/u',
+            'status' => '',
+        ],
+        'returning' => ['pattern' => '/devolvido|devolução|devolucao/u', 'status' => self::RETURNING],
+        'delivered' => [
+            'pattern' => '/^(?!.*(n[aã]o entregue|ponto de postagem)).*entregue/u',
+            'status' => self::DELIVERED,
+        ],
+        'pickup' => ['pattern' => '/aguardando retirada|dispon[ií]vel para retirada/u', 'status' => self::PICKUP],
     ];
 
-    /** Correios events before posting ("Etiqueta emitida - Aguardando postagem", "Etiqueta expirada"). */
-    private const NOT_POSTED = ['etiqueta emitida', 'etiqueta expirada', 'aguardando postagem', 'prazo para postagem'];
-
-    /** Final statuses: the order is not checked again once it reaches one of them. */
-    public const FINAL = [self::DELIVERED];
+    /** @var mixed[] */
+    private readonly array $rules;
 
     /**
-     * Order status for an event; '' when the package has not been posted yet (no change).
-     *
-     * Frenet's EventType wins when it is conclusive (9 delivered, 3 returned); otherwise the description decides.
-     *
-     * @param string $description
-     * @param string $eventType
-     * @return string
-     *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @param mixed[] $rules Ordered rules (see di.xml); the defaults when empty.
      */
-    public static function statusFor(string $description, string $eventType = ''): string
+    public function __construct(array $rules = [])
     {
-        if ($eventType === '9') {
-            return self::DELIVERED;
-        }
-        if ($eventType === '3') {
-            return self::RETURNING;
-        }
+        $this->rules = $rules ?: self::DEFAULT_RULES;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function statusFor(string $description, string $eventType = ''): string
+    {
         $text = mb_strtolower($description);
-        foreach (self::NOT_POSTED as $needle) {
-            if (str_contains($text, $needle)) {
-                return '';
+        foreach ($this->rules as $rule) {
+            if ($this->matches($rule, $text, $eventType)) {
+                return (string) $rule['status'];
             }
         }
-        if (str_contains($text, 'devolvido') || str_contains($text, 'devolução') || str_contains($text, 'devolucao')) {
-            return self::RETURNING;
-        }
-        if (str_contains($text, 'entregue')
-            && !str_contains($text, 'não entregue')
-            && !str_contains($text, 'nao entregue')
-            && !str_contains($text, 'ponto de postagem')
-        ) {
-            return self::DELIVERED;
-        }
-        if (str_contains($text, 'aguardando retirada') || str_contains($text, 'disponível para retirada')
-            || str_contains($text, 'disponivel para retirada')) {
-            return self::PICKUP;
-        }
         return self::IN_TRANSIT;
+    }
+
+    /**
+     * Whether one rule applies to the event.
+     *
+     * @param mixed[] $rule
+     * @param string $text Lower-cased description.
+     * @param string $eventType
+     * @return bool
+     */
+    private function matches(array $rule, string $text, string $eventType): bool
+    {
+        if (isset($rule['event'])) {
+            return $eventType !== '' && (string) $rule['event'] === $eventType;
+        }
+        return isset($rule['pattern']) && preg_match((string) $rule['pattern'], $text) === 1;
     }
 
     /**
@@ -80,12 +77,10 @@ class StatusMapper
      *
      * @param string $date
      * @return int
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    public static function eventTime(string $date): int
+    public function eventTime(string $date): int
     {
-        $parsed = DateTime::createFromFormat('d/m/Y H:i', trim($date));
+        $parsed = date_create_from_format('d/m/Y H:i', trim($date));
         return $parsed ? $parsed->getTimestamp() : 0;
     }
 
@@ -95,7 +90,7 @@ class StatusMapper
      * @param string $shippingMethod
      * @return string
      */
-    public static function serviceCode(string $shippingMethod): string
+    public function serviceCode(string $shippingMethod): string
     {
         return str_starts_with($shippingMethod, 'frenetshipping_') ? substr($shippingMethod, 15) : '';
     }

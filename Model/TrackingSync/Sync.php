@@ -25,8 +25,6 @@ use Zend_Db_Expr;
 
 /**
  * Reads the Frenet tracking events of the Frenet tracking codes and applies them to the orders.
- *
- * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class Sync
 {
@@ -42,6 +40,7 @@ class Sync
      * @param OrderRepositoryInterface $orderRepository
      * @param OrderCommentSender $commentSender
      * @param LoggerInterface $logger
+     * @param StatusMapperInterface $statusMapper
      */
     public function __construct(
         private readonly ResourceConnection $resource,
@@ -50,7 +49,8 @@ class Sync
         private readonly Settings $settings,
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly OrderCommentSender $commentSender,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly StatusMapperInterface $statusMapper
     ) {
     }
 
@@ -89,7 +89,7 @@ class Sync
             $select->where('t.order_id = ?', $orderId);
         } else {
             $select->where('o.state NOT IN (?)', [Order::STATE_CANCELED, Order::STATE_CLOSED])
-                ->where('o.status NOT IN (?)', StatusMapper::FINAL)
+                ->where('o.status NOT IN (?)', StatusMapperInterface::FINAL)
                 ->where(
                     'f.synced_at IS NULL OR f.synced_at < ?',
                     gmdate('Y-m-d H:i:s', time() - self::REFRESH_MINUTES * 60)
@@ -108,7 +108,10 @@ class Sync
     {
         $out = ['synced' => 0, 'errors' => 0, 'changed' => 0];
         foreach ($this->pendingTracks($orderId) as $row) {
-            $service = (string) ($row['label_service'] ?: StatusMapper::serviceCode((string) $row['shipping_method']));
+            $service = (string) $row['label_service'];
+            if ($service === '') {
+                $service = $this->statusMapper->serviceCode((string) $row['shipping_method']);
+            }
             if ($service === '') {
                 continue;
             }
@@ -174,8 +177,8 @@ class Sync
         $events = array_values($unique);
         usort(
             $events,
-            static fn ($left, $right) => StatusMapper::eventTime($left['date'])
-                <=> StatusMapper::eventTime($right['date'])
+            fn ($left, $right) => $this->statusMapper->eventTime($left['date'])
+                <=> $this->statusMapper->eventTime($right['date'])
         );
         $last = $events ? end($events) : null;
         $connection->insertOnDuplicate($this->table(), [
@@ -207,10 +210,10 @@ class Sync
         if (in_array($order->getState(), [Order::STATE_CANCELED, Order::STATE_CLOSED, Order::STATE_HOLDED], true)) {
             return false;
         }
-        $status = StatusMapper::statusFor((string) $event['description'], (string) ($event['type'] ?? ''));
+        $status = $this->statusMapper->statusFor((string) $event['description'], (string) ($event['type'] ?? ''));
         if ($status === ''
             || $order->getStatus() === $status
-            || in_array($order->getStatus(), StatusMapper::FINAL, true)
+            || in_array($order->getStatus(), StatusMapperInterface::FINAL, true)
         ) {
             return false;
         }
@@ -277,10 +280,10 @@ class Sync
             (clone $base)->reset(Select::COLUMNS)->columns('COUNT(*)')->where('f.synced_at IS NULL')
         );
         $map = [
-            'delivered' => StatusMapper::DELIVERED,
-            'returning' => StatusMapper::RETURNING,
-            'pickup' => StatusMapper::PICKUP,
-            'moving' => StatusMapper::IN_TRANSIT,
+            'delivered' => StatusMapperInterface::DELIVERED,
+            'returning' => StatusMapperInterface::RETURNING,
+            'pickup' => StatusMapperInterface::PICKUP,
+            'moving' => StatusMapperInterface::IN_TRANSIT,
         ];
         if (isset($map[$filter])) {
             $base->where('o.status = ?', $map[$filter]);

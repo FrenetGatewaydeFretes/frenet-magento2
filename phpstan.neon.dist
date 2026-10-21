@@ -16,8 +16,3 @@ parameters:
         -
             message: '#^PHPDoc tag @SuppressWarnings has invalid value#'
             identifier: phpDoc.parseError
-        -
-            identifier: bitExpertMagento.abstractModelUseServiceContract
-            paths:
-                - Model/Labels/RegionResolver.php
-                - Model/Labels/Shipper.php

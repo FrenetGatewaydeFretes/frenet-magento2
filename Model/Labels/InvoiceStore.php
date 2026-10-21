@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model\Labels;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * NF-e access key per order (table frenet_shipping_invoice).
@@ -18,9 +19,12 @@ class InvoiceStore
 {
     /**
      * @param ResourceConnection $resource
+     * @param NfeKey $nfeKeys
      */
-    public function __construct(private readonly ResourceConnection $resource)
-    {
+    public function __construct(
+        private readonly ResourceConnection $resource,
+        private readonly NfeKey $nfeKeys
+    ) {
     }
 
     /**
@@ -62,5 +66,27 @@ class InvoiceStore
     private function table(): string
     {
         return $this->resource->getTableName('frenet_shipping_invoice');
+    }
+
+    /**
+     * Saves a pasted NF-e key after checking it; an empty key saves nothing.
+     *
+     * @param int $orderId
+     * @param string $pasted Key as typed (spaces and dots allowed).
+     * @return void
+     * @throws LocalizedException When the key is not a valid NF-e access key.
+     */
+    public function saveChecked(int $orderId, string $pasted): void
+    {
+        $key = $this->nfeKeys->normalize($pasted);
+        if ($key === '') {
+            return;
+        }
+        if (!$this->nfeKeys->isValid($key)) {
+            throw new LocalizedException(
+                __('The NF-e key is not valid (44 digits, the last one is a check digit). Nothing was created.')
+            );
+        }
+        $this->save($orderId, $key);
     }
 }

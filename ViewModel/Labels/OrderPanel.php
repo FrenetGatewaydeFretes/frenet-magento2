@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\ViewModel\Labels;
 
+use Frenet\Shipping\Model\Labels\IssueStore;
 use Frenet\Shipping\Model\Labels\LabelsConfig;
 use Frenet\Shipping\Model\Labels\LabelStore;
 use Magento\Framework\App\RequestInterface;
@@ -23,12 +24,24 @@ class OrderPanel implements ArgumentInterface
      * @param RequestInterface $request
      * @param LabelStore $store
      * @param LabelsConfig $config
+     * @param IssueStore $issues
      */
     public function __construct(
         private readonly RequestInterface $request,
         private readonly LabelStore $store,
-        private readonly LabelsConfig $config
+        private readonly LabelsConfig $config,
+        private readonly IssueStore $issues
     ) {
+    }
+
+    /**
+     * Why the last label of the order failed ("Notes"), or null.
+     *
+     * @return array{message: string, at: string}|null
+     */
+    public function issue(): ?array
+    {
+        return $this->orderId() ? $this->issues->get($this->orderId()) : null;
     }
 
     /**

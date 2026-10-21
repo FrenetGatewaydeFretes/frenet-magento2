@@ -16,7 +16,7 @@ class AddressMapperTest extends TestCase
 {
     private function map(array $street): array
     {
-        $a = AddressMapper::toFrenet($street, 'Rio de Janeiro', 'rj', '20040-002');
+        $a = (new AddressMapper())->toFrenet($street, 'Rio de Janeiro', 'rj', '20040-002');
         return [$a['Street'], $a['AddressNumber'], $a['AddressComplement'], $a['AddressQuarter']];
     }
 
@@ -42,7 +42,7 @@ class AddressMapperTest extends TestCase
 
     public function testStateAndZip(): void
     {
-        $a = AddressMapper::toFrenet(['Rua A', '1', 'Centro'], 'Rio', 'rj', '20040-002');
+        $a = (new AddressMapper())->toFrenet(['Rua A', '1', 'Centro'], 'Rio', 'rj', '20040-002');
         $this->assertSame('RJ', $a['AddressState']);
         $this->assertSame('20040002', $a['ZipCode']);
     }

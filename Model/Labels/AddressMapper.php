@@ -29,7 +29,7 @@ class AddressMapper
      * @param string $postcode
      * @return array<string, string>
      */
-    public static function toFrenet(array $street, string $city, string $regionCode, string $postcode): array
+    public function toFrenet(array $street, string $city, string $regionCode, string $postcode): array
     {
         $lines = array_values(array_map('trim', array_map('strval', $street)));
         $count = count($lines);

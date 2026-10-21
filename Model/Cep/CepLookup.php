@@ -47,7 +47,7 @@ class CepLookup implements CepLookupInterface
      * @param string $cep
      * @return string
      */
-    public static function normalize(string $cep): string
+    public function normalize(string $cep): string
     {
         $digits = (string) preg_replace('/\D/', '', $cep);
         return strlen($digits) === 8 ? $digits : '';
@@ -58,7 +58,7 @@ class CepLookup implements CepLookupInterface
      */
     public function lookup(string $cep): CepAddressInterface
     {
-        $digits = self::normalize($cep);
+        $digits = $this->normalize($cep);
         if ($digits === '' || !$this->settings->cepAutofill()) {
             throw new NoSuchEntityException(__('Invalid CEP.'));
         }

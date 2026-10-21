@@ -8,6 +8,8 @@
  */
 /** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
 $common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\Carriers $carriers */
+$carriers = $block->getData('carriers');
 /** @var \Frenet\Shipping\ViewModel\Labels\LabelsList $vm */
 $vm = $block->getData('view_model');
 $route = (string) $block->getData('route');
@@ -82,11 +84,13 @@ $formKey = $block->getFormKey();
                         <th class="is-num"><?= $escaper->escapeHtml(__('Shipping')) ?></th>
                         <th><?= $escaper->escapeHtml(__('Tracking')) ?></th>
                         <th><?= $escaper->escapeHtml(__('Updated')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Notes')) ?></th>
                         <th><span class="frenet-sr"><?= $escaper->escapeHtml(__('Actions')) ?></span></th>
                     </tr></thead>
                     <tbody>
                     <?php foreach ($data['rows'] as $r): ?>
-                        <tr>
+                        <?php $svc = $carriers->serviceHtml($r['carrier_code'], $r['carrier'], $r['service_code']); ?>
+                        <tr class="<?= $r['issue'] ? 'is-failed' : '' ?>">
                             <td class="is-check">
                                 <?php if ($r['can_pay'] || $r['can_print']): ?>
                                     <input type="checkbox"
@@ -100,7 +104,7 @@ $formKey = $block->getFormKey();
                                 <?php endif; ?>
                             </td>
                             <td class="frenet-code"><?= $escaper->escapeHtml($r['id']) ?></td>
-                            <td><?php if ($r['order_url']): ?><a href="<?= $escaper
+                            <td class="frenet-nowrap"><?php if ($r['order_url']): ?><a href="<?= $escaper
                                 ->escapeUrl($r['order_url']) ?>">#<?= $escaper->escapeHtml($r['order']) ?></a>
                                 <?php else: ?><span class="frenet-muted"
                                       title="<?= $escaper->escapeHtmlAttr(__(
@@ -111,7 +115,7 @@ $formKey = $block->getFormKey();
                             <td><span class="frenet-pill frenet-pill--<?= $escaper
                                 ->escapeHtmlAttr($r['tone']) ?>"><?= $escaper
                                 ->escapeHtml($r['status_label']) ?></span></td>
-                            <td><?= $escaper->escapeHtml($r['service'] ?: '—') ?></td>
+                            <td><?= /* @noEscape */ $svc ?></td>
                             <td class="is-num"><?= $r['price'] > 0
                                 ? $escaper->escapeHtml($common->money($r['price']))
                                 : '—' ?></td>
@@ -122,6 +126,7 @@ $formKey = $block->getFormKey();
                                 class="frenet-muted">—</span><?php endif; ?></td>
                             <td class="frenet-muted frenet-nowrap"><?= $escaper
                                 ->escapeHtml(substr($r['date'], 0, 16)) ?></td>
+                            <td class="frenet-issue"><?= /* @noEscape */ $common->issueHtml($r['issue']) ?></td>
                             <td class="frenet-row-actions">
                                 <?php if ($r['label_url']): ?>
                                     <a class="action-default frenet-btn-sm"
@@ -152,33 +157,35 @@ $formKey = $block->getFormKey();
                     </tbody>
                 </table>
             </div>
-            <div class="frenet-actionbar">
-                <span class="frenet-muted"
-                      data-frenet-count
-                      data-zero="<?= $escaper->escapeHtmlAttr(__('Select labels to pay or print.')) ?>"
-                      data-some="<?= $escaper->escapeHtmlAttr(__(
-                          '%1 label(s) selected'
-                      )) ?>"><?= $escaper->escapeHtml(__('Select labels to pay or print.')) ?></span>
-                <?php if ($common->config()->batchPrint()): ?>
-                    <label class="frenet-format"><?= $escaper->escapeHtml(__('Format')) ?>
-                        <select name="format" class="admin__control-select">
-                            <option value="A4" <?= $common->config()->printingFormat() === 'A4'
-                                ? 'selected'
-                                : '' ?>>A4</option>
-                            <option value="10x15" <?= $common->config()->printingFormat() === '10x15'
-                                ? 'selected'
-                                : '' ?>>10x15</option>
-                        </select></label>
-                    <button type="submit" class="action-default" data-frenet-print disabled
-                            formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/printPdf')) ?>"
-                            formtarget="_blank"><?= $escaper->escapeHtml(__('Print selected')) ?></button>
-                <?php endif; ?>
-                <button type="submit" class="action-primary" data-frenet-pay disabled
-                        formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/pay')) ?>"
-                        data-label="<?= $escaper->escapeHtmlAttr(__('Pay %1 · %2')) ?>"
-                        data-confirm="<?= $escaper->escapeHtmlAttr(__(
-                            'Pay %1 label(s) with the Frenet wallet (%2)?'
-                        )) ?>"><span><?= $escaper->escapeHtml(__('Pay selected')) ?></span></button>
+            <div class="frenet-bar" aria-live="polite">
+                <div class="frenet-bar__facts">
+                    <span class="frenet-bar__fact"><?= $escaper->escapeHtml(__('Selected labels')) ?>
+                        <strong data-frenet-sel-n>0</strong></span>
+                    <span class="frenet-bar__fact"><?= $escaper->escapeHtml(__('To pay')) ?>
+                        <strong data-frenet-sel-pay>—</strong></span>
+                </div>
+                <div class="frenet-bar__actions">
+                    <?php if ($common->config()->batchPrint()): ?>
+                        <label class="frenet-format"><?= $escaper->escapeHtml(__('Format')) ?>
+                            <select name="format" class="admin__control-select">
+                                <option value="A4" <?= $common->config()->printingFormat() === 'A4'
+                                    ? 'selected'
+                                    : '' ?>>A4</option>
+                                <option value="10x15" <?= $common->config()->printingFormat() === '10x15'
+                                    ? 'selected'
+                                    : '' ?>>10x15</option>
+                            </select></label>
+                        <button type="submit" class="action-default" data-frenet-print disabled
+                                formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/printPdf')) ?>"
+                                formtarget="_blank"><?= $escaper->escapeHtml(__('Print selected')) ?></button>
+                    <?php endif; ?>
+                    <button type="submit" class="action-primary" data-frenet-pay disabled
+                            formaction="<?= $escaper->escapeUrl($common->url('frenetshipping/labels/pay')) ?>"
+                            data-label="<?= $escaper->escapeHtmlAttr(__('Pay %1 · %2')) ?>"
+                            data-confirm="<?= $escaper->escapeHtmlAttr(__(
+                                'Pay %1 label(s) with the Frenet wallet (%2)?'
+                            )) ?>"><span><?= $escaper->escapeHtml(__('Pay selected')) ?></span></button>
+                </div>
             </div>
         </form>
     <?php endif; ?>

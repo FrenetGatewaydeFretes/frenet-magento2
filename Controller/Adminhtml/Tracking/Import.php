@@ -26,9 +26,13 @@ class Import extends Action implements HttpPostActionInterface
     /**
      * @param Context $context
      * @param Importer $importer
+     * @param ImportParser $parser
      */
-    public function __construct(Context $context, private readonly Importer $importer)
-    {
+    public function __construct(
+        Context $context,
+        private readonly Importer $importer,
+        private readonly ImportParser $parser
+    ) {
         parent::__construct($context);
     }
 
@@ -36,8 +40,6 @@ class Import extends Action implements HttpPostActionInterface
      * Handles step=preview | confirm | cancel.
      *
      * @return Redirect
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function execute(): Redirect
     {
@@ -71,7 +73,7 @@ class Import extends Action implements HttpPostActionInterface
             return $redirect;
         }
         $raw = (string) $this->getRequest()->getParam('lines');
-        $parsed = ImportParser::parse($raw);
+        $parsed = $this->parser->parse($raw);
         if (!$parsed['rows']) {
             $this->messageManager->addErrorMessage(__(
                 'No line could be read. Use one order per line: order number and tracking code, '

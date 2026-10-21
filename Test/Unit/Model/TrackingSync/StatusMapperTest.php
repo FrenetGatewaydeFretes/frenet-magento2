@@ -12,6 +12,7 @@ namespace Frenet\Shipping\Test\Unit\Model\TrackingSync;
 use Frenet\Shipping\Model\TrackingSync\StatusMapper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use SimpleXMLElement;
 
 /**
  * Unit tests of the Frenet tracking event to order status mapping.
@@ -50,7 +51,7 @@ class StatusMapperTest extends TestCase
     #[DataProvider('events')]
     public function testStatusFor(string $description, string $type, string $expected): void
     {
-        $this->assertSame($expected, StatusMapper::statusFor($description, $type));
+        $this->assertSame($expected, (new StatusMapper())->statusFor($description, $type));
     }
 
     /**
@@ -58,12 +59,35 @@ class StatusMapperTest extends TestCase
      */
     public function testServiceCodeAndEventTime(): void
     {
-        $this->assertSame('03298', StatusMapper::serviceCode('frenetshipping_03298'));
-        $this->assertSame('', StatusMapper::serviceCode('flatrate_flatrate'));
+        $this->assertSame('03298', (new StatusMapper())->serviceCode('frenetshipping_03298'));
+        $this->assertSame('', (new StatusMapper())->serviceCode('flatrate_flatrate'));
         $this->assertGreaterThan(
-            StatusMapper::eventTime('01/10/2026 10:00'),
-            StatusMapper::eventTime('02/10/2026 09:00')
+            (new StatusMapper())->eventTime('01/10/2026 10:00'),
+            (new StatusMapper())->eventTime('02/10/2026 09:00')
         );
-        $this->assertSame(0, StatusMapper::eventTime('ontem'));
+        $this->assertSame(0, (new StatusMapper())->eventTime('ontem'));
+    }
+
+    public function testDiXmlRulesEqualTheDefaults(): void
+    {
+        $xml = new SimpleXMLElement((string) file_get_contents(dirname(__DIR__, 4) . '/etc/di.xml'));
+        $xml->registerXPathNamespace('x', 'http://www.w3.org/2001/XMLSchema-instance');
+        $items = $xml->xpath(
+            '//type[@name="Frenet\\Shipping\\Model\\TrackingSync\\StatusMapper"]/arguments/argument[@name="rules"]/item'
+        );
+        $rules = [];
+        foreach ($items ?: [] as $item) {
+            $rule = [];
+            foreach ($item->item as $field) {
+                $type = (string) $field->attributes('http://www.w3.org/2001/XMLSchema-instance')['type'];
+                $rule[(string) $field['name']] = $type === 'const' ? constant((string) $field) : (string) $field;
+            }
+            $rules[(string) $item['name']] = $rule;
+        }
+        $this->assertSame(StatusMapper::DEFAULT_RULES, $rules);
+        $this->assertSame(
+            StatusMapper::DELIVERED,
+            (new StatusMapper($rules))->statusFor('Objeto entregue ao destinatário')
+        );
     }
 }

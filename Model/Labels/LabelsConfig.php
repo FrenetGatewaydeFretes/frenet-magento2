@@ -22,6 +22,7 @@ class LabelsConfig
 {
     public const PATH = 'carriers/frenetshipping/labels/';
     public const DEFAULT_API_URL = 'https://whitelabel.frenet.com.br/v1';
+    public const CONFIGURATION_URL = 'https://whitelabel-configuration.frenet.com.br/v1';
     public const JOURNEY_HERE = 'here';
     public const JOURNEY_PANEL = 'panel';
     public const PANEL_URL = 'https://painel.frenet.com.br/';
@@ -88,23 +89,25 @@ class LabelsConfig
     }
 
     /**
-     * Whether the API URL is not the real Frenet one (local test simulator).
-     *
-     * @return bool
-     */
-    public function isSimulated(): bool
-    {
-        return stripos($this->apiUrl(), self::DEFAULT_API_URL) !== 0;
-    }
-
-    /**
-     * "here" (buy and print in this admin) or "panel" (send to the Frenet panel).
+     * WhiteLabel configuration API (carriers, drop-off points).
      *
      * @return string
      */
-    public function journey(): string
+    public function configurationUrl(): string
     {
-        return $this->value('journey') === self::JOURNEY_PANEL ? self::JOURNEY_PANEL : self::JOURNEY_HERE;
+        return self::CONFIGURATION_URL;
+    }
+
+    /**
+     * Suffix for cached Frenet answers (wallet, carriers).
+     *
+     * They belong to one account on one API, so changing the tokens or the API URL never shows the previous ones.
+     *
+     * @return string
+     */
+    public function cacheScope(): string
+    {
+        return substr(hash('sha256', $this->apiUrl() . '|' . $this->storeToken() . '|' . $this->partnerToken()), 0, 16);
     }
 
     /**

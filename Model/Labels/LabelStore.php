@@ -61,6 +61,36 @@ class LabelStore
     }
 
     /**
+     * How many Frenet shipments the order ever had here (cancelled ones too).
+     *
+     * @param int $orderId
+     * @return int
+     */
+    public function countForOrder(int $orderId): int
+    {
+        $connection = $this->connection();
+        $select = $connection->select()->from($this->table(), 'COUNT(*)')->where('order_id = ?', $orderId);
+        return (int) $connection->fetchOne($select);
+    }
+
+    /**
+     * Orders whose Frenet labels were all cancelled or deleted, newest first.
+     *
+     * They can get a new label even when Magento already shipped them with the cancelled one.
+     *
+     * @param int $limit
+     * @return int[]
+     */
+    public function onlyGone(int $limit = 200): array
+    {
+        $connection = $this->connection();
+        $active = $connection->quoteInto('SUM(status NOT IN (?)) = 0', self::GONE);
+        $select = $connection->select()->from($this->table(), 'order_id');
+        $select->group('order_id')->having($active)->order('MAX(entity_id) DESC')->limit($limit);
+        return array_map('intval', $connection->fetchCol($select));
+    }
+
+    /**
      * Order ids (among the given ones) that already have a shipment that still exists.
      *
      * @param int[] $orderIds

@@ -7,6 +7,8 @@
  */
 /** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
 $common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\Carriers $carriers */
+$carriers = $block->getData('carriers');
 /** @var \Frenet\Shipping\ViewModel\Labels\LabelsList $vm */
 $vm = $block->getData('view_model');
 $route = (string) $block->getData('route');
@@ -63,6 +65,7 @@ $pages = $vm->pages();
                     </tr></thead>
                     <tbody>
                     <?php foreach ($data['rows'] as $r): ?>
+                        <?php $svc = $carriers->serviceHtml($r['carrier_code'], $r['carrier'], $r['service_code']); ?>
                         <tr>
                             <td class="is-check"><input type="checkbox"
                                 name="ids[]"
@@ -77,7 +80,7 @@ $pages = $vm->pages();
                             <td><span class="frenet-pill frenet-pill--<?= $escaper
                                 ->escapeHtmlAttr($r['tone']) ?>"><?= $escaper
                                 ->escapeHtml($r['status_label']) ?></span></td>
-                            <td><?= $escaper->escapeHtml($r['service'] ?: '—') ?></td>
+                            <td><?= /* @noEscape */ $svc ?></td>
                             <td class="frenet-code"><?= $escaper->escapeHtml($r['tracking'] ?: '—') ?></td>
                             <td><?php if ($r['label_url']): ?><a class="action-default frenet-btn-sm"
                                    href="<?= $escaper->escapeUrl($r['label_url']) ?>"
@@ -90,28 +93,26 @@ $pages = $vm->pages();
                 </table>
             </div>
             <?php if ($common->config()->batchPrint()): ?>
-                <div class="frenet-actionbar">
-                    <span class="frenet-muted"
-                          data-frenet-count
-                          data-zero="<?= $escaper->escapeHtmlAttr(__('Select the labels to print.')) ?>"
-                          data-some="<?= $escaper->escapeHtmlAttr(__(
-                              '%1 label(s) selected'
-                          )) ?>"><?= $escaper->escapeHtml(__('Select the labels to print.')) ?></span>
-                    <fieldset class="frenet-journey frenet-journey--inline">
-                        <legend><?= $escaper->escapeHtml(__('Format')) ?></legend>
-                        <label><input type="radio"
-                            name="format"
-                            value="A4"
-                            <?= $common->config()->printingFormat() === 'A4' ? 'checked' : '' ?>/> A4</label>
-                        <label><input type="radio"
-                            name="format"
-                            value="10x15"
-                            <?= $common->config()->printingFormat() === '10x15' ? 'checked' : '' ?>/> 10x15</label>
-                    </fieldset>
-                    <button type="submit"
-                            class="action-primary"
-                            data-frenet-needs-selection
-                            disabled><span><?= $escaper->escapeHtml(__('Print selected')) ?></span></button>
+                <div class="frenet-bar" aria-live="polite">
+                    <div class="frenet-bar__facts">
+                        <span class="frenet-bar__fact"><?= $escaper->escapeHtml(__('Selected labels')) ?>
+                            <strong data-frenet-sel-n>0</strong></span>
+                    </div>
+                    <div class="frenet-bar__actions">
+                        <label class="frenet-format"><?= $escaper->escapeHtml(__('Format')) ?>
+                            <select name="format" class="admin__control-select">
+                                <option value="A4" <?= $common->config()->printingFormat() === 'A4'
+                                    ? 'selected'
+                                    : '' ?>>A4</option>
+                                <option value="10x15" <?= $common->config()->printingFormat() === '10x15'
+                                    ? 'selected'
+                                    : '' ?>>10x15</option>
+                            </select></label>
+                        <button type="submit"
+                                class="action-primary"
+                                data-frenet-needs-selection
+                                disabled><span><?= $escaper->escapeHtml(__('Print selected')) ?></span></button>
+                    </div>
                 </div>
             <?php endif; ?>
         </form>

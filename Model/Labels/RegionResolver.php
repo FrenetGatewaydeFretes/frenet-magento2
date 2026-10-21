@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Frenet\Shipping\Model\Labels;
 
 use Magento\Directory\Model\RegionFactory;
+use Magento\Directory\Model\ResourceModel\Region as RegionResource;
 
 /**
  * Brazilian state (UF) as the 2-letter code. Some addresses keep the state name ("Rio de Janeiro")
@@ -19,9 +20,12 @@ class RegionResolver
 {
     /**
      * @param RegionFactory $regionFactory
+     * @param RegionResource $regionResource
      */
-    public function __construct(private readonly RegionFactory $regionFactory)
-    {
+    public function __construct(
+        private readonly RegionFactory $regionFactory,
+        private readonly RegionResource $regionResource
+    ) {
     }
 
     /**
@@ -40,10 +44,10 @@ class RegionResolver
         }
         $region = $this->regionFactory->create();
         if ($regionId) {
-            $region->load($regionId);
+            $this->regionResource->load($region, $regionId);
         }
         if (!$region->getId()) {
-            $region->loadByName(trim($name !== '' ? $name : $code), 'BR');
+            $this->regionResource->loadByName($region, trim($name !== '' ? $name : $code), 'BR');
         }
         return $region->getId() ? strtoupper((string) $region->getCode()) : strtoupper($code);
     }

@@ -21,7 +21,7 @@ class NfeKey
      * @param string $key
      * @return string
      */
-    public static function normalize(string $key): string
+    public function normalize(string $key): string
     {
         return (string) preg_replace('/\D/', '', $key);
     }
@@ -32,13 +32,13 @@ class NfeKey
      * @param string $key
      * @return bool
      */
-    public static function isValid(string $key): bool
+    public function isValid(string $key): bool
     {
-        $key = self::normalize($key);
+        $key = $this->normalize($key);
         if (strlen($key) !== 44) {
             return false;
         }
-        return self::checkDigit(substr($key, 0, 43)) === (int) $key[43];
+        return $this->checkDigit(substr($key, 0, 43)) === (int) $key[43];
     }
 
     /**
@@ -47,7 +47,7 @@ class NfeKey
      * @param string $digits43
      * @return int
      */
-    public static function checkDigit(string $digits43): int
+    public function checkDigit(string $digits43): int
     {
         $sum = 0;
         $weight = 2;
@@ -65,9 +65,9 @@ class NfeKey
      * @param string $key
      * @return array{number: string, series: string, cnpj: string, model: string}
      */
-    public static function parse(string $key): array
+    public function parse(string $key): array
     {
-        $key = self::normalize($key);
+        $key = $this->normalize($key);
         return [
             'number' => ltrim(substr($key, 25, 9), '0') ?: '0',
             'series' => ltrim(substr($key, 22, 3), '0') ?: '0',

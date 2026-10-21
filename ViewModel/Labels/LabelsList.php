@@ -9,21 +9,15 @@ declare(strict_types=1);
 
 namespace Frenet\Shipping\ViewModel\Labels;
 
-use Frenet\Shipping\Model\Labels\Client;
-use Frenet\Shipping\Model\Labels\LabelException;
-use Frenet\Shipping\Model\Labels\LabelsConfig;
-use Frenet\Shipping\Model\Labels\ShipmentService;
+use Frenet\Shipping\Model\Labels\LabelRows;
 use Frenet\Shipping\Model\Labels\StatusName;
 use Magento\Backend\Model\UrlInterface;
 use Magento\Framework\App\RequestInterface;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 
 /**
- * "Manage your labels" and "Printing": one page of GET /shipments (every label of the Frenet account, also the
- * ones bought in the Frenet panel), newest first, with the status filter in the URL.
- *
- * @SuppressWarnings(PHPMD.StaticAccess)
+ * "Manage your labels" and "Printing": the page and status filter from the URL, the rows from LabelRows and the
+ * admin URLs the templates need.
  */
 class LabelsList implements ArgumentInterface
 {
@@ -34,18 +28,16 @@ class LabelsList implements ArgumentInterface
 
     /**
      * @param RequestInterface $request
-     * @param Client $client
-     * @param LabelsConfig $config
-     * @param ResourceConnection $resource
+     * @param LabelRows $rows
      * @param UrlInterface $url
+     * @param StatusName $statusNames
      * @param mixed[] $statuses Statuses shown by this screen (empty: all); "Printing" passes the paid ones.
      */
     public function __construct(
         private readonly RequestInterface $request,
-        private readonly Client $client,
-        private readonly LabelsConfig $config,
-        private readonly ResourceConnection $resource,
+        private readonly LabelRows $rows,
         private readonly UrlInterface $url,
+        private readonly StatusName $statusNames,
         private readonly array $statuses = []
     ) {
     }
@@ -74,67 +66,17 @@ class LabelsList implements ArgumentInterface
      * Rows of the page (after the filters), total of the account and error text.
      *
      * @return array{total: int, rows: mixed[], error: string, counts: int[]}
-     *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function data(): array
     {
-        if ($this->data !== null) {
-            return $this->data;
-        }
-        $this->data = ['total' => 0, 'rows' => [], 'error' => '', 'counts' => []];
-        if (!$this->config->isAvailable()) {
-            return $this->data;
-        }
-        try {
-            $res = $this->client->whitelabel('GET', '/shipments?page=' . $this->page() . '&per_page=' . self::PER_PAGE);
-        } catch (LabelException $e) {
-            $this->data['error'] = $e->getMessage();
-            return $this->data;
-        }
-        $this->data['total'] = (int) (Client::field($res, 'total') ?? 0);
-        $list = (array) (Client::field($res, 'shipments') ?? []);
-        $orders = $this->localOrders(array_map(static fn ($shipment) => (string) ($shipment['orderId'] ?? ''), $list));
-        foreach ($list as $shipment) {
-            $status = (int) ($shipment['shipmentStatus'] ?? 0);
-            if ($this->allowed() && !in_array($status, $this->allowed(), true)) {
-                continue;
+        if ($this->data === null) {
+            $this->data = $this->rows->page($this->page(), self::PER_PAGE, $this->allowed(), $this->statusFilter());
+            foreach ($this->data['rows'] as &$row) {
+                $row['order_url'] = $row['order_id']
+                    ? $this->url->getUrl('sales/order/view', ['order_id' => $row['order_id']])
+                    : '';
             }
-            $this->data['counts'][$status] = ($this->data['counts'][$status] ?? 0) + 1;
-            if ($this->statusFilter() && $status !== $this->statusFilter()) {
-                continue;
-            }
-            $quote = (array) ($shipment['quotation'] ?? []);
-            $volume = (array) (((array) ($shipment['volumes'] ?? []))[0] ?? []);
-            $orderId = (string) ($shipment['orderId'] ?? '');
-            $paid = in_array($status, ShipmentService::PAID, true);
-            $this->data['rows'][] = [
-                'id' => (string) ($shipment['shipmentId'] ?? ''),
-                'order' => $orderId,
-                'order_url' => isset($orders[$orderId])
-                    ? $this->url->getUrl('sales/order/view', ['order_id' => $orders[$orderId]]) : '',
-                'status' => $status,
-                'status_label' => StatusName::label($status),
-                'tone' => StatusName::tone($status),
-                'service' => trim(($quote['carrierCode'] ?? '') . ' ' . ($quote['shippingServiceCode'] ?? '')),
-                'price' => (float) ($quote['shippingPrice'] ?? $quote['platformShippingPrice'] ?? 0),
-                'tracking_url' => (string) ($shipment['trackingUrl'] ?? ''),
-                'tracking' => (string) preg_replace(
-                    '#^.*/#',
-                    '',
-                    rtrim((string) ($shipment['trackingUrl'] ?? ''), '/')
-                ),
-                'label_url' => $paid ? (string) ($shipment['labelUrl'] ?? '') : '',
-                'can_pay' => in_array(
-                    $status,
-                    [ShipmentService::STATUS_CREATED, ShipmentService::STATUS_PENDING_PAYMENT],
-                    true
-                ),
-                'can_print' => $paid,
-                'can_cancel' => !in_array($status, [6, 7, 9], true),
-                'date' => (string) ($volume['modifiedOn'] ?? ''),
-            ];
+            unset($row);
         }
         return $this->data;
     }
@@ -156,7 +98,7 @@ class LabelsList implements ArgumentInterface
      */
     public function statusOptions(): array
     {
-        $all = array_map(static fn ($option) => $option[0], StatusName::all());
+        $all = array_map(static fn ($option) => $option[0], $this->statusNames->all());
         return $this->allowed() ? array_intersect_key($all, array_flip($this->allowed())) : $all;
     }
 
@@ -181,23 +123,5 @@ class LabelsList implements ArgumentInterface
     private function allowed(): array
     {
         return array_values(array_map('intval', $this->statuses));
-    }
-
-    /**
-     * Local orders (increment id → entity id) among the Frenet order ids.
-     *
-     * @param string[] $incrementIds
-     * @return array<string, int>
-     */
-    private function localOrders(array $incrementIds): array
-    {
-        $ids = array_values(array_filter(array_unique($incrementIds), fn ($value): bool => (string) $value !== ''));
-        if (!$ids) {
-            return [];
-        }
-        $connection = $this->resource->getConnection('sales');
-        return array_map('intval', $connection->fetchPairs($connection->select()
-            ->from($this->resource->getTableName('sales_order'), ['increment_id', 'entity_id'])
-            ->where('increment_id IN (?)', $ids)));
     }
 }

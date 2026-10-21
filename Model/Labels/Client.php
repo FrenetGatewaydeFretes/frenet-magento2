@@ -16,6 +16,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 use Magento\Framework\Serialize\Serializer\Json;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -35,12 +36,14 @@ class Client
      * @param LabelsConfig $config
      * @param Json $json
      * @param LoggerInterface $logger
+     * @param ResponseReader $reader
      */
     public function __construct(
         private readonly ClientFactory $clientFactory,
         private readonly LabelsConfig $config,
         private readonly Json $json,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ResponseReader $reader
     ) {
     }
 
@@ -146,64 +149,26 @@ class Client
     }
 
     /**
-     * Reads $key in camelCase or PascalCase (WhiteLabel answers camelCase, the docs show PascalCase).
+     * WhiteLabel configuration call: carriers, drop-off points and the default point of the store profile.
      *
-     * @param mixed[] $data
-     * @param int|string $key
-     * @return mixed
+     * Same two tokens, its own host. Validated live 2026-10-14: GET /carriers/services,
+     * GET /carriers/{code}/zipcode/{cep}/branches (404 when the carrier has no drop-off points, e.g. Correios),
+     * GET and PUT /profile/{code}/defaultbranch (404 when there is none yet; the PUT only works for Jadlog today,
+     * the others answer 400 "Unidade não existe").
+     *
+     * @param string $method
+     * @param string $path Path after /v1, e.g. "/carriers/services".
+     * @param mixed $body
+     * @return mixed[]
+     * @throws LabelException With the HTTP status as code.
      */
-    public static function field(array $data, $key)
+    public function configuration(string $method, string $path, $body = null): array
     {
-        if (array_key_exists($key, $data)) {
-            return $data[$key];
-        }
-        if (is_string($key) && array_key_exists(ucfirst($key), $data)) {
-            return $data[ucfirst($key)];
-        }
-        return null;
+        return $this->request($method, $this->config->configurationUrl() . $path, $body, true, self::TIMEOUT_QUOTE * 2);
     }
 
     /**
-     * Hides the store token that Frenet embeds (base64) in label and declaration URLs (?p=...).
-     *
-     * @param string $text
-     * @return string
-     */
-    public static function redact(string $text): string
-    {
-        return (string) preg_replace('/([?&]p=)[^&"\s]+/', '$1***', $text);
-    }
-
-    /**
-     * Keeps only the human part of a Frenet error and explains the known ones.
-     *
-     * @param string $message
-     * @return string
-     */
-    public static function cleanError(string $message): string
-    {
-        if (stripos($message, 'acesso negado para o parceiro') !== false) {
-            return (string) __(
-                'Frenet refused the partner token. Check the partner token in the labels settings. '
-                . 'Nothing was charged.'
-            );
-        }
-        if (stripos($message, 'acesso negado para o cliente') !== false) {
-            return (string) __('Frenet refused the customer token. Check the Frenet token. Nothing was charged.');
-        }
-        if (stripos($message, 'nota fiscal') !== false) {
-            return (string) __(
-                'This service requires an invoice (NF-e). Paste the NF-e key of the order and try again. '
-                . 'Nothing was charged.'
-            );
-        }
-        $message = (string) preg_replace('/\s*-->.*$/s', '', $message);
-        $message = (string) preg_replace('/(Detalhes )?identificador:\s*[0-9a-f-]{36}\s*/i', '', $message);
-        return trim($message);
-    }
-
-    /**
-     * Sends the request and decodes the JSON answer.
+     * Sends the request and decodes the JSON answer; a non-2xx answer becomes a LabelException.
      *
      * @param string $method
      * @param string $url
@@ -213,9 +178,6 @@ class Client
      * @param string $printingFormat
      * @return mixed[]
      * @throws LabelException
-     *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function request(
         string $method,
@@ -225,6 +187,28 @@ class Client
         int $timeout,
         string $printingFormat = 'A4'
     ): array {
+        $response = $this->send($method, $url, $this->options($body, $partner, $timeout, $printingFormat));
+        $status = $response->getStatusCode();
+        $raw = (string) $response->getBody();
+        $data = $this->decode($raw);
+        if ($status < 200 || $status >= 300) {
+            throw $this->failure($method, $url, $status, $data, $raw);
+        }
+        return $data;
+    }
+
+    /**
+     * Guzzle options: tokens, printing format (partner calls), timeouts and the JSON body.
+     *
+     * @param mixed $body
+     * @param bool $partner
+     * @param int $timeout
+     * @param string $printingFormat
+     * @return mixed[]
+     * @throws LabelException When the store token is missing.
+     */
+    private function options($body, bool $partner, int $timeout, string $printingFormat): array
+    {
         $token = $this->config->storeToken();
         if ($token === '') {
             throw new LabelException(__('Frenet token not configured.'));
@@ -244,37 +228,72 @@ class Client
         if ($body !== null) {
             $options[RequestOptions::BODY] = $this->json->serialize($body);
         }
+        return $options;
+    }
+
+    /**
+     * The HTTP exchange itself; a transport failure (DNS, timeout) becomes a LabelException.
+     *
+     * @param string $method
+     * @param string $url
+     * @param mixed[] $options
+     * @return ResponseInterface
+     * @throws LabelException
+     */
+    private function send(string $method, string $url, array $options): ResponseInterface
+    {
         try {
             /** @var HttpClient $client */
             $client = $this->clientFactory->create();
-            $response = $client->request($method, $url, $options);
+            return $client->request($method, $url, $options);
         } catch (GuzzleException $e) {
             $this->logger->error('Frenet labels ' . $method . ' ' . $url . ': ' . $e->getMessage());
             /** @var Exception&GuzzleException $cause */
             $cause = $e;
             throw new LabelException(__('Frenet did not answer (%1).', $e->getMessage()), $cause);
         }
-        $status = $response->getStatusCode();
-        $raw = (string) $response->getBody();
-        $data = [];
-        if ($raw !== '') {
-            try {
-                $data = (array) $this->json->unserialize($raw);
-            } catch (InvalidArgumentException $e) {
-                $data = [];
-            }
+    }
+
+    /**
+     * Decoded JSON body; an empty or invalid body is an empty array (the HTTP status decides).
+     *
+     * @param string $raw
+     * @return mixed[]
+     */
+    private function decode(string $raw): array
+    {
+        if ($raw === '') {
+            return [];
         }
-        if ($status < 200 || $status >= 300) {
-            $message = (string) (self::field($data, 'message') ?? self::field($data, 'title') ?? ('HTTP ' . $status));
-            $details = (array) (self::field($data, 'details') ?? []);
-            if ($details && is_array($details[0] ?? null)) {
-                $message .= ' ' . (string) (self::field($details[0], 'message') ?? '');
-            }
-            $this->logger->error(
-                'Frenet labels ' . $method . ' ' . $url . ' HTTP ' . $status . ': ' . self::redact(substr($raw, 0, 500))
-            );
-            throw new LabelException(__('%1', self::cleanError(trim($message))));
+        try {
+            return (array) $this->json->unserialize($raw);
+        } catch (InvalidArgumentException $e) {
+            return [];
         }
-        return $data;
+    }
+
+    /**
+     * Exception for a non-2xx answer: Frenet's message (plus the first detail), cleaned, with the HTTP status as code.
+     *
+     * @param string $method
+     * @param string $url
+     * @param int $status
+     * @param mixed[] $data
+     * @param string $raw
+     * @return LabelException
+     */
+    private function failure(string $method, string $url, int $status, array $data, string $raw): LabelException
+    {
+        $message = (string) ($this->reader->field($data, 'message')
+            ?? $this->reader->field($data, 'title') ?? ('HTTP ' . $status));
+        $details = (array) ($this->reader->field($data, 'details') ?? []);
+        if ($details && is_array($details[0] ?? null)) {
+            $message .= ' ' . (string) ($this->reader->field($details[0], 'message') ?? '');
+        }
+        $this->logger->error(
+            'Frenet labels ' . $method . ' ' . $url . ' HTTP ' . $status . ': '
+            . $this->reader->redact(substr($raw, 0, 500))
+        );
+        return new LabelException(__('%1', $this->reader->cleanError(trim($message))), null, $status);
     }
 }

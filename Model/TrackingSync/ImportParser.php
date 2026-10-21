@@ -1,7 +1,7 @@
 <?php
 /**
  * Frenet Shipping Gateway — parses pasted lines "order number <sep> tracking code" (sep: ; , tab or spaces).
- * Blank lines and a header row are skipped. Pure function (unit tested).
+ * Blank lines and a header row are skipped. Injected service, unit tested.
  *
  * @category Frenet
  */
@@ -18,7 +18,7 @@ class ImportParser
      * @param string $text
      * @return array{rows: array<int, array{order: string, code: string}>, invalid: array<int, int>}
      */
-    public static function parse(string $text): array
+    public function parse(string $text): array
     {
         $rows = [];
         $invalid = [];

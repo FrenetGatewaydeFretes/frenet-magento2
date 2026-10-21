@@ -11,6 +11,7 @@
                     <resource id="Frenet_Shipping::labels" title="Manage labels (pay, cancel)" translate="title" sortOrder="20"/>
                     <resource id="Frenet_Shipping::print" title="Print labels" translate="title" sortOrder="30"/>
                     <resource id="Frenet_Shipping::tracking" title="Tracking" translate="title" sortOrder="40"/>
+                    <resource id="Frenet_Shipping::dropoff" title="Drop-off point of each carrier" translate="title" sortOrder="50"/>
                 </resource>
             </resource>
         </resources>

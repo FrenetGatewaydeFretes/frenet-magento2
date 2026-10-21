@@ -20,8 +20,6 @@ use Magento\Sales\Model\Order\Item;
  * - Order.Created is ISO 8601 UTC with milliseconds;
  * - Quotation needs Carrier, CarrierCode, ShippingPrice and DeliveryTime (else HTTP 500 null reference);
  * - Order.From needs the full sender address even with UseFrenetRegistration.
- *
- * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class PayloadBuilder
 {
@@ -29,11 +27,17 @@ class PayloadBuilder
      * @param LabelsConfig $config
      * @param RegionResolver $regions
      * @param InvoiceStore $invoices
+     * @param AddressMapper $addresses
+     * @param FrenetOrderId $orderIds
+     * @param NfeKey $nfeKeys
      */
     public function __construct(
         private readonly LabelsConfig $config,
         private readonly RegionResolver $regions,
-        private readonly InvoiceStore $invoices
+        private readonly InvoiceStore $invoices,
+        private readonly AddressMapper $addresses,
+        private readonly FrenetOrderId $orderIds,
+        private readonly NfeKey $nfeKeys
     ) {
     }
 
@@ -61,9 +65,13 @@ class PayloadBuilder
      * @param Item $item
      * @return float
      */
-    public function unitWeightKg(Item $item): float
+    private function unitWeightKg(Item $item): float
     {
-        $weight = (float) $item->getWeight();
+        // Same fallback as the checkout quote: the default weight of the settings when the product has none, so an
+        // order that quoted at checkout can also get its label.
+        $weight = (float) $item->getWeight() ?: (float) $this->config->storeValue(
+            'carriers/frenetshipping/default_measurements/default_weight'
+        );
         return $this->config->storeValue('general/locale/weight_unit') === 'lbs'
             ? round($weight * 0.45359237, 3)
             : $weight;
@@ -75,7 +83,7 @@ class PayloadBuilder
      * @param Item $item
      * @return array{length: float, height: float, width: float}
      */
-    public function dimensions(Item $item): array
+    private function dimensions(Item $item): array
     {
         $product = $item->getProduct();
         $get = function (string $dim, float $default) use ($product): float {
@@ -146,7 +154,7 @@ class PayloadBuilder
     public function sender(int $storeId): array
     {
         $info = fn (string $key): string => $this->config->storeValue('general/store_information/' . $key, $storeId);
-        $address = AddressMapper::toFrenet(
+        $address = $this->addresses->toFrenet(
             array_filter(
                 [$info('street_line1'), $info('street_line2')],
                 fn ($value): bool => (string) $value !== ''
@@ -176,10 +184,11 @@ class PayloadBuilder
      *
      * @param Order $order
      * @param mixed[] $service Chosen service: code, carrier, carrier_code, name, price, days.
+     * @param int $attempt 1 for the first Frenet shipment of the order (see FrenetOrderId).
      * @return mixed[]
      * @throws LocalizedException
      */
-    public function build(Order $order, array $service): array
+    public function build(Order $order, array $service, int $attempt = 1): array
     {
         $shipping = $order->getShippingAddress();
         if (!$shipping) {
@@ -209,7 +218,7 @@ class PayloadBuilder
         $document = (string) ($order->getCustomerTaxvat() ?: $shipping->getVatId());
         $payload = [
             'Order' => [
-                'Id' => (string) $order->getIncrementId(),
+                'Id' => $this->orderIds->build((string) $order->getIncrementId(), $attempt),
                 'Value' => $value,
                 'Created' => gmdate('Y-m-d\TH:i:s.000\Z', $created),
                 'UseFrenetRegistration' => true,
@@ -220,7 +229,7 @@ class PayloadBuilder
                     'Email' => (string) $order->getCustomerEmail(),
                     'Phone' => (string) $shipping->getTelephone(),
                     'Document' => (string) preg_replace('/\D/', '', $document),
-                    'Address' => AddressMapper::toFrenet(
+                    'Address' => $this->addresses->toFrenet(
                         (array) $shipping->getStreet(),
                         (string) $shipping->getCity(),
                         $this->regions->code(
@@ -260,7 +269,29 @@ class PayloadBuilder
     }
 
     /**
-     * Order.Invoice from the NF-e key saved for the order (null when there is none).
+     * NF-e key saved for the order ('' when none).
+     *
+     * @param int $orderId
+     * @return string
+     */
+    public function invoiceKey(int $orderId): string
+    {
+        return $this->invoices->get($orderId);
+    }
+
+    /**
+     * Whether a key is a valid NF-e access key (44 digits, correct check digit).
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function validInvoiceKey(string $key): bool
+    {
+        return $key !== '' && $this->nfeKeys->isValid($key);
+    }
+
+    /**
+     * NF-e block of the shipment payload, or null when the order has no valid key.
      *
      * @param Order $order
      * @return mixed[]|null
@@ -268,10 +299,10 @@ class PayloadBuilder
     public function invoice(Order $order): ?array
     {
         $key = $this->invoices->get((int) $order->getId());
-        if ($key === '' || !NfeKey::isValid($key)) {
+        if ($key === '' || !$this->nfeKeys->isValid($key)) {
             return null;
         }
-        $nfe = NfeKey::parse($key);
+        $nfe = $this->nfeKeys->parse($key);
         $created = strtotime((string) $order->getCreatedAt()) ?: time();
         return [
             'Key' => $key,
