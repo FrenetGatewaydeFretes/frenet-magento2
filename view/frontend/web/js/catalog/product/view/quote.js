@@ -84,8 +84,12 @@ define([
         },
         processFailure: function (result) {
             // console.log("RESULT FAILURE", result);
+            var response = result.responseJSON || result;
+
             this.reset();
-            this.errorMessage(result.message);
+            this.errorMessage(
+                response.message || $.mage.__('Unable to quote the shipping right now. Please try again later.')
+            );
             this.error(true);
         },
         processAlways: function (result) {

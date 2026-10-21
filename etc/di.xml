@@ -23,6 +23,8 @@
     <preference for="Frenet\Shipping\Model\TrackingInterface" type="Frenet\Shipping\Model\Tracking"/>
     <preference for="Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface" type="Frenet\Shipping\Model\Quote\MultiQuoteValidator"/>
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
+    <preference for="Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiterInterface" type="Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiter"/>
+    <preference for="Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolverInterface" type="Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolver"/>
     <!-- Address by CEP (checkout) -->
     <preference for="Frenet\Shipping\Api\CepLookupInterface" type="Frenet\Shipping\Model\Cep\CepLookup"/>
     <preference for="Frenet\Shipping\Api\Data\CepAddressInterface" type="Frenet\Shipping\Model\Cep\CepAddress"/>

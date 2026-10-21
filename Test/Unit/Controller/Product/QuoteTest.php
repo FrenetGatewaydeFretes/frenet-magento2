@@ -15,6 +15,8 @@ namespace Frenet\Shipping\Test\Unit\Controller\Product;
 
 use Frenet\Shipping\Api\QuoteProductInterface;
 use Frenet\Shipping\Controller\Product\Quote;
+use Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiterInterface;
+use Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolverInterface;
 use Frenet\Shipping\Model\ConfigInterface;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\RequestInterface;
@@ -59,6 +61,16 @@ class QuoteTest extends TestCase
     private MockObject $logger;
 
     /**
+     * @var QuoteRateLimiterInterface&MockObject
+     */
+    private MockObject $rateLimiter;
+
+    /**
+     * @var int|null
+     */
+    private ?int $httpResponseCode = null;
+
+    /**
      * @var Quote
      */
     private Quote $subject;
@@ -80,6 +92,11 @@ class QuoteTest extends TestCase
 
             return $json;
         });
+        $json->method('setHttpResponseCode')->willReturnCallback(function (int $code) use ($json) {
+            $this->httpResponseCode = $code;
+
+            return $json;
+        });
         $resultFactory = $this->createMock(ResultFactory::class);
         $resultFactory->method('create')->with(ResultFactory::TYPE_JSON)->willReturn($json);
 
@@ -91,8 +108,18 @@ class QuoteTest extends TestCase
         $this->config = $this->createMock(ConfigInterface::class);
         $this->config->method('getMaxUnitQuantity')->willReturn(5000);
         $this->logger = $this->createMock(LoggerInterface::class);
+        $this->rateLimiter = $this->createMock(QuoteRateLimiterInterface::class);
+        $visitorResolver = $this->createMock(QuoteVisitorResolverInterface::class);
+        $visitorResolver->method('resolve')->with($request)->willReturn('203.0.113.5');
 
-        $this->subject = new Quote($context, $this->quoteProduct, $this->config, $this->logger);
+        $this->subject = new Quote(
+            $context,
+            $this->quoteProduct,
+            $this->config,
+            $this->logger,
+            $this->rateLimiter,
+            $visitorResolver
+        );
     }
 
     /**
@@ -134,6 +161,7 @@ class QuoteTest extends TestCase
     public function testShouldReturnTheRatesForAValidRequest(): void
     {
         $this->enableQuote(true);
+        $this->rateLimiter->method('isAllowed')->with('203.0.113.5')->willReturn(true);
         $this->quoteProduct->method('quoteByProductId')
             ->with(7, '01310-100', 2)
             ->willReturn([['service_code' => '03298']]);
@@ -151,6 +179,7 @@ class QuoteTest extends TestCase
     public function testShouldShowTheMessageOfALocalizedException(): void
     {
         $this->enableQuote(true);
+        $this->rateLimiter->method('isAllowed')->willReturn(true);
         $this->quoteProduct->method('quoteByProductId')
             ->willThrowException(new LocalizedException(__('Out of range.')));
 
@@ -167,6 +196,7 @@ class QuoteTest extends TestCase
     public function testShouldHideAndLogAnUnexpectedError(): void
     {
         $this->enableQuote(true);
+        $this->rateLimiter->method('isAllowed')->willReturn(true);
         $this->quoteProduct->method('quoteByProductId')->willThrowException(new RuntimeException('SQLSTATE[42S02]'));
         $this->logger->expects($this->once())->method('critical');
 
@@ -176,6 +206,61 @@ class QuoteTest extends TestCase
             ['error' => true, 'message' => 'Unable to quote the shipping right now. Please try again later.'],
             $this->payload
         );
+    }
+
+    /**
+     * Confirms a visitor over the limit gets HTTP 429 and a message, without any call to the Frenet API.
+     *
+     * @return void
+     */
+    public function testShouldAnswerTooManyRequestsWithoutQuotingWhenTheLimitIsReached(): void
+    {
+        $this->enableQuote(true);
+        $this->rateLimiter->method('isAllowed')->with('203.0.113.5')->willReturn(false);
+        $this->quoteProduct->expects($this->never())->method('quoteByProductId');
+
+        $this->subject->execute();
+
+        $this->assertSame(429, $this->httpResponseCode);
+        $this->assertSame(
+            [
+                'error' => true,
+                'message' => 'Too many shipping quotes in a short time. Please wait a minute and try again.',
+            ],
+            $this->payload
+        );
+    }
+
+    /**
+     * Confirms a request refused for its own input does not count towards the limit, as it never reaches the API.
+     *
+     * @return void
+     */
+    public function testShouldNotCountARequestRefusedForItsInput(): void
+    {
+        $this->enableQuote(true);
+        $this->params['qty'] = 0;
+        $this->rateLimiter->expects($this->never())->method('isAllowed');
+
+        $this->subject->execute();
+
+        $this->assertSame(['error' => true, 'message' => 'Invalid quantity informed.'], $this->payload);
+    }
+
+    /**
+     * Confirms an allowed request keeps the default HTTP status.
+     *
+     * @return void
+     */
+    public function testShouldKeepTheDefaultStatusWhenTheLimitIsNotReached(): void
+    {
+        $this->enableQuote(true);
+        $this->rateLimiter->method('isAllowed')->willReturn(true);
+        $this->quoteProduct->method('quoteByProductId')->willReturn([]);
+
+        $this->subject->execute();
+
+        $this->assertNull($this->httpResponseCode);
     }
 
     /**
