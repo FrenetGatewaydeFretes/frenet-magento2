@@ -12,6 +12,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 
 - **Cotação de frete em tempo real** no carrinho e no checkout, via API da Frenet, com todas as transportadoras habilitadas na sua conta (Correios, Jadlog, transportadoras parceiras, etc).
 - **Cotação de frete na página de produto**, antes de adicionar ao carrinho — configurável por tipo de produto (simples, configurável, bundle, agrupado).
+- **Limite de cotações na página de produto**, por visitante e por loja a cada minuto (padrões 60 e 1000), para que um script não consuma a cota da sua conta na API da Frenet. Funciona com qualquer cache do Magento, atrás de proxy ou CDN, e nunca limita o carrinho nem o checkout.
 - **Divisão automática em múltiplos pacotes** (*multi-quote*) quando o peso total do carrinho excede o peso máximo configurado por pacote (padrão 30kg), com cálculo de empacotamento O(1) independente da quantidade de itens.
 - **Mapeamento de atributos de produto** para peso, altura, largura e comprimento — use os atributos padrão ou aponte para atributos customizados do seu catálogo.
 - **Rastreio de encomendas** integrado (`Model/Tracking.php`), exibindo o status de entrega da Frenet direto no Magento.
