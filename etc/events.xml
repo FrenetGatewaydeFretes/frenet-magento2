@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — automatic tracking: a Frenet code added to a shipment moves the order to "Em transporte".
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_shipment_track_save_after">
+        <observer name="frenet_shipping_tracking_in_transit" instance="Frenet\Shipping\Observer\TrackingSync\TrackAdded"/>
+    </event>
+</config>

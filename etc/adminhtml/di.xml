@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — admin only wiring.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Sales\Block\Adminhtml\Order\View">
+        <plugin name="frenet_shipping_labels_order_buttons" type="Frenet\Shipping\Plugin\Labels\OrderViewButtons"/>
+    </type>
+    <!-- "Printing" shows only paid labels (paid, posted, at the drop-off point). -->
+    <virtualType name="Frenet\Shipping\ViewModel\Labels\PaidLabelsList" type="Frenet\Shipping\ViewModel\Labels\LabelsList">
+        <arguments>
+            <argument name="statuses" xsi:type="array">
+                <item name="paid" xsi:type="number">4</item>
+                <item name="posted" xsi:type="number">5</item>
+                <item name="drop_off" xsi:type="number">18</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>
