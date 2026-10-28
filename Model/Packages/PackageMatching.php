@@ -185,7 +185,7 @@ class PackageMatching
     }
 
     /**
-     * Splits the incoming results into the full-call list and the per-package lists.
+     * Clears the previous quote and splits the incoming results into the full-call list and the per-package lists.
      *
      * @param Service[][] $results
      *
@@ -193,6 +193,7 @@ class PackageMatching
      */
     private function init(array $results): self
     {
+        $this->services = [];
         $this->fullResults = $results['full'] ?? [];
         unset($results['full']);
         $this->results = $results;

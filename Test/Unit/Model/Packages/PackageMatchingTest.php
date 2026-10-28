@@ -112,6 +112,27 @@ class PackageMatchingTest extends TestCase
     }
 
     /**
+     * A second quote in the same request starts from zero instead of adding to the totals of the first one.
+     *
+     * @return void
+     */
+    public function testShouldNotCarryTheTotalsOfAPreviousQuoteWhenMatchingAgain(): void
+    {
+        $results = [
+            'full' => [],
+            0 => [$this->service('03298', 'Correios', 25.90, 7)],
+            1 => [$this->service('03298', 'Correios', 12.00, 4)],
+        ];
+
+        $this->subject->match($results);
+        $result = $this->subject->match($results);
+
+        $this->assertCount(1, $result);
+        $this->assertEqualsWithDelta(37.90, $result[0]->getShippingPrice(), 0.001);
+        $this->assertEqualsWithDelta(37.90, $result[0]->getOriginalShippingPrice(), 0.001);
+    }
+
+    /**
      * Builds a real quote Service so the matcher's price and carrier reads run for real.
      *
      * @param string $code
