@@ -127,7 +127,7 @@ class PackageMatching
         }
 
         if ($service->getOriginalDeliveryTime() > $originalDeliveryTime) {
-            $deliveryTime = $service->getDeliveryTime();
+            $originalDeliveryTime = $service->getOriginalDeliveryTime();
         }
 
         $object = [
