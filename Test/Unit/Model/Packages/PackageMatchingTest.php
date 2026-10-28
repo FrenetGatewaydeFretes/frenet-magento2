@@ -112,6 +112,24 @@ class PackageMatchingTest extends TestCase
     }
 
     /**
+     * The order arrives with its slowest package, so the bound service keeps the largest delivery time of any package.
+     *
+     * @return void
+     */
+    public function testShouldKeepTheSlowestDeliveryTimeWhenAFasterPackageComesLast(): void
+    {
+        $result = $this->subject->match([
+            'full' => [],
+            0 => [$this->service('03220', 'Correios', 60.00, 6)],
+            1 => [$this->service('03220', 'Correios', 45.00, 3)],
+        ]);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(6, $result[0]->getDeliveryTime());
+        $this->assertSame(6, $result[0]->getOriginalDeliveryTime());
+    }
+
+    /**
      * A second quote in the same request starts from zero instead of adding to the totals of the first one.
      *
      * @return void
