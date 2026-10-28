@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model\Packages;
 
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
+use Frenet\Shipping\Model\WeightConverterInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 
@@ -32,6 +33,7 @@ class PackagesCalculator
      * @param PackageLimit                 $packageLimit
      * @param PackageMatching              $packageMatching
      * @param RateRequestProviderInterface $rateRequestProvider
+     * @param WeightConverterInterface     $weightConverter
      */
     public function __construct(
         private readonly MultiQuoteValidatorInterface $multiQuoteValidator,
@@ -39,7 +41,8 @@ class PackagesCalculator
         private readonly PackageManager $packageManager,
         private readonly PackageLimit $packageLimit,
         private readonly PackageMatching $packageMatching,
-        private readonly RateRequestProviderInterface $rateRequestProvider
+        private readonly RateRequestProviderInterface $rateRequestProvider,
+        private readonly WeightConverterInterface $weightConverter
     ) {
     }
 
@@ -57,7 +60,9 @@ class PackagesCalculator
         /**
          * If the package is not overweight then we simply process all the package.
          */
-        if (!$this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight())) {
+        $cartWeight = $this->weightConverter->convertToKg((float) $rateRequest->getPackageWeight());
+
+        if (!$this->packageLimit->isOverWeight($cartWeight)) {
             return $this->processPackages();
         }
 
