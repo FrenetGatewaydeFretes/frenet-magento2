@@ -23,6 +23,7 @@ use Frenet\Shipping\Model\Packages\PackageMatching;
 use Frenet\Shipping\Model\Packages\PackageProcessor;
 use Frenet\Shipping\Model\Packages\PackagesCalculator;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
+use Frenet\Shipping\Model\WeightConverterInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -71,6 +72,21 @@ class PackagesCalculatorTest extends TestCase
     private MockObject $serializer;
 
     /**
+     * @var RateRequest
+     */
+    private RateRequest $rateRequest;
+
+    /**
+     * @var WeightConverterInterface&MockObject
+     */
+    private MockObject $weightConverter;
+
+    /**
+     * @var float
+     */
+    private float $toKgFactor = 1.0;
+
+    /**
      * @var PackagesCalculator
      */
     private PackagesCalculator $subject;
@@ -84,8 +100,13 @@ class PackagesCalculatorTest extends TestCase
         $this->packageMatching = $this->createMock(PackageMatching::class);
         $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
         $this->serializer = $this->createMock(SerializerInterface::class);
+        $this->rateRequest = new RateRequest();
+        $this->weightConverter = $this->createMock(WeightConverterInterface::class);
+        $this->weightConverter->method('convertToKg')->willReturnCallback(
+            fn (float $weight): float => $weight * $this->toKgFactor
+        );
 
-        $this->rateRequestProvider->method('getRateRequest')->willReturn($this->createMock(RateRequest::class));
+        $this->rateRequestProvider->method('getRateRequest')->willReturn($this->rateRequest);
         $this->packageManager->method('process')->willReturnSelf();
 
         $this->subject = new PackagesCalculator(
@@ -94,7 +115,8 @@ class PackagesCalculatorTest extends TestCase
             $this->packageManager,
             $this->packageLimit,
             $this->packageMatching,
-            $this->rateRequestProvider
+            $this->rateRequestProvider,
+            $this->weightConverter
         );
     }
 
@@ -207,7 +229,8 @@ class PackagesCalculatorTest extends TestCase
             $this->packageManager,
             $this->packageLimit,
             new PackageMatching($serviceFactory),
-            $this->rateRequestProvider
+            $this->rateRequestProvider,
+            $this->weightConverter
         );
 
         $this->givenAMultiQuoteSplit();
@@ -226,6 +249,26 @@ class PackagesCalculatorTest extends TestCase
         $this->assertSame(6, (int) $byCode['03298']->getDeliveryTime());
         $this->assertEqualsWithDelta(190.56, $byCode['JTE_INT']->getShippingPrice(), 0.001);
         $this->assertCount(2, $byCode);
+    }
+
+    /**
+     * The cart weight is compared with the kilogram limit in kilograms: 50 lb (22.7 kg) is quoted as one package.
+     *
+     * @return void
+     */
+    public function testShouldCompareTheCartWeightInKilogramsWhenTheStoreWeighsInPounds(): void
+    {
+        $this->toKgFactor = 0.453592;
+        $this->rateRequest->setData('package_weight', 50);
+        $this->packageLimit->expects($this->once())
+            ->method('isOverWeight')
+            ->with($this->callback(fn (float $weight): bool => abs($weight - 22.6796) < 0.001))
+            ->willReturn(false);
+        $this->multiQuoteValidator->expects($this->never())->method('canProcessMultiQuote');
+        $this->packageManager->method('getPackages')->willReturn(['full' => $this->createStub(Package::class)]);
+        $this->packageProcessor->method('process')->willReturn([$this->service('03298', 25.90, 7)]);
+
+        $this->assertCount(1, $this->subject->calculate());
     }
 
     /**

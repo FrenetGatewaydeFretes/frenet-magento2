@@ -28,6 +28,7 @@ Integre sua loja Magento 2 aos serviços da [Frenet](https://www.frenet.com.br/)
 
 | Módulo | Magento | PHP |
 |---|---|---|
+| `2.4.9.3` | 2.4.9 | 8.3, 8.4, 8.5 |
 | `2.4.9.2` | 2.4.9 | 8.3, 8.4, 8.5 |
 | `2.4.9.1` | 2.4.9 | 8.3, 8.4, 8.5 |
 | `2.4.9` | 2.4.9 | 8.3, 8.4, 8.5 |
@@ -61,13 +62,13 @@ php bin/magento cache:flush                   # Limpa o cache
 Se você quiser fixar uma versão específica em vez do último release, informe a constraint diretamente:
 
 ```bash
-composer require frenet/frenet-magento2:2.4.9.2   # Magento 2.4.9
+composer require frenet/frenet-magento2:2.4.9.3   # Magento 2.4.9
 composer require frenet/frenet-magento2:2.4.8-p5  # Magento 2.4.8 a 2.4.8-p5
 ```
 
 ### Atualização
 
-Para atualizar uma loja que já usa o módulo (por exemplo, da `2.4.9.1` para a `2.4.9.2`):
+Para atualizar uma loja que já usa o módulo (por exemplo, da `2.4.9.2` para a `2.4.9.3`):
 
 ```bash
 composer update frenet/frenet-magento2 frenet/frenet-php   # Atualiza o módulo e a biblioteca da API Frenet
@@ -76,7 +77,7 @@ php bin/magento setup:di:compile                           # Recompila o projeto
 php bin/magento cache:flush                                # Limpa o cache
 ```
 
-A `frenet/frenet-php` entra no comando porque, desde a `2.4.9.1`, o módulo requer a versão **1.3.4**, e a `2.4.9` instalava a 1.3.2: vindo da `2.4.9`, sem ela o Composer mantém a versão travada no `composer.lock` e recusa a atualização. Assim só esses dois pacotes mudam. Se o Composer ainda recusar por outra dependência, use `composer update frenet/frenet-magento2 -W`, que também atualiza as dependências dos dois. Se o `composer.json` da loja fixa uma versão exata do módulo, troque-a por `2.4.9.2` e rode o mesmo comando.
+A `frenet/frenet-php` entra no comando porque, desde a `2.4.9.1`, o módulo requer a versão **1.3.4**, e a `2.4.9` instalava a 1.3.2: vindo da `2.4.9`, sem ela o Composer mantém a versão travada no `composer.lock` e recusa a atualização. Assim só esses dois pacotes mudam. Se o Composer ainda recusar por outra dependência, use `composer update frenet/frenet-magento2 -W`, que também atualiza as dependências dos dois. Se o `composer.json` da loja fixa uma versão exata do módulo, troque-a por `2.4.9.3` e rode o mesmo comando.
 
 ## Configuração
 
@@ -111,6 +112,17 @@ Recursos opcionais, no mesmo painel:
 - Bugs e sugestões neste módulo: abra uma [issue no GitHub](https://github.com/FrenetGatewaydeFretes/frenet-magento2/issues).
 
 ## Changelog
+
+### 2.4.9.3
+
+**Corrigido**
+
+Na Multi-cotação (opção ativa e carrinho acima do peso máximo por pacote, 30 kg por padrão):
+
+- Um serviço dos Correios só é oferecido quando todos os pacotes foram cotados com ele. Antes, se um pacote voltava com erro, o preço mostrado somava só os outros pacotes e o frete saía mais barato que o real.
+- O prazo de entrega exibido é o do pacote mais demorado. Antes valia o prazo do último pacote cotado.
+- Em lojas com peso em libras, o peso do carrinho e dos produtos é convertido para kg antes de comparar com o peso máximo por pacote, que é em kg, e os pacotes são montados pelo peso em kg. Antes, um carrinho de 50 lb (22,7 kg) era dividido sem necessidade e um produto de 50 lb era tratado como pesado demais para a Multi-cotação.
+- Quando o frete é calculado mais de uma vez na mesma requisição, o valor dos Correios não soma mais o do cálculo anterior.
 
 ### 2.4.9.2
 

@@ -17,6 +17,7 @@ namespace Frenet\Shipping\Model\Quote;
 
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\PackageLimit;
+use Frenet\Shipping\Model\WeightConverterInterface;
 use Frenet\Shipping\Service\RateRequestProviderInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Item\AbstractItem;
@@ -27,33 +28,17 @@ use Magento\Quote\Model\Quote\Item\AbstractItem;
 class MultiQuoteValidator implements MultiQuoteValidatorInterface
 {
     /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var PackageLimit
-     */
-    private $packageLimit;
-
-    /**
-     * @var RateRequestProviderInterface
-     */
-    private $rateRequestProvider;
-
-    /**
      * @param ConfigInterface              $config
      * @param PackageLimit                 $packageLimit
      * @param RateRequestProviderInterface $rateRequestProvider
+     * @param WeightConverterInterface     $weightConverter
      */
     public function __construct(
-        ConfigInterface $config,
-        PackageLimit $packageLimit,
-        RateRequestProviderInterface $rateRequestProvider
+        private readonly ConfigInterface $config,
+        private readonly PackageLimit $packageLimit,
+        private readonly RateRequestProviderInterface $rateRequestProvider,
+        private readonly WeightConverterInterface $weightConverter
     ) {
-        $this->config = $config;
-        $this->packageLimit = $packageLimit;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
@@ -69,7 +54,9 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
         }
 
         $isUnlimited = $this->packageLimit->isUnlimited();
-        $isOverweight = $this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight());
+        $isOverweight = $this->packageLimit->isOverWeight(
+            $this->weightConverter->convertToKg((float) $rateRequest->getPackageWeight())
+        );
 
         if (!$isUnlimited && !$isOverweight) {
             return false;
@@ -80,7 +67,7 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
             /**
              * If any single product is overweight then the multi quote cannot be done.
              */
-            if ($this->packageLimit->isOverWeight((float) $item->getWeight())) {
+            if ($this->packageLimit->isOverWeight($this->weightConverter->convertToKg((float) $item->getWeight()))) {
                 return false;
             }
         }
