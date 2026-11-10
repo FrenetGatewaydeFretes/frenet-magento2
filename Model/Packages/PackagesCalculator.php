@@ -63,6 +63,10 @@ class PackagesCalculator
 
         $this->packageManager->process();
 
+        if (!$this->isWholeCartPacked($fullPackage)) {
+            return $this->quoteFullPackage($fullPackage);
+        }
+
         return $this->packageMatching->match($this->quotePackages());
     }
 
@@ -98,6 +102,41 @@ class PackagesCalculator
     {
         return $this->packageLimit->isOverWeight((float) $fullPackage->getTotalWeight())
             && $this->multiQuoteValidator->canProcessMultiQuote();
+    }
+
+    /**
+     * Checks that the split packages hold every unit of the full-cart package and that none of them is empty.
+     *
+     * @param Package $fullPackage
+     *
+     * @return bool
+     */
+    private function isWholeCartPacked(Package $fullPackage): bool
+    {
+        $packedQty = [];
+
+        /** @var Package $package */
+        foreach ($this->packageManager->getPackages() as $key => $package) {
+            if ($key === self::FULL_PACKAGE) {
+                continue;
+            }
+
+            if (!$package->getItems()) {
+                return false;
+            }
+
+            foreach ($package->getItems() as $itemKey => $packageItem) {
+                $packedQty[$itemKey] = ($packedQty[$itemKey] ?? 0.0) + (float) $packageItem->getQty();
+            }
+        }
+
+        foreach ($fullPackage->getItems() as $itemKey => $packageItem) {
+            if (($packedQty[$itemKey] ?? 0.0) !== (float) $packageItem->getQty()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

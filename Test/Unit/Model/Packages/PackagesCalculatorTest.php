@@ -18,6 +18,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\Package;
+use Frenet\Shipping\Model\Packages\PackageItem;
 use Frenet\Shipping\Model\Packages\PackageLimit;
 use Frenet\Shipping\Model\Packages\PackageManager;
 use Frenet\Shipping\Model\Packages\PackageMatching;
@@ -25,6 +26,7 @@ use Frenet\Shipping\Model\Packages\PackageProcessor;
 use Frenet\Shipping\Model\Packages\PackagesCalculator;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -206,6 +208,50 @@ class PackagesCalculatorTest extends TestCase
     }
 
     /**
+     * A split that leaves units out or yields an empty package is not quoted: the whole cart goes in one call instead.
+     *
+     * @param array<string, float>   $fullQty
+     * @param array<string, float>[] $packagesQty
+     *
+     * @return void
+     */
+    #[DataProvider('incompleteSplitProvider')]
+    public function testShouldQuoteTheWholeCartInOneCallWhenTheSplitLeavesUnitsOut(
+        array $fullQty,
+        array $packagesQty
+    ): void {
+        $this->fullStage = ['full' => $this->package(40.0, $fullQty)];
+        $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturn(true);
+        $this->splitStage = $this->fullStage;
+        foreach ($packagesQty as $qty) {
+            $this->splitStage[] = $this->package(20.0, $qty);
+        }
+
+        $sedex = $this->service('03220', 120.00, 6);
+        $this->packageProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->fullStage['full'])
+            ->willReturn([$sedex]);
+        $this->packageMatching->expects($this->never())->method('match');
+
+        $this->assertSame([$sedex], $this->subject->calculate());
+    }
+
+    /**
+     * Provides the full-cart quantities with a split that does not hold all of them.
+     *
+     * @return array<string, array{array<string, float>, array<string, float>[]}>
+     */
+    public static function incompleteSplitProvider(): array
+    {
+        return [
+            'units left out'         => [['a' => 200.0], [['a' => 130.0]]],
+            'an item left out'       => [['a' => 3.0, 'b' => 14.0], [['a' => 3.0, 'b' => 7.0], ['a' => 0.0]]],
+            'an empty first package' => [['a' => 200.0], [[], ['a' => 200.0]]],
+        ];
+    }
+
+    /**
      * The limit removed to pack the whole cart is back afterwards, so the next quote in the same request can split.
      *
      * @return void
@@ -292,20 +338,33 @@ class PackagesCalculatorTest extends TestCase
     {
         $this->givenAFullPackageOf(40.0);
         $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturn(true);
-        $this->splitStage = $this->fullStage + [0 => $this->package(30.0), 1 => $this->package(10.0)];
+        $this->fullStage = ['full' => $this->package(40.0, ['a' => 4.0])];
+        $this->splitStage = $this->fullStage + [
+            0 => $this->package(30.0, ['a' => 3.0]),
+            1 => $this->package(10.0, ['a' => 1.0]),
+        ];
     }
 
     /**
-     * Returns a package stub weighing $weight kg.
+     * Returns a package stub weighing $weight kg that holds the given quantity per item key.
      *
-     * @param float $weight
+     * @param float                $weight
+     * @param array<string, float> $qtyByItem
      *
      * @return Package
      */
-    private function package(float $weight): Package
+    private function package(float $weight, array $qtyByItem = []): Package
     {
+        $items = [];
+        foreach ($qtyByItem as $itemKey => $qty) {
+            $packageItem = $this->createStub(PackageItem::class);
+            $packageItem->method('getQty')->willReturn($qty);
+            $items[$itemKey] = $packageItem;
+        }
+
         $package = $this->createStub(Package::class);
         $package->method('getTotalWeight')->willReturn($weight);
+        $package->method('getItems')->willReturn($items);
 
         return $package;
     }
