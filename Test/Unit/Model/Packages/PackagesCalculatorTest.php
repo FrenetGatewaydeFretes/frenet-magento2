@@ -16,6 +16,7 @@ namespace Frenet\Shipping\Test\Unit\Model\Packages;
 use Frenet\Framework\Data\SerializerInterface;
 use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
+use Frenet\Shipping\Model\ConfigInterface;
 use Frenet\Shipping\Model\Packages\Package;
 use Frenet\Shipping\Model\Packages\PackageLimit;
 use Frenet\Shipping\Model\Packages\PackageManager;
@@ -269,6 +270,35 @@ class PackagesCalculatorTest extends TestCase
         $this->packageProcessor->method('process')->willReturn([$this->service('03298', 25.90, 7)]);
 
         $this->assertCount(1, $this->subject->calculate());
+    }
+
+    /**
+     * The limit removed for a cart Multi Quote cannot split is back for the next quote in the same request.
+     *
+     * @return void
+     */
+    public function testShouldSplitTheNextCartWhenTheLimitWasRemovedForThePreviousOne(): void
+    {
+        $config = $this->createStub(ConfigInterface::class);
+        $config->method('getPackageMaxWeight')->willReturn(30.0);
+        $subject = new PackagesCalculator(
+            $this->multiQuoteValidator,
+            $this->packageProcessor,
+            $this->packageManager,
+            new PackageLimit($config),
+            $this->packageMatching,
+            $this->rateRequestProvider,
+            $this->weightConverter
+        );
+
+        $this->rateRequest->setData('package_weight', 40);
+        $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturnOnConsecutiveCalls(false, true);
+        $this->packageManager->method('getPackages')->willReturn(['full' => $this->createStub(Package::class)]);
+        $this->packageProcessor->method('process')->willReturn([]);
+        $this->packageMatching->expects($this->once())->method('match')->willReturn([]);
+
+        $subject->calculate();
+        $subject->calculate();
     }
 
     /**
