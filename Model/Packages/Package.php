@@ -32,6 +32,13 @@ class Package
     private const WEIGHT_SCALE = 10000;
 
     /**
+     * Decimal places kept when comparing kilogram weights, enough to drop float noise and keep every real gram.
+     *
+     * @var int
+     */
+    private const WEIGHT_PRECISION = 6;
+
+    /**
      * @var PackageItem[]
      */
     private $items = [];
@@ -135,7 +142,9 @@ class Package
         // kilograms too instead of mixing the raw (possibly lbs) unit weight into the sum.
         $batchWeight = $this->weightConverter->convertToKg($unitWeight) * $qty;
 
-        if (($batchWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
+        $packedWeight = round($batchWeight + $this->getTotalWeight(), self::WEIGHT_PRECISION);
+
+        if ($packedWeight > $this->packageLimit->getMaxWeight()) {
             return false;
         }
 
@@ -188,9 +197,9 @@ class Package
 
         $convertedUnitWeight = $this->weightConverter->convertToKg($unitWeight);
 
-        $convertedScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
-        $fullCapacityScaled = (int) round($this->packageLimit->getMaxWeight() * self::WEIGHT_SCALE);
-        $remainingScaled = max(0, (int) round($this->getRemainingWeight() * self::WEIGHT_SCALE));
+        $convertedScaled = (int) ceil($this->scaleWeight($convertedUnitWeight));
+        $fullCapacityScaled = (int) floor($this->scaleWeight($this->packageLimit->getMaxWeight()));
+        $remainingScaled = max(0, (int) floor($this->scaleWeight($this->getRemainingWeight())));
 
         $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $convertedScaled);
 
@@ -230,6 +239,18 @@ class Package
         }
 
         return $plan;
+    }
+
+    /**
+     * Scales a kilogram weight to packing units, rounded to the comparison precision so float noise does not count.
+     *
+     * @param float $weight
+     *
+     * @return float
+     */
+    private function scaleWeight(float $weight): float
+    {
+        return round($weight * self::WEIGHT_SCALE, self::WEIGHT_PRECISION);
     }
 
     /**
