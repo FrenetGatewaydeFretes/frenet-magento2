@@ -21,7 +21,7 @@ namespace Frenet\Shipping\Model\Quote;
 interface MultiQuoteValidatorInterface
 {
     /**
-     * Checks whether the current rate request can be split into several weight-limited packages.
+     * Checks whether the current overweight cart can be split into several weight-limited packages.
      *
      * @return bool
      */

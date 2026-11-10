@@ -24,15 +24,13 @@ use Frenet\Shipping\Model\Packages\PackageMatching;
 use Frenet\Shipping\Model\Packages\PackageProcessor;
 use Frenet\Shipping\Model\Packages\PackagesCalculator;
 use Frenet\Shipping\Model\Quote\MultiQuoteValidatorInterface;
-use Frenet\Shipping\Model\WeightConverterInterface;
-use Frenet\Shipping\Service\RateRequestProviderInterface;
-use Magento\Quote\Model\Quote\Address\RateRequest;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
- * Tests that PackagesCalculator returns a flat Service list for split carts and keeps Multi Quote results per package.
+ * Tests that PackagesCalculator decides on the packed cart weight and keeps Multi Quote results per package.
  */
 #[AllowMockObjectsWithoutExpectations]
 class PackagesCalculatorTest extends TestCase
@@ -53,9 +51,9 @@ class PackagesCalculatorTest extends TestCase
     private MockObject $packageManager;
 
     /**
-     * @var PackageLimit&MockObject
+     * @var PackageLimit
      */
-    private MockObject $packageLimit;
+    private PackageLimit $packageLimit;
 
     /**
      * @var PackageMatching&MockObject
@@ -63,29 +61,24 @@ class PackagesCalculatorTest extends TestCase
     private MockObject $packageMatching;
 
     /**
-     * @var RateRequestProviderInterface&MockObject
-     */
-    private MockObject $rateRequestProvider;
-
-    /**
      * @var SerializerInterface&MockObject
      */
     private MockObject $serializer;
 
     /**
-     * @var RateRequest
+     * @var int
      */
-    private RateRequest $rateRequest;
+    private int $processCalls = 0;
 
     /**
-     * @var WeightConverterInterface&MockObject
+     * @var Package[]
      */
-    private MockObject $weightConverter;
+    private array $fullStage = [];
 
     /**
-     * @var float
+     * @var Package[]
      */
-    private float $toKgFactor = 1.0;
+    private array $splitStage = [];
 
     /**
      * @var PackagesCalculator
@@ -94,103 +87,71 @@ class PackagesCalculatorTest extends TestCase
 
     protected function setUp(): void
     {
+        $config = $this->createStub(ConfigInterface::class);
+        $config->method('getPackageMaxWeight')->willReturn(30.0);
+
         $this->multiQuoteValidator = $this->createMock(MultiQuoteValidatorInterface::class);
         $this->packageProcessor = $this->createMock(PackageProcessor::class);
         $this->packageManager = $this->createMock(PackageManager::class);
-        $this->packageLimit = $this->createMock(PackageLimit::class);
+        $this->packageLimit = new PackageLimit($config);
         $this->packageMatching = $this->createMock(PackageMatching::class);
-        $this->rateRequestProvider = $this->createMock(RateRequestProviderInterface::class);
         $this->serializer = $this->createMock(SerializerInterface::class);
-        $this->rateRequest = new RateRequest();
-        $this->weightConverter = $this->createMock(WeightConverterInterface::class);
-        $this->weightConverter->method('convertToKg')->willReturnCallback(
-            fn (float $weight): float => $weight * $this->toKgFactor
+
+        $this->packageManager->method('process')->willReturnCallback(function (): PackageManager {
+            $this->processCalls++;
+            return $this->packageManager;
+        });
+        $this->packageManager->method('getPackages')->willReturnCallback(
+            fn (): array => $this->processCalls > 1 ? $this->splitStage : $this->fullStage
         );
 
-        $this->rateRequestProvider->method('getRateRequest')->willReturn($this->rateRequest);
-        $this->packageManager->method('process')->willReturnSelf();
-
-        $this->subject = new PackagesCalculator(
-            $this->multiQuoteValidator,
-            $this->packageProcessor,
-            $this->packageManager,
-            $this->packageLimit,
-            $this->packageMatching,
-            $this->rateRequestProvider,
-            $this->weightConverter
-        );
+        $this->subject = $this->calculator($this->packageMatching);
     }
 
     /**
-     * A single-package quote passes straight through untouched.
+     * A packed cart within the limit goes in one call without asking Multi Quote; errored services are dropped.
      *
      * @return void
      */
-    public function testShouldReturnTheServiceListUnchangedWhenTheCartFitsOnePackage(): void
+    public function testShouldQuoteTheWholeCartInOneCallWhenItFitsOnePackage(): void
     {
-        $this->packageLimit->method('isOverWeight')->willReturn(false);
-        $this->packageManager->method('countPackages')->willReturn(1);
-        $this->packageManager->method('getPackages')->willReturn(['full' => $this->createStub(Package::class)]);
-
+        $this->givenAFullPackageOf(20.0);
         $pac = $this->service('03298', 25.90, 7);
         $sedex = $this->service('03220', 42.50, 3);
-        $this->packageProcessor->method('process')->willReturn([$pac, $sedex]);
+        $this->packageProcessor->expects($this->once())->method('process')
+            ->willReturn([$pac, $this->service('04014', 0.0, 0, 'Correios', true), $sedex]);
+        $this->multiQuoteValidator->expects($this->never())->method('canProcessMultiQuote');
 
-        $result = $this->subject->calculate();
-
-        $this->assertSame([$pac, $sedex], $result);
+        $this->assertSame([$pac, $sedex], $this->subject->calculate());
     }
 
     /**
-     * A cart split across two packages yields one row per method, priced as the sum of both packages.
+     * A packed cart over the limit that Multi Quote cannot split (off, or an item over the limit) goes in one call.
      *
      * @return void
      */
-    public function testShouldSumTheServicePricesAcrossPackagesWhenTheCartIsSplit(): void
+    public function testShouldQuoteTheWholeCartInOneCallWhenMultiQuoteCannotSplitIt(): void
     {
-        $this->packageLimit->method('isOverWeight')->willReturn(false);
-        $this->packageManager->method('countPackages')->willReturn(2);
-        $this->packageManager->method('getPackages')->willReturn($this->twoPackages());
+        $this->givenAFullPackageOf(40.0);
+        $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturn(false);
+        $jadlog = $this->service('JADLOG', 55.00, 6, 'Jadlog');
+        $this->packageProcessor->expects($this->once())->method('process')->willReturn([$jadlog]);
+        $this->packageMatching->expects($this->never())->method('match');
 
-        $this->packageProcessor->method('process')->willReturnOnConsecutiveCalls(
-            [$this->service('03298', 25.90, 7), $this->service('03220', 40.00, 3)],
-            [$this->service('03298', 10.00, 5), $this->service('03220', 15.00, 2)]
-        );
-
-        $result = $this->subject->calculate();
-
-        $this->assertContainsOnlyInstancesOf(Service::class, $result);
-        $byCode = [];
-        foreach ($result as $service) {
-            $byCode[$service->getServiceCode()] = $service;
-        }
-
-        $this->assertEqualsWithDelta(35.90, $byCode['03298']->getShippingPrice(), 0.001);
-        $this->assertSame(7, $byCode['03298']->getDeliveryTime());
-        $this->assertEqualsWithDelta(55.00, $byCode['03220']->getShippingPrice(), 0.001);
-        $this->assertSame(3, $byCode['03220']->getDeliveryTime());
+        $this->assertSame([$jadlog], $this->subject->calculate());
+        $this->assertSame(1, $this->processCalls);
     }
 
     /**
-     * A method only one of the packages can ship is dropped: it cannot cover the whole order.
+     * An empty cart builds no package and is not sent to the API.
      *
      * @return void
      */
-    public function testShouldDropAServiceThatIsMissingFromAnyPackageWhenTheCartIsSplit(): void
+    public function testShouldReturnNoServicesWhenTheCartHasNothingToPack(): void
     {
-        $this->packageLimit->method('isOverWeight')->willReturn(false);
-        $this->packageManager->method('countPackages')->willReturn(2);
-        $this->packageManager->method('getPackages')->willReturn($this->twoPackages());
+        $this->packageProcessor->expects($this->never())->method('process');
 
-        $this->packageProcessor->method('process')->willReturnOnConsecutiveCalls(
-            [$this->service('03298', 25.90, 7), $this->service('03220', 40.00, 3)],
-            [$this->service('03298', 10.00, 5)]
-        );
-
-        $result = $this->subject->calculate();
-
-        $this->assertCount(1, $result);
-        $this->assertSame('03298', $result[0]->getServiceCode());
+        $this->assertSame([], $this->subject->calculate());
     }
 
     /**
@@ -198,7 +159,7 @@ class PackagesCalculatorTest extends TestCase
      *
      * @return void
      */
-    public function testShouldHandTheMatcherTheFullCallAndEachPackageWhenMultiQuoteIsOn(): void
+    public function testShouldHandTheMatcherTheFullCallAndEachPackageWhenMultiQuoteSplitsTheCart(): void
     {
         $this->givenAMultiQuoteSplit();
         $full = [$this->service('JTE_INT', 190.56, 4, 'J&T Express')];
@@ -224,15 +185,7 @@ class PackagesCalculatorTest extends TestCase
     {
         $serviceFactory = $this->createMock(ServiceFactory::class);
         $serviceFactory->method('create')->willReturnCallback(fn () => new Service($this->serializer));
-        $subject = new PackagesCalculator(
-            $this->multiQuoteValidator,
-            $this->packageProcessor,
-            $this->packageManager,
-            $this->packageLimit,
-            new PackageMatching($serviceFactory),
-            $this->rateRequestProvider,
-            $this->weightConverter
-        );
+        $subject = $this->calculator(new PackageMatching($serviceFactory));
 
         $this->givenAMultiQuoteSplit();
         $this->packageProcessor->method('process')->willReturnOnConsecutiveCalls(
@@ -253,78 +206,108 @@ class PackagesCalculatorTest extends TestCase
     }
 
     /**
-     * The cart weight is compared with the kilogram limit in kilograms: 50 lb (22.7 kg) is quoted as one package.
+     * The limit removed to pack the whole cart is back afterwards, so the next quote in the same request can split.
      *
      * @return void
      */
-    public function testShouldCompareTheCartWeightInKilogramsWhenTheStoreWeighsInPounds(): void
+    public function testShouldRestoreTheWeightLimitAfterPackingTheWholeCart(): void
     {
-        $this->toKgFactor = 0.453592;
-        $this->rateRequest->setData('package_weight', 50);
-        $this->packageLimit->expects($this->once())
-            ->method('isOverWeight')
-            ->with($this->callback(fn (float $weight): bool => abs($weight - 22.6796) < 0.001))
-            ->willReturn(false);
-        $this->multiQuoteValidator->expects($this->never())->method('canProcessMultiQuote');
-        $this->packageManager->method('getPackages')->willReturn(['full' => $this->createStub(Package::class)]);
-        $this->packageProcessor->method('process')->willReturn([$this->service('03298', 25.90, 7)]);
-
-        $this->assertCount(1, $this->subject->calculate());
-    }
-
-    /**
-     * The limit removed for a cart Multi Quote cannot split is back for the next quote in the same request.
-     *
-     * @return void
-     */
-    public function testShouldSplitTheNextCartWhenTheLimitWasRemovedForThePreviousOne(): void
-    {
-        $config = $this->createStub(ConfigInterface::class);
-        $config->method('getPackageMaxWeight')->willReturn(30.0);
-        $subject = new PackagesCalculator(
-            $this->multiQuoteValidator,
-            $this->packageProcessor,
-            $this->packageManager,
-            new PackageLimit($config),
-            $this->packageMatching,
-            $this->rateRequestProvider,
-            $this->weightConverter
-        );
-
-        $this->rateRequest->setData('package_weight', 40);
+        $this->givenAMultiQuoteSplit();
+        $this->multiQuoteValidator = $this->createMock(MultiQuoteValidatorInterface::class);
         $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturnOnConsecutiveCalls(false, true);
-        $this->packageManager->method('getPackages')->willReturn(['full' => $this->createStub(Package::class)]);
+        $subject = $this->calculator($this->packageMatching);
         $this->packageProcessor->method('process')->willReturn([]);
         $this->packageMatching->expects($this->once())->method('match')->willReturn([]);
 
         $subject->calculate();
+        $this->assertFalse($this->packageLimit->isUnlimited());
+
+        $this->processCalls = 0;
         $subject->calculate();
     }
 
     /**
-     * Configures an overweight cart with Multi Quote on, split into the full-cart package plus two packages.
+     * The limit is restored even when packing the whole cart fails.
+     *
+     * @return void
+     */
+    public function testShouldRestoreTheWeightLimitWhenPackingTheWholeCartFails(): void
+    {
+        $packageManager = $this->createMock(PackageManager::class);
+        $packageManager->method('process')->willThrowException(new RuntimeException('product not found'));
+        $subject = new PackagesCalculator(
+            $this->multiQuoteValidator,
+            $this->packageProcessor,
+            $packageManager,
+            $this->packageLimit,
+            $this->packageMatching
+        );
+
+        try {
+            $subject->calculate();
+            $this->fail('The packing failure should reach the caller.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('product not found', $exception->getMessage());
+        }
+
+        $this->assertSame(30.0, $this->packageLimit->getMaxWeight());
+    }
+
+    /**
+     * Builds the calculator under test with the given matcher.
+     *
+     * @param PackageMatching $packageMatching
+     *
+     * @return PackagesCalculator
+     */
+    private function calculator(PackageMatching $packageMatching): PackagesCalculator
+    {
+        return new PackagesCalculator(
+            $this->multiQuoteValidator,
+            $this->packageProcessor,
+            $this->packageManager,
+            $this->packageLimit,
+            $packageMatching
+        );
+    }
+
+    /**
+     * Makes the first packing pass build only the full-cart package, weighing $weight kg.
+     *
+     * @param float $weight
+     *
+     * @return void
+     */
+    private function givenAFullPackageOf(float $weight): void
+    {
+        $this->fullStage = ['full' => $this->package($weight)];
+    }
+
+    /**
+     * Configures a 40 kg cart with Multi Quote on, split into the full-cart package plus two packages.
      *
      * @return void
      */
     private function givenAMultiQuoteSplit(): void
     {
-        $this->packageLimit->method('isOverWeight')->willReturn(true);
+        $this->givenAFullPackageOf(40.0);
         $this->multiQuoteValidator->method('canProcessMultiQuote')->willReturn(true);
-        $this->packageManager->method('getPackages')->willReturn([
-            'full' => $this->createStub(Package::class),
-            0 => $this->createStub(Package::class),
-            1 => $this->createStub(Package::class),
-        ]);
+        $this->splitStage = $this->fullStage + [0 => $this->package(30.0), 1 => $this->package(10.0)];
     }
 
     /**
-     * Returns two distinct package stubs, the shape PackageManager::getPackages() reports for a split cart.
+     * Returns a package stub weighing $weight kg.
      *
-     * @return Package[]
+     * @param float $weight
+     *
+     * @return Package
      */
-    private function twoPackages(): array
+    private function package(float $weight): Package
     {
-        return [$this->createStub(Package::class), $this->createStub(Package::class)];
+        $package = $this->createStub(Package::class);
+        $package->method('getTotalWeight')->willReturn($weight);
+
+        return $package;
     }
 
     /**
@@ -334,18 +317,24 @@ class PackagesCalculatorTest extends TestCase
      * @param float  $price
      * @param int    $deliveryTime
      * @param string $carrier
+     * @param bool   $error
      *
      * @return Service
      */
-    private function service(string $code, float $price, int $deliveryTime, string $carrier = 'Correios'): Service
-    {
+    private function service(
+        string $code,
+        float $price,
+        int $deliveryTime,
+        string $carrier = 'Correios',
+        bool $error = false
+    ): Service {
         return new Service($this->serializer, [
             'Carrier'               => $carrier,
             'ServiceCode'           => $code,
             'ShippingPrice'         => (string) $price,
             'OriginalShippingPrice' => (string) $price,
             'DeliveryTime'          => (string) $deliveryTime,
-            'Error'                 => false,
+            'Error'                 => $error,
         ]);
     }
 }
