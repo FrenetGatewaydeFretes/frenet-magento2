@@ -18,6 +18,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\Service;
 use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 use Frenet\Shipping\Model\Packages\PackageMatching;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -187,6 +188,68 @@ class PackageMatchingTest extends TestCase
     }
 
     /**
+     * The merged Correios service keeps the API messages of its packages, each distinct text once, in package order.
+     *
+     * @param string[] $messages
+     * @param string   $expected
+     *
+     * @return void
+     */
+    #[DataProvider('messageProvider')]
+    public function testShouldKeepThePackageMessagesOnTheMergedService(array $messages, string $expected): void
+    {
+        $results = ['full' => []];
+        foreach ($messages as $message) {
+            $results[] = [$this->service('03220', 'Correios', 45.00, 3, false, $message)];
+        }
+
+        $result = $this->subject->match($results);
+
+        $this->assertCount(1, $result);
+        $this->assertSame($expected, $result[0]->getMessage());
+    }
+
+    /**
+     * Provides the message each package returned with the message expected on the merged service.
+     *
+     * @return array<string, array{string[], string}>
+     */
+    public static function messageProvider(): array
+    {
+        return [
+            'same message in every package' => [
+                ['Entrega com restrição', 'Entrega com restrição'],
+                'Entrega com restrição',
+            ],
+            'different messages'            => [
+                ['Prazo estendido', '', ' Entrega com restrição ', 'Prazo estendido'],
+                'Prazo estendido; Entrega com restrição',
+            ],
+            'no message'                    => [['', ''], ''],
+        ];
+    }
+
+    /**
+     * A message from a previous quote in the same request is not carried into the next one.
+     *
+     * @return void
+     */
+    public function testShouldNotCarryTheMessagesOfAPreviousQuoteWhenMatchingAgain(): void
+    {
+        $this->subject->match([
+            'full' => [],
+            0 => [$this->service('03220', 'Correios', 45.00, 3, false, 'Prazo estendido')],
+        ]);
+
+        $result = $this->subject->match([
+            'full' => [],
+            0 => [$this->service('03220', 'Correios', 45.00, 3)],
+        ]);
+
+        $this->assertSame('', $result[0]->getMessage());
+    }
+
+    /**
      * Builds a real quote Service so the matcher's price and carrier reads run for real.
      *
      * @param string $code
@@ -194,6 +257,7 @@ class PackageMatchingTest extends TestCase
      * @param float  $price
      * @param int    $deliveryTime
      * @param bool   $error
+     * @param string $message
      *
      * @return Service
      */
@@ -202,7 +266,8 @@ class PackageMatchingTest extends TestCase
         string $carrier,
         float $price,
         int $deliveryTime,
-        bool $error = false
+        bool $error = false,
+        string $message = ''
     ): Service {
         return new Service($this->serializer, [
             'ServiceCode'           => $code,
@@ -212,6 +277,7 @@ class PackageMatchingTest extends TestCase
             'DeliveryTime'          => (string) $deliveryTime,
             'OriginalDeliveryTime'  => (string) $deliveryTime,
             'Error'                 => $error,
+            'Msg'                   => $message,
         ]);
     }
 }
