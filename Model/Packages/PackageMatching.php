@@ -47,6 +47,11 @@ class PackageMatching
     private array $quotedPackages = [];
 
     /**
+     * @var string[][]
+     */
+    private array $messages = [];
+
+    /**
      * @param ServiceFactory $serviceFactory
      */
     public function __construct(
@@ -151,8 +156,25 @@ class PackageMatching
         ];
 
         $this->services[$serviceCode] = $object;
+        $this->collectMessage($service);
 
         return $this;
+    }
+
+    /**
+     * Keeps a package's API message for its service code, once per distinct text, in package order.
+     *
+     * @param Service $service
+     *
+     * @return void
+     */
+    private function collectMessage(Service $service): void
+    {
+        $message = trim((string) $service->getMessage());
+
+        if ($message !== '') {
+            $this->messages[$service->getServiceCode()][$message] = $message;
+        }
     }
 
     /**
@@ -171,6 +193,7 @@ class PackageMatching
                 continue;
             }
 
+            $serviceData['message'] = implode('; ', $this->messages[$serviceCode] ?? []);
             $results[] = $this->serviceFactory->create()->setData($serviceData);
         }
 
@@ -208,6 +231,7 @@ class PackageMatching
     {
         $this->services = [];
         $this->quotedPackages = [];
+        $this->messages = [];
         $this->fullResults = $results['full'] ?? [];
         unset($results['full']);
         $this->results = $results;
