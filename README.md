@@ -126,6 +126,7 @@ Na Multi-cotação (opção ativa e carrinho acima do peso máximo por pacote, 3
 - Produtos que completam exatamente o peso máximo de um pacote (por exemplo, 11,1 kg + 18,9 kg = 30 kg) não ficam mais fora da cotação.
 - Nenhuma unidade fica fora da cotação: se o carrinho não puder ser dividido com todas as unidades, ele é cotado inteiro numa única chamada.
 - Depois de um carrinho que a Multi-cotação não consegue dividir (com um produto acima do peso máximo), o cálculo seguinte na mesma requisição, como no checkout com vários endereços, volta a dividir o carrinho.
+- Os avisos que a API da Frenet envia junto com um serviço dos Correios, como restrição de entrega ou prazo estendido, voltam a aparecer ao lado do método no carrinho, no checkout e na página do produto. Cada aviso diferente dos pacotes aparece uma vez, separado por "; ".
 
 No cálculo dos pacotes, com ou sem Multi-cotação:
 
