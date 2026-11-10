@@ -15,12 +15,11 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Frenet\Shipping\Model\ConfigInterface;
+use Frenet\Shipping\Model\Packages\PackageItemDistributor;
 use Frenet\Shipping\Model\Packages\PackageLimit;
 use Frenet\Shipping\Model\WeightConverterInterface;
-use Frenet\Shipping\Service\RateRequestProviderInterface;
-use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Quote\Model\Quote\Item\AbstractItem;
 
 /**
  * Allows splitting an overweight cart into packages only when multi-quote is enabled and every item fits one package.
@@ -30,13 +29,15 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
     /**
      * @param ConfigInterface              $config
      * @param PackageLimit                 $packageLimit
-     * @param RateRequestProviderInterface $rateRequestProvider
+     * @param PackageItemDistributor       $itemDistributor
+     * @param DimensionsExtractorInterface $dimensionsExtractor
      * @param WeightConverterInterface     $weightConverter
      */
     public function __construct(
         private readonly ConfigInterface $config,
         private readonly PackageLimit $packageLimit,
-        private readonly RateRequestProviderInterface $rateRequestProvider,
+        private readonly PackageItemDistributor $itemDistributor,
+        private readonly DimensionsExtractorInterface $dimensionsExtractor,
         private readonly WeightConverterInterface $weightConverter
     ) {
     }
@@ -46,31 +47,19 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
      */
     public function canProcessMultiQuote(): bool
     {
-        /** @var RateRequest $rateRequest */
-        $rateRequest = $this->rateRequestProvider->getRateRequest();
-
         if (!$this->config->isMultiQuoteEnabled()) {
             return false;
         }
 
-        $isUnlimited = $this->packageLimit->isUnlimited();
-        $isOverweight = $this->packageLimit->isOverWeight(
-            $this->weightConverter->convertToKg((float) $rateRequest->getPackageWeight())
-        );
+        foreach ($this->itemDistributor->distribute() as $entry) {
+            $this->dimensionsExtractor->setProductByCartItem($entry['item']);
+            $unitWeight = $this->weightConverter->convertToKg((float) $this->dimensionsExtractor->getWeight());
 
-        if (!$isUnlimited && !$isOverweight) {
-            return false;
-        }
-
-        /** @var AbstractItem $item */
-        foreach ($rateRequest->getAllItems() as $item) {
-            /**
-             * If any single product is overweight then the multi quote cannot be done.
-             */
-            if ($this->packageLimit->isOverWeight($this->weightConverter->convertToKg((float) $item->getWeight()))) {
+            if ($this->packageLimit->isOverWeight($unitWeight)) {
                 return false;
             }
         }
+
         return true;
     }
 }
