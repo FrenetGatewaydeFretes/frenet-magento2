@@ -82,7 +82,7 @@ class PackageItemDistributor
                 continue;
             }
 
-            $qty = floor($this->itemQuantityCalculator->calculate($item));
+            $qty = $this->roundQuantity((float) $this->itemQuantityCalculator->calculate($item));
 
             if ($qty < 1) {
                 continue;
@@ -92,5 +92,17 @@ class PackageItemDistributor
         }
 
         return $groupedItems;
+    }
+
+    /**
+     * Rounds the item's final quantity half up (2.4 to 2, 2.5 to 3), ignoring float noise past Magento's 4 decimals.
+     *
+     * @param float $qty
+     *
+     * @return float
+     */
+    private function roundQuantity(float $qty): float
+    {
+        return round(round($qty, 4), 0, PHP_ROUND_HALF_UP);
     }
 }
