@@ -123,6 +123,14 @@ Na Multi-cotação (opção ativa e carrinho acima do peso máximo por pacote, 3
 - O prazo de entrega exibido é o do pacote mais demorado. Antes valia o prazo do último pacote cotado.
 - Em lojas com peso em libras, o peso do carrinho e dos produtos é convertido para kg antes de comparar com o peso máximo por pacote, que é em kg, e os pacotes são montados pelo peso em kg. Antes, um carrinho de 50 lb (22,7 kg) era dividido sem necessidade e um produto de 50 lb era tratado como pesado demais para a Multi-cotação.
 - Quando o frete é calculado mais de uma vez na mesma requisição, o valor dos Correios não soma mais o do cálculo anterior.
+- Produtos que completam exatamente o peso máximo de um pacote (por exemplo, 11,1 kg + 18,9 kg = 30 kg) não ficam mais fora da cotação.
+- Nenhuma unidade fica fora da cotação: se o carrinho não puder ser dividido com todas as unidades, ele é cotado inteiro numa única chamada.
+- Depois de um carrinho que a Multi-cotação não consegue dividir (com um produto acima do peso máximo), o cálculo seguinte na mesma requisição, como no checkout com vários endereços, volta a dividir o carrinho.
+
+No cálculo dos pacotes, com ou sem Multi-cotação:
+
+- A decisão de dividir o carrinho usa o mesmo peso usado para montar os pacotes: o atributo de peso configurado em **Attributes Mapping** ou, quando o produto não tem peso, o **Default Weight**. Antes, com a Multi-cotação desligada, um carrinho de produtos sem peso podia ser dividido em pacotes e ter o frete de todas as transportadoras somado. Agora ele é cotado inteiro numa única chamada, e com a Multi-cotação ativa é dividido normalmente.
+- Quantidades decimais (produtos vendidos em fração) são arredondadas para o inteiro mais próximo, com meio para cima: 2,4 é cotado como 2 e 2,5 como 3. Antes eram sempre arredondadas para baixo.
 
 ### 2.4.9.2
 
