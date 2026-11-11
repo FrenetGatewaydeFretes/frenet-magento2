@@ -15,11 +15,11 @@ declare(strict_types = 1);
 
 namespace Frenet\Shipping\Model\Quote;
 
+use Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface;
 use Frenet\Shipping\Model\ConfigInterface;
+use Frenet\Shipping\Model\Packages\PackageItemDistributor;
 use Frenet\Shipping\Model\Packages\PackageLimit;
-use Frenet\Shipping\Service\RateRequestProviderInterface;
-use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Quote\Model\Quote\Item\AbstractItem;
+use Frenet\Shipping\Model\WeightConverterInterface;
 
 /**
  * Allows splitting an overweight cart into packages only when multi-quote is enabled and every item fits one package.
@@ -27,33 +27,19 @@ use Magento\Quote\Model\Quote\Item\AbstractItem;
 class MultiQuoteValidator implements MultiQuoteValidatorInterface
 {
     /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var PackageLimit
-     */
-    private $packageLimit;
-
-    /**
-     * @var RateRequestProviderInterface
-     */
-    private $rateRequestProvider;
-
-    /**
      * @param ConfigInterface              $config
      * @param PackageLimit                 $packageLimit
-     * @param RateRequestProviderInterface $rateRequestProvider
+     * @param PackageItemDistributor       $itemDistributor
+     * @param DimensionsExtractorInterface $dimensionsExtractor
+     * @param WeightConverterInterface     $weightConverter
      */
     public function __construct(
-        ConfigInterface $config,
-        PackageLimit $packageLimit,
-        RateRequestProviderInterface $rateRequestProvider
+        private readonly ConfigInterface $config,
+        private readonly PackageLimit $packageLimit,
+        private readonly PackageItemDistributor $itemDistributor,
+        private readonly DimensionsExtractorInterface $dimensionsExtractor,
+        private readonly WeightConverterInterface $weightConverter
     ) {
-        $this->config = $config;
-        $this->packageLimit = $packageLimit;
-        $this->rateRequestProvider = $rateRequestProvider;
     }
 
     /**
@@ -61,29 +47,19 @@ class MultiQuoteValidator implements MultiQuoteValidatorInterface
      */
     public function canProcessMultiQuote(): bool
     {
-        /** @var RateRequest $rateRequest */
-        $rateRequest = $this->rateRequestProvider->getRateRequest();
-
         if (!$this->config->isMultiQuoteEnabled()) {
             return false;
         }
 
-        $isUnlimited = $this->packageLimit->isUnlimited();
-        $isOverweight = $this->packageLimit->isOverWeight((float) $rateRequest->getPackageWeight());
+        foreach ($this->itemDistributor->distribute() as $entry) {
+            $this->dimensionsExtractor->setProductByCartItem($entry['item']);
+            $unitWeight = $this->weightConverter->convertToKg((float) $this->dimensionsExtractor->getWeight());
 
-        if (!$isUnlimited && !$isOverweight) {
-            return false;
-        }
-
-        /** @var AbstractItem $item */
-        foreach ($rateRequest->getAllItems() as $item) {
-            /**
-             * If any single product is overweight then the multi quote cannot be done.
-             */
-            if ($this->packageLimit->isOverWeight((float) $item->getWeight())) {
+            if ($this->packageLimit->isOverWeight($unitWeight)) {
                 return false;
             }
         }
+
         return true;
     }
 }

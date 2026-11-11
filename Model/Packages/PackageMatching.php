@@ -20,6 +20,7 @@ use Frenet\ObjectType\Entity\Shipping\Quote\ServiceFactory;
 
 /**
  * Merges a split-cart quote: Correios is summed per package, the other carriers come from the full unlimited call.
+ * A Correios service is only offered when every package quoted it without an error.
  *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
@@ -39,6 +40,16 @@ class PackageMatching
      * @var mixed[][]
      */
     private array $services = [];
+
+    /**
+     * @var bool[][]
+     */
+    private array $quotedPackages = [];
+
+    /**
+     * @var string[][]
+     */
+    private array $messages = [];
 
     /**
      * @param ServiceFactory $serviceFactory
@@ -69,8 +80,8 @@ class PackageMatching
     private function matchResults(): array
     {
         /** @var Service[] $services */
-        foreach ($this->results as $services) {
-            $this->prepareServices($services);
+        foreach ($this->results as $packageKey => $services) {
+            $this->prepareServices($packageKey, $services);
         }
 
         return $this->buildServicesResult();
@@ -79,11 +90,12 @@ class PackageMatching
     /**
      * Feeds one package's non-error Correios services into the running per-code totals.
      *
-     * @param Service[] $services
+     * @param int|string $packageKey
+     * @param Service[]  $services
      *
      * @return $this
      */
-    private function prepareServices(array $services): self
+    private function prepareServices(int|string $packageKey, array $services): self
     {
         /** @var Service $service */
         foreach ($services as $service) {
@@ -95,6 +107,7 @@ class PackageMatching
                 continue;
             }
 
+            $this->quotedPackages[$service->getServiceCode()][$packageKey] = true;
             $this->appendService($service);
         }
 
@@ -127,7 +140,7 @@ class PackageMatching
         }
 
         if ($service->getOriginalDeliveryTime() > $originalDeliveryTime) {
-            $deliveryTime = $service->getDeliveryTime();
+            $originalDeliveryTime = $service->getOriginalDeliveryTime();
         }
 
         $object = [
@@ -143,21 +156,44 @@ class PackageMatching
         ];
 
         $this->services[$serviceCode] = $object;
+        $this->collectMessage($service);
 
         return $this;
     }
 
     /**
-     * Builds the bound Correios services and merges them with the carriers kept from the full call.
+     * Keeps a package's API message for its service code, once per distinct text, in package order.
+     *
+     * @param Service $service
+     *
+     * @return void
+     */
+    private function collectMessage(Service $service): void
+    {
+        $message = trim((string) $service->getMessage());
+
+        if ($message !== '') {
+            $this->messages[$service->getServiceCode()][$message] = $message;
+        }
+    }
+
+    /**
+     * Builds the Correios services quoted by every package and merges them with the carriers kept from the full call.
      *
      * @return Service[]
      */
     private function buildServicesResult(): array
     {
         $results = [];
+        $packageCount = count($this->results);
 
         /** @var mixed[] $serviceData */
-        foreach ($this->services as $serviceData) {
+        foreach ($this->services as $serviceCode => $serviceData) {
+            if (count($this->quotedPackages[$serviceCode]) !== $packageCount) {
+                continue;
+            }
+
+            $serviceData['message'] = implode('; ', $this->messages[$serviceCode] ?? []);
             $results[] = $this->serviceFactory->create()->setData($serviceData);
         }
 
@@ -185,7 +221,7 @@ class PackageMatching
     }
 
     /**
-     * Splits the incoming results into the full-call list and the per-package lists.
+     * Clears the previous quote and splits the incoming results into the full-call list and the per-package lists.
      *
      * @param Service[][] $results
      *
@@ -193,6 +229,9 @@ class PackageMatching
      */
     private function init(array $results): self
     {
+        $this->services = [];
+        $this->quotedPackages = [];
+        $this->messages = [];
         $this->fullResults = $results['full'] ?? [];
         unset($results['full']);
         $this->results = $results;

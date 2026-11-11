@@ -32,6 +32,13 @@ class Package
     private const WEIGHT_SCALE = 10000;
 
     /**
+     * Decimal places kept when comparing kilogram weights, enough to drop float noise and keep every real gram.
+     *
+     * @var int
+     */
+    private const WEIGHT_PRECISION = 6;
+
+    /**
      * @var PackageItem[]
      */
     private $items = [];
@@ -135,7 +142,9 @@ class Package
         // kilograms too instead of mixing the raw (possibly lbs) unit weight into the sum.
         $batchWeight = $this->weightConverter->convertToKg($unitWeight) * $qty;
 
-        if (($batchWeight + $this->getTotalWeight()) > $this->packageLimit->getMaxWeight()) {
+        $packedWeight = round($batchWeight + $this->getTotalWeight(), self::WEIGHT_PRECISION);
+
+        if ($packedWeight > $this->packageLimit->getMaxWeight()) {
             return false;
         }
 
@@ -188,12 +197,11 @@ class Package
 
         $convertedUnitWeight = $this->weightConverter->convertToKg($unitWeight);
 
-        $unitWeightScaled = (int) round($unitWeight * self::WEIGHT_SCALE);
-        $convertedScaled = (int) round($convertedUnitWeight * self::WEIGHT_SCALE);
-        $fullCapacityScaled = (int) round($this->packageLimit->getMaxWeight() * self::WEIGHT_SCALE);
-        $remainingScaled = max(0, (int) round($this->getRemainingWeight() * self::WEIGHT_SCALE));
+        $convertedScaled = (int) ceil($this->scaleWeight($convertedUnitWeight));
+        $fullCapacityScaled = (int) floor($this->scaleWeight($this->packageLimit->getMaxWeight()));
+        $remainingScaled = max(0, (int) floor($this->scaleWeight($this->getRemainingWeight())));
 
-        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $unitWeightScaled, $convertedScaled);
+        $unitsPerFullPackage = $this->unitsFitting($fullCapacityScaled, $convertedScaled);
 
         if ($unitsPerFullPackage < 1) {
             return [];
@@ -202,7 +210,7 @@ class Package
         $requestedQtyInt = (int) $requestedQty;
         $firstBatch = min(
             $requestedQtyInt,
-            $this->unitsFitting($remainingScaled, $unitWeightScaled, $convertedScaled)
+            $this->unitsFitting($remainingScaled, $convertedScaled)
         );
         $remaining = $requestedQtyInt - $firstBatch;
 
@@ -234,21 +242,28 @@ class Package
     }
 
     /**
-     * Computes how many units fit in a given weight capacity.
+     * Scales a kilogram weight to packing units, rounded to the comparison precision so float noise does not count.
+     *
+     * @param float $weight
+     *
+     * @return float
+     */
+    private function scaleWeight(float $weight): float
+    {
+        return round($weight * self::WEIGHT_SCALE, self::WEIGHT_PRECISION);
+    }
+
+    /**
+     * Computes how many units of a kilogram weight fit in a kilogram capacity.
      *
      * @param int $capacityScaled
-     * @param int $rawUnitWeightScaled
-     * @param int $convertedScaled
+     * @param int $unitWeightScaled
      *
      * @return int
      */
-    private function unitsFitting(int $capacityScaled, int $rawUnitWeightScaled, int $convertedScaled): int
+    private function unitsFitting(int $capacityScaled, int $unitWeightScaled): int
     {
-        if ($rawUnitWeightScaled > $capacityScaled) {
-            return 0;
-        }
-
-        return intdiv($capacityScaled - $rawUnitWeightScaled, max($convertedScaled, 1)) + 1;
+        return intdiv($capacityScaled, max($unitWeightScaled, 1));
     }
 
     /**
