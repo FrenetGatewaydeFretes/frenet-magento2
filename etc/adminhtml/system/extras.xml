@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — address by CEP in the checkout and automatic tracking.
+  New keys only: carriers/frenetshipping/cep_autofill/* and carriers/frenetshipping/tracking_sync/*.
+  -->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="cep_autofill" translate="label comment" type="text" sortOrder="230" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Address by CEP (checkout)</label>
+        <comment>When the customer types the CEP, street, district, city and state fill in by themselves. Uses the Frenet token of this shipping method; read only.</comment>
+        <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Fill the address from the CEP</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+    </group>
+    <group id="tracking_sync" translate="label comment" type="text" sortOrder="240" showInDefault="1" showInWebsite="0" showInStore="0">
+        <label>Automatic tracking</label>
+        <comment>Every 30 minutes the store reads the Frenet events of the orders shipped with Frenet and shows them in Frenet › Shipment tracking and on the order.</comment>
+        <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1">
+            <label>Read the tracking events</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+        <field id="auto_status" translate="label comment" type="select" sortOrder="20" showInDefault="1">
+            <label>Change the order status automatically</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <comment>Em transporte, Aguardando retirada, Entregue or Em devolução, following the latest event. Off by default so that existing order flows do not change on update.</comment>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+        </field>
+        <field id="notify_customer" translate="label comment" type="select" sortOrder="30" showInDefault="1">
+            <label>E-mail the customer</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <comment>When the status changes. Bulk imports ask each time.</comment>
+            <depends>
+                <field id="active">1</field>
+                <field id="auto_status">1</field>
+            </depends>
+        </field>
+    </group>
+</include>

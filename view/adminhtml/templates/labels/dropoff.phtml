@@ -1,0 +1,158 @@
+<?php
+/**
+ * Frenet Shipping Gateway — "Drop-off point": default drop-off point of each carrier (the panel's map, as a
+ * searchable list).
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Frenet\Shipping\ViewModel\Labels\Common $common */
+$common = $block->getData('common');
+/** @var \Frenet\Shipping\ViewModel\Labels\Carriers $carriers */
+$carriers = $block->getData('carriers');
+/** @var \Frenet\Shipping\ViewModel\Labels\Dropoff $vm */
+$vm = $block->getData('view_model');
+?>
+<div class="frenet-labels">
+<?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Frenet_Shipping::labels/header.phtml')) ?>
+<?php if (!$common->isAvailable()): ?>
+    </div>
+    <?php return; ?>
+<?php endif; ?>
+<?php $data = $vm->data(); ?>
+    <p class="frenet-lead"><?= $escaper->escapeHtml(__(
+        'Some carriers let you choose where you drop off your packages. Frenet uses the default point of each '
+        . 'carrier for its next labels. To turn a default point off, use the Frenet panel.'
+    )) ?></p>
+
+<?php if ($data['error'] !== ''): ?>
+    <div class="message message-error"><div><?= $escaper->escapeHtml($data['error']) ?></div></div>
+<?php elseif (!$data['carriers']): ?>
+    <div class="frenet-empty">
+        <h2><?= $escaper->escapeHtml(__('No active carrier')) ?></h2>
+        <p><?= $escaper->escapeHtml(__(
+            'Activate carriers in the Frenet panel to choose their drop-off points here.'
+        )) ?></p>
+        <a class="action-primary"
+           href="<?= $escaper->escapeUrl($common->panelUrl()) ?>"
+           target="_blank"
+           rel="noopener"><span><?= $escaper->escapeHtml(__('Open the Frenet panel')) ?></span></a>
+    </div>
+<?php else: ?>
+    <div class="frenet-dropoff" data-frenet-dropoff
+         data-current-url="<?= $escaper->escapeUrl($common->url('frenetshipping/dropoff/current')) ?>"
+         data-branches-url="<?= $escaper->escapeUrl($common->url('frenetshipping/dropoff/branches')) ?>"
+         data-save-url="<?= $escaper->escapeUrl($common->url('frenetshipping/dropoff/save')) ?>"
+         data-t-none="<?= $escaper->escapeHtmlAttr(__('No default point')) ?>"
+         data-t-change="<?= $escaper->escapeHtmlAttr(__('Change')) ?>"
+         data-t-choose="<?= $escaper->escapeHtmlAttr(__('Choose')) ?>"
+         data-t-for="<?= $escaper->escapeHtmlAttr(__('Drop-off point for %1')) ?>"
+         data-t-current="<?= $escaper->escapeHtmlAttr(__('Current:')) ?>"
+         data-t-loading="<?= $escaper->escapeHtmlAttr(__('Searching drop-off points…')) ?>"
+         data-t-no-points="<?= $escaper->escapeHtmlAttr(__(
+             'This carrier has no drop-off points to choose near this CEP.'
+         )) ?>"
+         data-t-found="<?= $escaper->escapeHtmlAttr(__('%1 points found. Type to filter.')) ?>"
+         data-t-found-one="<?= $escaper->escapeHtmlAttr(__('%1 point found.')) ?>"
+         data-t-shown="<?= $escaper->escapeHtmlAttr(__('%1 of %2 points')) ?>"
+         data-t-working="<?= $escaper->escapeHtmlAttr(__('Saving…')) ?>"
+         data-t-panel="<?= $escaper->escapeHtmlAttr(__('Open the Frenet panel')) ?>"
+         data-t-error="<?= $escaper->escapeHtmlAttr(__('Something went wrong. Reload the page and try again.')) ?>">
+        <div class="frenet-table-wrap">
+            <table class="frenet-table">
+                <thead><tr>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Carrier')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Default drop-off point')) ?></th>
+                    <th scope="col" class="is-action"><span class="frenet-sr"><?= $escaper->escapeHtml(__(
+                        'Actions'
+                    )) ?></span></th>
+                </tr></thead>
+                <tbody>
+                <?php foreach ($data['carriers'] as $c): ?>
+                    <?php $services = implode(', ', array_filter($c['services'])); ?>
+                    <tr data-frenet-dropoff-row="<?= $escaper->escapeHtmlAttr($c['code']) ?>"
+                        data-name="<?= $escaper->escapeHtmlAttr($c['name']) ?>">
+                        <th scope="row"><?= /* @noEscape */ $carriers->html($c['code'], $c['name']) ?>
+                            <span class="frenet-muted frenet-block"><?= $escaper->escapeHtml($services) ?></span></th>
+                        <td data-frenet-dropoff-default><span class="frenet-muted"><?= $escaper->escapeHtml(__(
+                            'Loading…'
+                        )) ?></span></td>
+                        <td class="is-action">
+                            <button type="button"
+                                    class="action-default frenet-btn-sm"
+                                    data-frenet-dropoff-edit
+                                    disabled><?= $escaper->escapeHtml(__('Change')) ?></button>
+                            <a class="frenet-small frenet-block"
+                               href="<?= $escaper->escapeUrl($vm->panelUrl($c['code'])) ?>"
+                               target="_blank"
+                               rel="noopener"><?= $escaper->escapeHtml(__('In the Frenet panel')) ?></a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <section class="frenet-card frenet-dropoff__editor"
+                 data-frenet-dropoff-editor
+                 hidden
+                 aria-labelledby="frenet-dropoff-title">
+            <h2 id="frenet-dropoff-title" data-frenet-dropoff-title></h2>
+            <p class="frenet-muted" data-frenet-dropoff-current></p>
+            <div class="frenet-dropoff__search">
+                <div>
+                    <label class="frenet-field" for="frenet-dropoff-cep"><?= $escaper->escapeHtml(__(
+                        'Near the CEP'
+                    )) ?></label>
+                    <input id="frenet-dropoff-cep"
+                           class="admin__control-text"
+                           type="text"
+                           inputmode="numeric"
+                           maxlength="9"
+                           autocomplete="postal-code"
+                           value="<?= $escaper->escapeHtmlAttr($vm->originCep()) ?>"
+                           data-frenet-dropoff-cep/>
+                </div>
+                <button type="button"
+                        class="action-default"
+                        data-frenet-dropoff-search><?= $escaper->escapeHtml(__('Search points')) ?></button>
+            </div>
+            <label class="frenet-field" for="frenet-dropoff-filter"><?= $escaper->escapeHtml(__(
+                'Filter by name, neighborhood or city'
+            )) ?></label>
+            <input id="frenet-dropoff-filter"
+                   class="admin__control-text"
+                   type="search"
+                   autocomplete="off"
+                   data-frenet-dropoff-filter
+                   disabled
+                   aria-describedby="frenet-dropoff-count"/>
+            <p id="frenet-dropoff-count"
+               class="frenet-muted frenet-small"
+               role="status"
+               aria-live="polite"
+               data-frenet-dropoff-count></p>
+            <label class="frenet-sr" for="frenet-dropoff-branch"><?= $escaper->escapeHtml(__(
+                'Drop-off point'
+            )) ?></label>
+            <select id="frenet-dropoff-branch"
+                    class="admin__control-multiselect"
+                    size="8"
+                    data-frenet-dropoff-branch
+                    disabled></select>
+            <p class="frenet-dropoff__address" data-frenet-dropoff-address></p>
+            <div class="frenet-actionbar frenet-actionbar--start">
+                <button type="button"
+                        class="action-primary"
+                        data-frenet-dropoff-save
+                        disabled><span><?= $escaper->escapeHtml(__('Save default point')) ?></span></button>
+                <button type="button"
+                        class="action-default"
+                        data-frenet-dropoff-close><?= $escaper->escapeHtml(__('Cancel')) ?></button>
+                <span class="frenet-status-line" role="status" aria-live="polite" data-frenet-dropoff-status></span>
+            </div>
+        </section>
+    </div>
+<?php endif; ?>
+</div>
+<script type="text/x-magento-init">{"*": {"Frenet_Shipping/js/labels/page": {}}}</script>

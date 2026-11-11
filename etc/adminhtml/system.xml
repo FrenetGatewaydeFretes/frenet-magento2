@@ -77,6 +77,11 @@
                 <!-- PRODUCT QUOTE OPTIONS -->
                 <include path="Frenet_Shipping::system/product_quote.xml"/>
 
+                <!-- LABELS: create shipments, pay with the Frenet wallet and print -->
+                <include path="Frenet_Shipping::system/labels.xml"/>
+                <!-- Address by CEP and automatic tracking -->
+                <include path="Frenet_Shipping::system/extras.xml"/>
+
                 <!-- ADDITIONAL LEAD TIME -->
                 <field id="additional_lead_time" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Additional Lead Time</label>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — fetches labels that Frenet has not released yet (paid shipments without label).
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="frenet_shipping_labels_poll" instance="Frenet\Shipping\Cron\PollLabels" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <!-- Automatic tracking: Frenet events of the shipped orders. -->
+        <job name="frenet_shipping_tracking_sync" instance="Frenet\Shipping\Cron\SyncTracking" method="execute">
+            <schedule>*/30 * * * *</schedule>
+        </job>
+    </group>
+</config>

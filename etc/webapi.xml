@@ -28,4 +28,11 @@
         </resources>
     </route>
     -->
+    <!-- Read-only and public: the checkout of guests fills the address from the CEP. Cached for 30 days. -->
+    <route url="/V1/frenet/cep/:cep" method="GET">
+        <service class="Frenet\Shipping\Api\CepLookupInterface" method="lookup"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
 </routes>

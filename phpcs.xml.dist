@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="Frenet_Shipping">
+    <description>Magento2 coding standard for Frenet_Shipping.</description>
+    <rule ref="Magento2"/>
+
+</ruleset>

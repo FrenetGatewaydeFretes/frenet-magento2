@@ -25,6 +25,41 @@
     <preference for="Frenet\Shipping\Model\Quote\ItemQuantityCalculatorInterface" type="Frenet\Shipping\Model\Quote\ItemQuantityCalculator"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiterInterface" type="Frenet\Shipping\Model\Catalog\Product\View\QuoteRateLimiter"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolverInterface" type="Frenet\Shipping\Model\Catalog\Product\View\QuoteVisitorResolver"/>
+    <!-- Address by CEP (checkout) -->
+    <preference for="Frenet\Shipping\Api\CepLookupInterface" type="Frenet\Shipping\Model\Cep\CepLookup"/>
+    <preference for="Frenet\Shipping\Model\TrackingSync\StatusMapperInterface" type="Frenet\Shipping\Model\TrackingSync\StatusMapper"/>
+    <!-- Tracking event → order status, first match wins. Add or override a rule by its name to change the mapping. -->
+    <type name="Frenet\Shipping\Model\TrackingSync\StatusMapper">
+        <arguments>
+            <argument name="rules" xsi:type="array">
+                <item name="event_delivered" xsi:type="array">
+                    <item name="event" xsi:type="string">9</item>
+                    <item name="status" xsi:type="const">Frenet\Shipping\Model\TrackingSync\StatusMapper::DELIVERED</item>
+                </item>
+                <item name="event_returned" xsi:type="array">
+                    <item name="event" xsi:type="string">3</item>
+                    <item name="status" xsi:type="const">Frenet\Shipping\Model\TrackingSync\StatusMapper::RETURNING</item>
+                </item>
+                <item name="not_posted" xsi:type="array">
+                    <item name="pattern" xsi:type="string">/etiqueta emitida|etiqueta expirada|aguardando postagem|prazo para postagem/u</item>
+                    <item name="status" xsi:type="string"></item>
+                </item>
+                <item name="returning" xsi:type="array">
+                    <item name="pattern" xsi:type="string">/devolvido|devolução|devolucao/u</item>
+                    <item name="status" xsi:type="const">Frenet\Shipping\Model\TrackingSync\StatusMapper::RETURNING</item>
+                </item>
+                <item name="delivered" xsi:type="array">
+                    <item name="pattern" xsi:type="string">/^(?!.*(n[aã]o entregue|ponto de postagem)).*entregue/u</item>
+                    <item name="status" xsi:type="const">Frenet\Shipping\Model\TrackingSync\StatusMapper::DELIVERED</item>
+                </item>
+                <item name="pickup" xsi:type="array">
+                    <item name="pattern" xsi:type="string">/aguardando retirada|dispon[ií]vel para retirada/u</item>
+                    <item name="status" xsi:type="const">Frenet\Shipping\Model\TrackingSync\StatusMapper::PICKUP</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Frenet\Shipping\Api\Data\CepAddressInterface" type="Frenet\Shipping\Model\Cep\CepAddress"/>
     <preference for="Frenet\Shipping\Model\Quote\QuoteItemValidatorInterface" type="Frenet\Shipping\Model\Quote\ItemValidator"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractorInterface" type="Frenet\Shipping\Model\Catalog\Product\DimensionsExtractor"/>
     <preference for="Frenet\Shipping\Model\Catalog\Product\AttributesMappingInterface" type="Frenet\Shipping\Model\Catalog\Product\AttributesMapping"/>
@@ -87,6 +122,19 @@
         </arguments>
     </type>
 
+    <!-- Automatic tracking: CLI (proxy so bin/magento does not build the service on every run). -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="frenet_tracking_sync" xsi:type="object">Frenet\Shipping\Console\Command\TrackingSyncCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Frenet\Shipping\Console\Command\TrackingSyncCommand">
+        <arguments>
+            <argument name="sync" xsi:type="object">Frenet\Shipping\Model\TrackingSync\Sync\Proxy</argument>
+        </arguments>
+    </type>
     <type name="Magento\Config\Model\Config\TypePool">
         <arguments>
             <argument name="sensitive" xsi:type="array">

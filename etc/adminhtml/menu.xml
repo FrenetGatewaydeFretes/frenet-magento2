@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+  Frenet Shipping Gateway — top level "Frenet" menu.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Frenet_Shipping::frenet" title="Frenet" translate="title" module="Frenet_Shipping" sortOrder="35"
+             resource="Frenet_Shipping::frenet"/>
+        <add id="Frenet_Shipping::menu_main" title="Shipments" translate="title" module="Frenet_Shipping" sortOrder="10"
+             parent="Frenet_Shipping::frenet" resource="Frenet_Shipping::frenet"/>
+        <add id="Frenet_Shipping::menu_create" title="Create shipment" translate="title" module="Frenet_Shipping" sortOrder="10"
+             parent="Frenet_Shipping::menu_main" action="frenetshipping/shipment/index" resource="Frenet_Shipping::labels_create"/>
+        <add id="Frenet_Shipping::menu_labels" title="Labels" translate="title" module="Frenet_Shipping" sortOrder="20"
+             parent="Frenet_Shipping::menu_main" action="frenetshipping/labels/index" resource="Frenet_Shipping::labels"/>
+        <add id="Frenet_Shipping::menu_print" title="Printing" translate="title" module="Frenet_Shipping" sortOrder="30"
+             parent="Frenet_Shipping::menu_main" action="frenetshipping/printing/index" resource="Frenet_Shipping::print"/>
+        <add id="Frenet_Shipping::menu_tracking" title="Shipment tracking" translate="title" module="Frenet_Shipping" sortOrder="40"
+             parent="Frenet_Shipping::menu_main" action="frenetshipping/tracking/index" resource="Frenet_Shipping::tracking"/>
+        <add id="Frenet_Shipping::menu_dropoff" title="Drop-off point" translate="title" module="Frenet_Shipping" sortOrder="45"
+             parent="Frenet_Shipping::menu_main" action="frenetshipping/dropoff/index" resource="Frenet_Shipping::dropoff"/>
+        <add id="Frenet_Shipping::menu_config" title="Settings" translate="title" module="Frenet_Shipping" sortOrder="50"
+             parent="Frenet_Shipping::menu_main" action="adminhtml/system_config/edit/section/carriers" resource="Magento_Config::config"/>
+    </menu>
+</config>

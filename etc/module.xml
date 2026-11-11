@@ -14,6 +14,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Frenet_Shipping">
         <sequence>
+            <module name="Magento_Backend"/>
+            <module name="Magento_Sales"/>
             <module name="Magento_Catalog"/>
             <module name="Magento_Quote"/>
             <module name="Magento_Shipping"/>
